@@ -1,0 +1,53 @@
+{
+  "name": "folio-epub",
+  "version": "0.1.0",
+  "description": "A TypeScript EPUB parsing and rendering library, currently in development.",
+  "type": "module",
+  "license": "BSD-2-Clause",
+  "packageManager": "pnpm@11.8.0",
+  "engines": {
+    "node": "^24.17.0",
+    "pnpm": "11.8.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "main": "./dist/folio.js",
+  "module": "./dist/folio.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/folio.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "lint": "oxlint . --max-warnings 0",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:package": "pnpm build && node --test tests/package/*.test.mjs",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm test:package && pnpm test:e2e",
+    "prepack": "pnpm build"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/node": "24.19.2",
+    "@vitest/coverage-v8": "5.1.0",
+    "oxlint": "1.93.0",
+    "oxlint-tsgolint": "7.0.2006",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "vite": "8.3.7",
+    "vitest": "5.1.0"
+  }
+}
