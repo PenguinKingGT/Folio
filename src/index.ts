@@ -31,3 +31,5 @@ export type { ResourceAddress } from './resources/path';
 export { Navigation } from './navigation/navigation';
 export type { NavigationItem, Landmark } from './navigation/navigation';
 export { parseNavigation } from './navigation/parse';
+export { Book } from './book/book';
+export type { BookOptions } from './book/options';

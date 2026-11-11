@@ -2,7 +2,7 @@
 
 An open-source TypeScript EPUB library that progressively replaces epub.js capabilities with traceable regression coverage.
 
-**Implemented: input normalization, request adapters, ZIP resource access, OCF container parsing, and EPUB 2/3 package parsing. Rendering is still in development; epub.js API compatibility is not yet guaranteed.** The local package name `folio-epub` has not been published or checked for npm availability.
+**Implemented: headless EPUB 2/3 loading, metadata, navigation, lazy chapters, covers and resource rewriting. Rendering is still in development; epub.js API compatibility is not yet guaranteed.** The local package name `folio-epub` has not been published or checked for npm availability.
 
 ## Development
 

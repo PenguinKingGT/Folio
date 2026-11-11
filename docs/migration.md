@@ -10,7 +10,7 @@ Scanned on 2026-11-11 against local epub.js `0.3.93`, commit `eee359d0790002115a
 - The TypeScript / Vite / pnpm / Oxlint / Prettier / test / CI foundation is complete; smoke tests do not count as EPUB features.
 - Decide compatibility scope before implementing optional legacy behavior. Record excluded items as Out of scope with a reason.
 
-**Progress: Done 8 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 28.** Update totals with every status change; list out-of-scope items separately.
+**Progress: Done 9 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 27.** Update totals with every status change; list out-of-scope items separately.
 
 ## Phase 1: Opening books and location primitives
 
@@ -26,7 +26,7 @@ Upstream reference: [Book](../epub.js/src/book.js), [Archive](../epub.js/src/arc
 | F06 | Cover: EPUB 2/3 discovery, cover URL and absent-cover handling                                                  | Done        | [Source](../src/cover/) / [Tests](../tests/unit/cover/)                                                    |
 | F07 | Resources: relative / encoded paths, canonical URLs, images / fonts, CSS url() / @import, Blob URLs             | Done        | [Source](../src/resources/) / [Unit](../tests/unit/resources/) / [Browser](../tests/e2e/resources.spec.ts) |
 | F08 | Navigation: EPUB 3 nav, EPUB 2 NCX, nested TOC, landmarks and href / ID lookup                                  | Done        | [Source](../src/navigation/) / [Tests](../tests/unit/navigation/)                                          |
-| F09 | Headless reading: metadata, TOC, chapters and resources without creating views                                  | Not started | —                                                                                                          |
+| F09 | Headless reading: metadata, TOC, chapters and resources without creating views                                  | Done        | [Source](../src/book/) / [Unit](../tests/unit/book/) / [Browser](../tests/e2e/book.spec.ts)                |
 | F10 | CFI core: parsing, serialization, comparison, spine position, point / range CFIs and collapse                   | Not started | —                                                                                                          |
 | F11 | CFI / DOM: Node / Range conversion, text offsets and ignored annotation wrappers                                | Not started | —                                                                                                          |
 
