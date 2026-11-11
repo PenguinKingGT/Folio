@@ -11,3 +11,11 @@ export { Archive } from './archive/archive';
 export type { ArchiveLimits } from './archive/unzip';
 export { parseContainer } from './container/container';
 export type { Container } from './container/container';
+export { parsePackage } from './package/package';
+export type {
+  ManifestItem,
+  SpineItem,
+  MetadataEntry,
+  PackageMetadata,
+  PublicationPackage,
+} from './package/types';
