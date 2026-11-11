@@ -32,3 +32,13 @@ Reader contents default to horizontal fixed-height CSS columns. `spread` accepts
 Actual column counts come from browser overflow with a one-pixel CSSOM rounding tolerance. Final-spread padding preserves its scroll target when the last spread has an empty second column. Frames are measured with temporary hidden visibility so a hidden reader remains hidden. The host must have measurable dimensions; zero-size views reject.
 
 Each chapter uses standards mode for consistent CSS columns and scrolling roots. Pagination sets document/body dimensions, margin/padding and column rules while retaining chapter text styling. Page navigation, automatic resize preservation, fixed layout and vertical writing are tracked in F15/F17/F18/F19.
+
+## Scrolled flow (F14)
+
+Set `flow` to `auto` (default), `paginated`, `scrolled-doc`, or `scrolled-continuous`. Auto honors recognized OPF rendition:flow metadata and otherwise selects pagination. Scrolled modes default to a vertical axis; `axis: 'horizontal'` enables native non-snapping column scrolling. Vertical pagination remains part of F19.
+
+`reader.flow(mode, axis?)` switches current/future content and returns measured `flowState`, or null before display. Mode changes reset scroll position. `flowState` contains effective flow, axis, content length and viewport length. `pagination` is null while scrolling; spread settings remain available when switching back.
+
+Vertical flow clears fixed heights and column styles, using native vertical scrolling. Horizontal flow uses fixed-height full-width columns without gaps or snapping; its scrollbar is hidden to prevent overlap with the last text line. Hidden reader measurement preserves visibility state.
+
+Both scrolled mode values configure chapter geometry here; seamless multi-chapter management and preloading are separately tracked under F22. Current mode transitions and scroll coordinates are verified in all three browser engines.

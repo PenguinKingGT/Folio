@@ -4,11 +4,12 @@ import type { Section } from '../spine/section';
 import { prepareContent } from './content';
 import { IframeView } from './iframe-view';
 import type { ViewOptions } from './iframe-view';
-import { PaginationLayout } from '../layout/pagination-layout';
+import { ReaderLayout } from '../layout/reader-layout';
 import type { PaginationOptions, PaginationState } from '../layout/pagination';
+import type { FlowMode, FlowOptions, FlowState, ReadingAxis } from '../layout/flow';
 
 /** Initial renderer options; layout-specific behavior is added by subsequent features. */
-export type RenditionOptions = ViewOptions & PaginationOptions;
+export type RenditionOptions = ViewOptions & PaginationOptions & FlowOptions;
 
 /** Resolve selectors only when a browser DOM is available. */
 function mountTarget(target: HTMLElement | string): HTMLElement {
@@ -28,7 +29,7 @@ function mountTarget(target: HTMLElement | string): HTMLElement {
 /** Display a book in one reusable, script-disabled iframe surface. */
 export class Rendition {
   private readonly view: IframeView;
-  private readonly paginationLayout: PaginationLayout;
+  private readonly layoutController: ReaderLayout;
   private generation = 0;
   private controller: AbortController | undefined;
   private current: Section | null = null;
@@ -42,7 +43,7 @@ export class Rendition {
     options: RenditionOptions = {},
     private readonly onDestroy?: () => void,
   ) {
-    this.paginationLayout = new PaginationLayout(options);
+    this.layoutController = new ReaderLayout(options, book.publication.rendition.flow);
     this.view = new IframeView(mountTarget(target), options);
   }
 
@@ -86,7 +87,7 @@ export class Rendition {
 
   /** Return measured column geometry and visible page/spread count. */
   get pagination(): PaginationState | null {
-    return this.paginationLayout.state;
+    return this.layoutController.pagination;
   }
 
   /** Configure spread behavior and reflow current contents; no document returns null. */
@@ -94,10 +95,24 @@ export class Rendition {
     this.assertActive();
     const document = this.view.document;
     if (document === null) {
-      this.paginationLayout.configure(options);
+      this.layoutController.configure(options);
       return null;
     }
-    return this.paginationLayout.apply(this.frame, document, options);
+    return this.layoutController.apply(this.frame, document, options);
+  }
+
+  /** Return the active chapter's logical scroll extent after layout. */
+  get flowState(): FlowState | null {
+    return this.layoutController.state;
+  }
+
+  /** Switch reading modes and reflow current content; unopened readers retain configuration. */
+  flow(mode: FlowMode, axis?: ReadingAxis): FlowState | null {
+    this.assertActive();
+    this.layoutController.setFlow(mode, axis);
+    this.layout();
+    this.view.document?.defaultView?.scrollTo(0, 0);
+    return this.flowState;
   }
 
   /** Return native chapter contents, or null before the first successful display. */

@@ -42,3 +42,5 @@ export { Rendition } from './render/rendition';
 export type { RenditionOptions } from './render/rendition';
 export { computePagination } from './layout/pagination';
 export type { PaginationOptions, PaginationGeometry, PaginationState } from './layout/pagination';
+export { resolveFlow } from './layout/flow';
+export type { ReadingFlow, FlowMode, ReadingAxis, FlowOptions, FlowState } from './layout/flow';
