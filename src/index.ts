@@ -24,3 +24,7 @@ export type { SectionLoader } from './spine/section';
 export { Spine } from './spine/spine';
 export { Cover } from './cover/cover';
 export type { CoverLoader } from './cover/cover';
+export { Resources } from './resources/resources';
+export type { ResourceReader, ResourceOptions } from './resources/resources';
+export { resolveResource } from './resources/path';
+export type { ResourceAddress } from './resources/path';

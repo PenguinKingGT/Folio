@@ -46,7 +46,7 @@ examples/basic/      Minimal development example
 epub.js/             Unchanged upstream reference repository
 ```
 
-[Vite library mode](https://vite.dev/guide/build#library-mode) produces ESM; TypeScript emits declarations separately. [Vitest](https://vitest.dev/guide/coverage) measures coverage. [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware), backed by `oxlint-tsgolint`, checks unsafe type operations and unhandled promises. Rules live in `oxlint.config.ts`; TypeScript also runs independently. ZIP decompression uses `fflate`; environment-independent XML parsing uses `@xmldom/xmldom`. Both dependencies use the MIT license.
+[Vite library mode](https://vite.dev/guide/build#library-mode) produces ESM; TypeScript emits declarations separately. [Vitest](https://vitest.dev/guide/coverage) measures coverage. [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware), backed by `oxlint-tsgolint`, checks unsafe type operations and unhandled promises. Rules live in `oxlint.config.ts`; TypeScript also runs independently. ZIP decompression uses `fflate`; environment-independent XML parsing uses `@xmldom/xmldom`. CSS reference rewriting uses `css-tree` to handle escaped URLs and imports through an AST. All three dependencies use the MIT license.
 
 See [development guidelines](./AGENTS.md), the [migration tracker](./docs/migration.md), [input/request APIs](./docs/input.md), and [archive APIs](./docs/archive.md). All comments and documentation must be in English. Every feature requires tests and a separate verified commit.
 

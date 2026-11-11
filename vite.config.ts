@@ -3,6 +3,16 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  optimizeDeps: {
+    entries: ['examples/basic/index.html'],
+    include: [
+      'fflate',
+      '@xmldom/xmldom',
+      'css-tree/parser',
+      'css-tree/generator',
+      'css-tree/walker',
+    ],
+  },
   build: {
     lib: {
       entry: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
