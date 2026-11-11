@@ -7,6 +7,11 @@ import type { ViewOptions } from './iframe-view';
 import { ReaderLayout } from '../layout/reader-layout';
 import type { PaginationOptions, PaginationState } from '../layout/pagination';
 import type { FlowMode, FlowOptions, FlowState, ReadingAxis } from '../layout/flow';
+import { resolveDisplayTarget } from './target';
+import type { DisplayTarget, ResolvedTarget } from './target';
+import { seekTarget } from './position';
+import { turnPage } from './turn';
+import { measureFrame } from '../layout/columns';
 
 /** Initial renderer options; layout-specific behavior is added by subsequent features. */
 export type RenditionOptions = ViewOptions & PaginationOptions & FlowOptions;
@@ -58,15 +63,18 @@ export class Rendition {
   }
 
   /** Load, sanitize, resolve assets, and display one chapter; a newer display cancels the old wait. */
-  async display(target?: number | string): Promise<Section> {
+  async display(target?: DisplayTarget): Promise<Section> {
     this.assertActive();
     this.controller?.abort();
     const controller = new AbortController();
     this.controller = controller;
     const token = String(++this.generation);
-    const section = this.book.section(target);
-    if (section === null) {
-      throw new RangeError('Requested chapter is not in the spine.');
+    const resolved = await resolveDisplayTarget(this.book, this.current, target, controller.signal);
+    controller.signal.throwIfAborted();
+    const section = resolved.section;
+    if (section === this.current && this.view.document !== null) {
+      this.seek(resolved);
+      return section;
     }
     const address = this.book.resources.resolve(section.href);
     if (address.kind !== 'local') {
@@ -82,7 +90,29 @@ export class Rendition {
       this.view.show();
     }
     this.layout();
+    this.seek(resolved);
     return section;
+  }
+
+  /** Move forward one viewport or to the next linear chapter; book end returns null. */
+  next(): Promise<Section | null> {
+    this.assertActive();
+    return turnPage(this, this.book.spine, 'next');
+  }
+
+  /** Move backward one viewport or to the previous chapter's final viewport. */
+  prev(): Promise<Section | null> {
+    this.assertActive();
+    return turnPage(this, this.book.spine, 'previous');
+  }
+
+  /** Position a resolved destination after its chapter has acquired layout metrics. */
+  private seek(target: ResolvedTarget): void {
+    const document = this.view.document;
+    const state = this.flowState;
+    if (document !== null && state !== null) {
+      measureFrame(this.frame, () => seekTarget(document, state, this.pagination, target));
+    }
   }
 
   /** Return measured column geometry and visible page/spread count. */

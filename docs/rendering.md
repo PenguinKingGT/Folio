@@ -11,7 +11,7 @@ reader.show();
 reader.destroy();
 ```
 
-The container must be an attached HTML element or a CSS selector resolving to one. `renderTo()` creates one hidden iframe; `display(target?)` loads a spine chapter and returns its Section. Index, itemref ID, href, and CFI select chapters; within-chapter positioning is tracked under F15. Width/height accept positive numbers in pixels or valid CSS lengths; the default is 100%. `loadTimeoutMs` defaults to 15 seconds.
+The container must be an attached HTML element or a CSS selector resolving to one. `renderTo()` creates one hidden iframe; `display(target?)` loads a spine chapter and returns its Section. Index, itemref ID, href, and CFI select chapters; within-chapter positioning is described under F15 below. Width/height accept positive numbers in pixels or valid CSS lengths; the default is 100%. `loadTimeoutMs` defaults to 15 seconds.
 
 `getContents()` returns a native document after display, otherwise null. `currentSection` reports the last displayed chapter; `frame` exposes the owned iframe. Hidden readers remain hidden across display calls until `show()`.
 
@@ -31,7 +31,7 @@ Reader contents default to horizontal fixed-height CSS columns. `spread` accepts
 
 Actual column counts come from browser overflow with a one-pixel CSSOM rounding tolerance. Final-spread padding preserves its scroll target when the last spread has an empty second column. Frames are measured with temporary hidden visibility so a hidden reader remains hidden. The host must have measurable dimensions; zero-size views reject.
 
-Each chapter uses standards mode for consistent CSS columns and scrolling roots. Pagination sets document/body dimensions, margin/padding and column rules while retaining chapter text styling. Page navigation, automatic resize preservation, fixed layout and vertical writing are tracked in F15/F17/F18/F19.
+Each chapter uses standards mode for consistent CSS columns and scrolling roots. Pagination sets document/body dimensions, margin/padding and column rules while retaining chapter text styling. Automatic resize preservation, fixed layout and vertical writing are tracked in F17/F18/F19.
 
 ## Scrolled flow (F14)
 
@@ -42,3 +42,24 @@ Set `flow` to `auto` (default), `paginated`, `scrolled-doc`, or `scrolled-contin
 Vertical flow clears fixed heights and column styles, using native vertical scrolling. Horizontal flow uses fixed-height full-width columns without gaps or snapping; its scrollbar is hidden to prevent overlap with the last text line. Hidden reader measurement preserves visibility state.
 
 Both scrolled mode values configure chapter geometry here; seamless multi-chapter management and preloading are separately tracked under F22. Current mode transitions and scroll coordinates are verified in all three browser engines.
+
+## Reading navigation (F15)
+
+```ts
+await reader.display(0);
+await reader.display('text/chapter.xhtml#introduction');
+await reader.display('#introduction');
+await reader.display({ href: '../text/chapter.xhtml#introduction', from: 'OPS/nav/toc.xhtml' });
+await reader.display('epubcfi(/6/2[chapter]!/4/2/1:8)');
+await reader.display({ percentage: 0.5 });
+await reader.next();
+await reader.prev();
+```
+
+Numeric targets are zero-based spine indices. String hrefs are relative to the OPF; the structured href form accepts a decoded container-relative document path as its base. Fragment-only strings prefer an exact itemref ID, then an anchor in the current chapter (or the first linear chapter before opening). Anchors support IDs and legacy named elements; URI fragments are decoded once. A chapter target without a fragment starts at its beginning. Targets outside the local spine and missing anchors reject.
+
+CFIs resolve native content positions, including the start of a range. Pagination snaps destinations to their containing page/spread; scrolling positions the destination along its active axis, clamped to the final reachable viewport. Same-chapter navigation reuses the loaded document. Hidden readers can seek without becoming visible.
+
+Percentage values are finite numbers from zero through one. They use `book.locations` samples and generate the default character index if needed; generate a finer index first for greater precision. An empty reading corpus rejects. New display requests cancel pending destination resolution and chapter loading.
+
+`next()` and `prev()` return the displayed Section, or null at the publication boundary. They move one page/spread or one scrolling viewport, clamp partial final viewports, and cross linear chapters while skipping non-linear entries. Moving backward into a chapter lands on its final viewport. An unopened reader starts at the first linear chapter. RTL and vertical-writing page directions remain under F19.
