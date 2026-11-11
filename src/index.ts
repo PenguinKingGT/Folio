@@ -28,3 +28,6 @@ export { Resources } from './resources/resources';
 export type { ResourceReader, ResourceOptions } from './resources/resources';
 export { resolveResource } from './resources/path';
 export type { ResourceAddress } from './resources/path';
+export { Navigation } from './navigation/navigation';
+export type { NavigationItem, Landmark } from './navigation/navigation';
+export { parseNavigation } from './navigation/parse';
