@@ -5,11 +5,14 @@ export function withAbort<T>(operation: Promise<T>, signal?: AbortSignal): Promi
   if (signal === undefined) {
     return operation;
   }
-  signal.throwIfAborted();
   return new Promise<T>((resolve, reject) => {
     /** Reject only this consumer; the shared producer owns its own controller. */
     const abort = (): void => reject(signal.reason);
-    signal.addEventListener('abort', abort, { once: true });
+    if (signal.aborted) {
+      abort();
+    } else {
+      signal.addEventListener('abort', abort, { once: true });
+    }
     operation.then(
       (value) => {
         signal.removeEventListener('abort', abort);

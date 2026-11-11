@@ -10,7 +10,7 @@ Scanned on 2026-11-11 against local epub.js `0.3.93`, commit `eee359d0790002115a
 - The TypeScript / Vite / pnpm / Oxlint / Prettier / test / CI foundation is complete; smoke tests do not count as EPUB features.
 - Decide compatibility scope before implementing optional legacy behavior. Record excluded items as Out of scope with a reason.
 
-**Progress: Done 14 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 22.** Update totals with every status change; list out-of-scope items separately.
+**Progress: Done 15 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 21.** Update totals with every status change; list out-of-scope items separately.
 
 ## Phase 1: Opening books and location primitives
 
@@ -32,7 +32,7 @@ Upstream reference: [Book](../epub.js/src/book.js), [Archive](../epub.js/src/arc
 
 ## Phase 2: Basic reading
 
-Upstream reference: [Rendition](../epub.js/src/rendition.js), [Layout](../epub.js/src/layout.js), [Contents](../epub.js/src/contents.js), [default manager](../epub.js/src/managers/default/index.js). Requires loading and resources; CFI navigation requires F10–F11.
+Upstream reference: [Rendition](../epub.js/src/rendition.js), [Layout](../epub.js/src/layout.js), [Contents](../epub.js/src/contents.js), [default manager](../epub.js/src/managers/default/index.js). Requires loading and resources; CFI navigation requires F10–F11. F20 is implemented before F15 because percentage navigation depends on its full-book index.
 
 | ID  | Feature / scope                                                                                                | Status      | Implementation / tests                                                                                                                                                             |
 | --- | -------------------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -49,18 +49,18 @@ Upstream reference: [Rendition](../epub.js/src/rendition.js), [Layout](../epub.j
 
 Upstream reference: [Locations](../epub.js/src/locations.js), [PageList](../epub.js/src/pagelist.js), [continuous manager](../epub.js/src/managers/continuous/index.js), [Themes](../epub.js/src/themes.js), [Annotations](../epub.js/src/annotations.js). Builds on rendering and CFI.
 
-| ID  | Feature / scope                                                                                                 | Status      | Implementation / tests |
-| --- | --------------------------------------------------------------------------------------------------------------- | ----------- | ---------------------- |
-| F20 | Progress: character / word locations, CFI / index / percentage conversion, current position, save / restore     | Not started | —                      |
-| F21 | Print pages: nav page-list / NCX pageList, page / CFI / percentage conversion                                   | Not started | —                      |
-| F22 | Continuous views: seamless chapters, preloading, trimming and scroll-position compensation                      | Not started | —                      |
-| F23 | Touch: swipe navigation, scroll snapping and mobile interaction                                                 | Not started | —                      |
-| F24 | Themes: CSS / URL / rule registration, switching, font / size and style overrides                               | Not started | —                      |
-| F25 | Content interaction: selection / Range / CFI events, input forwarding, internal and external links              | Not started | —                      |
-| F26 | Annotations: highlight / underline / mark, add / update / remove, clicks, reload restoration and relayout       | Not started | —                      |
-| F27 | Search: chapter and cross-text-node matches with excerpts and CFIs for caller-side aggregation                  | Not started | —                      |
-| F28 | Events: typed on / off / once for books, rendering, locations, selection and errors                             | Not started | —                      |
-| F29 | Extensions: asynchronous content / serialization / rendering / unload hooks, custom managers / views and styles | Not started | —                      |
+| ID  | Feature / scope                                                                                                 | Status      | Implementation / tests                                                                                                                                                 |
+| --- | --------------------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F20 | Progress: character / word locations, CFI / index / percentage conversion, current position, save / restore     | Done        | [Source](../src/locations/) / [Unit](../tests/unit/locations/) / [Browser](../tests/browser/render/locations.test.ts) / [Cross-engine](../tests/e2e/locations.spec.ts) |
+| F21 | Print pages: nav page-list / NCX pageList, page / CFI / percentage conversion                                   | Not started | —                                                                                                                                                                      |
+| F22 | Continuous views: seamless chapters, preloading, trimming and scroll-position compensation                      | Not started | —                                                                                                                                                                      |
+| F23 | Touch: swipe navigation, scroll snapping and mobile interaction                                                 | Not started | —                                                                                                                                                                      |
+| F24 | Themes: CSS / URL / rule registration, switching, font / size and style overrides                               | Not started | —                                                                                                                                                                      |
+| F25 | Content interaction: selection / Range / CFI events, input forwarding, internal and external links              | Not started | —                                                                                                                                                                      |
+| F26 | Annotations: highlight / underline / mark, add / update / remove, clicks, reload restoration and relayout       | Not started | —                                                                                                                                                                      |
+| F27 | Search: chapter and cross-text-node matches with excerpts and CFIs for caller-side aggregation                  | Not started | —                                                                                                                                                                      |
+| F28 | Events: typed on / off / once for books, rendering, locations, selection and errors                             | Not started | —                                                                                                                                                                      |
+| F29 | Extensions: asynchronous content / serialization / rendering / unload hooks, custom managers / views and styles | Not started | —                                                                                                                                                                      |
 
 ## Phase 4: Compatibility and stability
 

@@ -1,6 +1,6 @@
 /** Prepare passive chapter content with a reader-owned CSP before assigning iframe srcdoc. */
 const xhtml = 'http://www.w3.org/1999/xhtml';
-const blocked = new Set(['script', 'iframe', 'object', 'embed', 'form', 'base']);
+import { passiveBlockedTags } from '../content/policy';
 const policy =
   "default-src 'none'; script-src 'none'; style-src 'unsafe-inline' blob:; img-src blob: data:; font-src blob: data:; media-src blob: data:; frame-src 'none'; object-src 'none'; connect-src 'none'; form-action 'none'; base-uri 'none'";
 
@@ -49,9 +49,15 @@ function makePassive(document: Document): void {
     const refresh =
       name === 'meta' &&
       (element.getAttribute('http-equiv') || '').trim().toLowerCase() === 'refresh';
-    if (blocked.has(name) || refresh) {
+    if (passiveBlockedTags.has(name) || refresh) {
       element.remove();
       continue;
+    }
+    // HTML srcdoc treats XHTML CDATA as comments outside foreign content; preserve its text explicitly.
+    for (const child of Array.from(element.childNodes)) {
+      if (child.nodeType === 4) {
+        element.replaceChild(document.createTextNode(child.nodeValue || ''), child);
+      }
     }
     for (const attribute of Array.from(element.attributes)) {
       const key = attribute.localName.toLowerCase();

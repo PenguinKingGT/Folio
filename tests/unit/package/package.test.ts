@@ -88,3 +88,8 @@ test('retains optional Dublin Core fields and empty extension values', () => {
     refines: null,
   });
 });
+
+test('records the actual even spine step for canonical publication positions', () => {
+  expect(parsePackage(opf()).spineStep).toBe(6);
+  expect(parsePackage(opf().replace('<metadata>', '<extension/><metadata>')).spineStep).toBe(8);
+});

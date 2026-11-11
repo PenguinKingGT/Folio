@@ -45,6 +45,7 @@ export interface PublicationPackage {
   metadata: PackageMetadata;
   manifest: ReadonlyMap<string, ManifestItem>;
   spine: readonly SpineItem[];
+  spineStep: number;
   direction: 'ltr' | 'rtl' | 'default';
   rendition: Readonly<Record<string, string>>;
   navPath: string | null;

@@ -15,6 +15,15 @@ function coverPath(
   return cover?.href ?? manifest.get(legacyId ?? '')?.href ?? null;
 }
 
+/** Retain unrefined publication-wide rendition properties without coupling layout interpretation. */
+function renditionProperties(metadata: PackageMetadata): Readonly<Record<string, string>> {
+  return Object.fromEntries(
+    metadata.entries
+      .filter((entry) => entry.refines === null && entry.name.startsWith('rendition:'))
+      .map((entry) => [entry.name.slice(10), entry.value]),
+  );
+}
+
 /**
  * Parse an EPUB 2/3 OPF package; paths remain relative to its document URL.
  * @throws TypeError for missing metadata, duplicate IDs, or invalid references.
@@ -46,18 +55,19 @@ export function parsePackage(source: string): PublicationPackage {
   if (ncxId !== null && ncx === undefined) {
     throw new TypeError('Spine TOC references a missing manifest resource.');
   }
-  const rendition = Object.fromEntries(
-    metadata.entries
-      .filter((entry) => entry.refines === null && entry.name.startsWith('rendition:'))
-      .map((entry) => [entry.name.slice(10), entry.value]),
-  );
   return {
     version,
     metadata,
     manifest,
     spine,
+    spineStep:
+      (Array.from(root.childNodes)
+        .filter((node) => node.nodeType === 1)
+        .indexOf(spineElement) +
+        1) *
+      2,
     direction,
-    rendition,
+    rendition: renditionProperties(metadata),
     navPath: nav?.href ?? null,
     ncxPath: ncx?.href ?? null,
     coverPath: coverPath(manifest, metadata),

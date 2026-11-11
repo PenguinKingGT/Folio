@@ -13,6 +13,7 @@ import { openSource } from './source';
 import type { PublicationSource } from './source';
 import { Rendition } from '../render/rendition';
 import type { RenditionOptions } from '../render/rendition';
+import { Locations } from '../locations/locations';
 
 /** An opened publication does not create iframes or depend on browser globals. */
 export class Book {
@@ -20,6 +21,7 @@ export class Book {
   readonly spine: Spine;
   readonly resources: Resources;
   readonly cover: Cover;
+  readonly locations: Locations;
 
   /** Compose already validated source components; open() owns failure cleanup. */
   private constructor(
@@ -28,6 +30,9 @@ export class Book {
     readonly navigation: Navigation,
     options: BookOptions,
   ) {
+    this.locations = new Locations(this.publication, (href, signal) =>
+      this.text(href, source.packagePath, signal),
+    );
     const read: ResourceReader = (path, signal) => source.read(path, signal);
     this.resources = new Resources(this.publication, source.packagePath, read, options);
     this.spine = new Spine(this.publication, (href, signal) =>
@@ -112,6 +117,7 @@ export class Book {
       rendition.destroy();
     }
     this.renditions.clear();
+    this.locations.destroy();
     this.source.destroy();
     this.spine.destroy();
     this.cover.destroy();
