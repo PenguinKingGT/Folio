@@ -42,6 +42,14 @@ export { Rendition } from './render/rendition';
 export { ContinuousReader } from './continuous/reader';
 export { TouchNavigation } from './touch/navigation';
 export { Themes } from './themes/themes';
+export { ContentInteractions } from './interaction/interactions';
+export type {
+  ContentSelection,
+  ContentInput,
+  ContentLink,
+  ContentAnchor,
+  LinkActivation,
+} from './interaction/types';
 export type { ThemeRules, ThemeSource, OverrideOptions } from './themes/types';
 export type { TouchOptions, TouchSettings } from './touch/options';
 export type { ContinuousOptions } from './continuous/options';

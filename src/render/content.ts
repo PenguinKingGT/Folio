@@ -1,6 +1,7 @@
 /** Prepare passive chapter content with a reader-owned CSP before assigning iframe srcdoc. */
 const xhtml = 'http://www.w3.org/1999/xhtml';
 import { passiveElementRemoved } from '../content/policy';
+import { passiveLinks } from '../content/links';
 const policy =
   "default-src 'none'; script-src 'none'; style-src 'unsafe-inline' blob:; img-src blob: data:; font-src blob: data:; media-src blob: data:; frame-src 'none'; object-src 'none'; connect-src 'none'; form-action 'none'; base-uri 'none'";
 
@@ -84,6 +85,7 @@ export function prepareContent(source: string, token: string): string {
     throw new TypeError('Expected a valid XHTML chapter.');
   }
   makePassive(document);
+  passiveLinks(document);
   if (document.getElementsByTagNameNS(xhtml, 'body').length !== 1) {
     throw new TypeError('A chapter requires exactly one body.');
   }

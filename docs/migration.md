@@ -10,7 +10,7 @@ Scanned on 2026-11-11 against local epub.js `0.3.93`, commit `eee359d0790002115a
 - The TypeScript / Vite / pnpm / Oxlint / Prettier / test / CI foundation is complete; smoke tests do not count as EPUB features.
 - Decide compatibility scope before implementing optional legacy behavior. Record excluded items as Out of scope with a reason.
 
-**Progress: Done 24 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 12.** Update totals with every status change; list out-of-scope items separately.
+**Progress: Done 25 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 11.** Update totals with every status change; list out-of-scope items separately.
 
 ## Phase 1: Opening books and location primitives
 
@@ -56,7 +56,7 @@ Upstream reference: [Locations](../epub.js/src/locations.js), [PageList](../epub
 | F22 | Continuous views: seamless chapters, preloading, trimming and scroll-position compensation                      | Done        | [Source](../src/continuous/) / [Unit](../tests/unit/continuous/) / [Browser](../tests/browser/continuous/) / [Cross-engine](../tests/e2e/continuous.spec.ts)                           |
 | F23 | Touch: swipe navigation, scroll snapping and mobile interaction                                                 | Done        | [Source](../src/touch/) / [Unit](../tests/unit/touch/) / [Browser](../tests/browser/touch/) / [Cross-engine](../tests/e2e/touch.spec.ts) / [Mobile](../tests/e2e/touch-mobile.spec.ts) |
 | F24 | Themes: CSS / URL / rule registration, switching, font / size and style overrides                               | Done        | [Source](../src/themes/) / [Unit](../tests/unit/themes/) / [Browser](../tests/browser/themes/) / [Cross-engine](../tests/e2e/themes.spec.ts)                                           |
-| F25 | Content interaction: selection / Range / CFI events, input forwarding, internal and external links              | Not started | —                                                                                                                                                                                      |
+| F25 | Content interaction: selection / Range / CFI events, input forwarding, internal and external links              | Done        | [Source](../src/interaction/) / [Unit](../tests/unit/interaction/) / [Browser](../tests/browser/interaction/) / [Cross-engine](../tests/e2e/interactions.spec.ts)                      |
 | F26 | Annotations: highlight / underline / mark, add / update / remove, clicks, reload restoration and relayout       | Not started | —                                                                                                                                                                                      |
 | F27 | Search: chapter and cross-text-node matches with excerpts and CFIs for caller-side aggregation                  | Not started | —                                                                                                                                                                                      |
 | F28 | Events: typed on / off / once for books, rendering, locations, selection and errors                             | Not started | —                                                                                                                                                                                      |

@@ -4,6 +4,8 @@ Opt-in [touch navigation](./touch.md) supports swipe turns, nearest-spread snapp
 
 [Themes and reader styles](./themes.md) support CSS/URL/rule registration, switching, and persistent font/style overrides in both reader kinds (F24).
 
+[Content interactions](./interactions.md) expose native selection/CFI snapshots, keyboard/pointer forwarding, and controlled hyperlink activation (F25). Chapter hyperlinks remain passive until activated through the reader.
+
 ## Passive chapter views (F12)
 
 ```ts

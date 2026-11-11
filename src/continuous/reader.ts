@@ -13,10 +13,11 @@ import { ContinuousObserver } from './observer';
 import { continuousOptions } from './options';
 import type { ContinuousOptions } from './options';
 import { continuousLocation, visiblePages } from './location';
-import { Listeners } from './listeners';
+import { ContinuousEvents } from './events';
 import { scrollToPosition } from './position';
 import { TouchNavigation } from '../touch/navigation';
 import { Themes } from '../themes/themes';
+import { ContentInteractions } from '../interaction/interactions';
 
 /** Opening remains lazy; display commits requested content and reports optional preload failures separately. */
 export class ContinuousReader {
@@ -24,17 +25,16 @@ export class ContinuousReader {
   readonly touch: TouchNavigation;
   /** Reader-owned default, named, and override styles. */
   readonly themes: Themes;
+  /** Reader-owned native selections, input events, and controlled links. */
+  readonly interactions: ContentInteractions;
   private readonly port: ContinuousPort;
   private readonly window: ContinuousWindow;
   private readonly navigation: ContinuousNavigation;
   private readonly observer: ContinuousObserver;
-  private readonly relocations = new Listeners<VisibleLocation>();
-  private readonly errors = new Listeners<unknown>();
+  private readonly events = new ContinuousEvents();
   private snapshot: VisibleLocation | null = null;
-  private locationKey = '';
   private geometryKey = '';
   private current: Section | null = null;
-  private failed: unknown = null;
   private active = false;
   private destroyed = false;
 
@@ -52,7 +52,15 @@ export class ContinuousReader {
       layout: () => this.layout(),
     });
     const changed = () => this.observer.schedule(true);
-    this.window = new ContinuousWindow(book, this.port, settings, changed, this.themes);
+    this.interactions = new ContentInteractions(book, this);
+    this.window = new ContinuousWindow(
+      book,
+      this.port,
+      settings,
+      changed,
+      this.themes,
+      this.interactions,
+    );
     this.navigation = new ContinuousNavigation(book, this.port, this.window, settings, {
       snapshot: () => this.snapshot,
       measure: () => this.currentLocation(),
@@ -61,9 +69,9 @@ export class ContinuousReader {
         this.report();
       },
       completed: () => this.observer.schedule(false),
-      failed: (error) => this.failure(error),
+      failed: (error) => this.events.fail(error),
       starting: () => {
-        this.failed = null;
+        this.events.lastError = null;
       },
     });
     this.observer = new ContinuousObserver(this.port, (layout) => this.flush(layout));
@@ -85,7 +93,7 @@ export class ContinuousReader {
   }
   /** Retain background failures until the next display/retry; whenIdle() also rejects them. */
   get lastError(): unknown {
-    return this.failed;
+    return this.events.lastError;
   }
   /** Return loaded/preloaded section identities, bounded by the configured view cap. */
   get loadedSections(): readonly Section[] {
@@ -121,12 +129,12 @@ export class ContinuousReader {
   /** Subscribe to changed reading snapshots; callbacks run synchronously and should not throw. */
   onRelocated(listener: RelocatedListener): () => void {
     this.assertActive();
-    return this.relocations.subscribe(listener);
+    return this.events.relocations.subscribe(listener);
   }
   /** Observe asynchronous preload/layout failures without relying on console messages. */
   onError(listener: (error: unknown) => void): () => void {
     this.assertActive();
-    return this.errors.subscribe(listener);
+    return this.events.errors.subscribe(listener);
   }
 
   /** Re-measure expanded documents and compensate with the last stable reading CFI. */
@@ -168,8 +176,8 @@ export class ContinuousReader {
       await this.observer.whenIdle();
     } while (version !== this.navigation.version || this.navigation.loading);
     this.report();
-    if (this.failed !== null) {
-      throw this.failed;
+    if (this.events.lastError !== null) {
+      throw this.events.lastError;
     }
   }
 
@@ -220,7 +228,7 @@ export class ContinuousReader {
       this.report();
       this.navigation.sync();
     } catch (error) {
-      this.failure(error);
+      this.events.fail(error);
     }
     return true;
   }
@@ -254,19 +262,7 @@ export class ContinuousReader {
     }
     this.current = this.book.section(this.snapshot.start.index);
     this.navigation.observe(this.snapshot);
-    const key = JSON.stringify(this.snapshot);
-    if (key !== this.locationKey) {
-      this.locationKey = key;
-      this.relocations.emit(this.snapshot);
-    }
-  }
-
-  /** Preserve errors as public state and typed subscriber notifications. */
-  private failure(error: unknown): void {
-    if (!this.destroyed) {
-      this.failed = error;
-      this.errors.emit(error);
-    }
+    this.events.report(this.snapshot);
   }
 
   /** Cancel IO consumers and observers, then release all owned frames/surfaces and subscribers. */
@@ -275,17 +271,16 @@ export class ContinuousReader {
       return;
     }
     this.themes.destroy();
+    this.interactions.destroy();
     this.destroyed = true;
     this.touch.destroy();
     this.navigation.destroy();
     this.observer.destroy();
     this.window.destroy();
     this.port.destroy();
-    this.relocations.clear();
-    this.errors.clear();
+    this.events.destroy();
     this.snapshot = null;
     this.current = null;
-    this.failed = null;
     this.onDestroy?.();
   }
 

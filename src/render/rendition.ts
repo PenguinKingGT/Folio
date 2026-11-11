@@ -22,6 +22,7 @@ import { touchOptions } from '../touch/options';
 import type { TouchSettings } from '../touch/options';
 import { Themes } from '../themes/themes';
 import { RenditionAnchor } from './reading-anchor';
+import { ContentInteractions } from '../interaction/interactions';
 
 /** Initial renderer options; layout-specific behavior is added by subsequent features. */
 export type RenditionOptions = ViewOptions &
@@ -40,6 +41,8 @@ export class Rendition {
   private readonly reflows: ReflowObserver;
   /** Reader-owned default, named, and override styles. */
   readonly themes: Themes;
+  /** Reader-owned selection snapshots, native input forwarding, and controlled links. */
+  readonly interactions: ContentInteractions;
   private readonly readingAnchor: RenditionAnchor;
   private generation = 0;
   private controller: AbortController | undefined;
@@ -66,7 +69,8 @@ export class Rendition {
         this.layout();
       },
     });
-    this.view = new PageViews(book, mountTarget(target), options, this.themes);
+    this.interactions = new ContentInteractions(book, this);
+    this.view = new PageViews(book, mountTarget(target), options, this.themes, this.interactions);
     this.relocations = new Relocations(
       () => (this.layoutController.matchesFrame(this.frame) ? this.currentLocation() : null),
       this.frame.ownerDocument.defaultView,
@@ -261,6 +265,7 @@ export class Rendition {
     if (!this.destroyed) {
       this.controller?.abort();
       this.touch.destroy();
+      this.interactions.destroy();
       this.themes.destroy();
       this.relocations.destroy();
       this.reflows.detach();

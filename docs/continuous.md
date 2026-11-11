@@ -29,3 +29,5 @@ Primary chapter failures reject `display()` and retain previously committed cont
 Geometry is bounded to 1,000,000 CSS pixels per chapter and 16,000,000 per estimated book. Viewport-dependent CSS must settle within eight expansion passes; feedback growth rejects instead of hanging. Insufficient `maxViews` for a viewport of tiny chapters is reported as a preload error. This first continuous implementation uses native iframe views and estimated spacers; upstream manager/plugin compatibility remains tracked separately.
 
 `themes` supports the same [reader style APIs](./themes.md) as the bounded reader, including updates to every currently loaded neighbor and persistence through trimming/reloading.
+
+`interactions` supports [selection, input, and hyperlink APIs](./interactions.md) across visible/preloaded native documents. Visible chapter membership uses shared logical offsets so rounded browser rectangles cannot introduce a phantom preceding chapter at an exact boundary.

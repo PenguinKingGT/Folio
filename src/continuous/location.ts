@@ -9,20 +9,19 @@ import type { ContinuousWindow } from './window';
 import type { ContinuousPage } from './page';
 import { isFixed } from '../layout/fixed-model';
 
-/** Return participating pages without exposing unloaded virtual ranges as readable content. */
+/** Compare shared logical offsets so native rectangle rounding cannot create phantom preceding pages. */
 export function visiblePages(
   port: ContinuousPort,
   window: ContinuousWindow,
 ): readonly ContinuousPage[] {
-  const clip = port.viewport.getBoundingClientRect();
+  const state = port.state(window.offsets.total);
+  if (state === null) {
+    return [];
+  }
+  const offset = port.offset();
   return window.all().filter((page) => {
-    const rect = page.cell.getBoundingClientRect();
-    return (
-      rect.right > clip.left &&
-      rect.bottom > clip.top &&
-      rect.left < clip.right &&
-      rect.top < clip.bottom
-    );
+    const start = window.offsets.start(page.section.index);
+    return start + page.measured.extent > offset && start < offset + state.viewport;
   });
 }
 

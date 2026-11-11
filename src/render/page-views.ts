@@ -13,6 +13,7 @@ import { isFixed } from '../layout/fixed-model';
 import { documentViewport } from '../layout/fixed-document';
 import { createSurface } from './surface';
 import type { Themes } from '../themes/themes';
+import type { ContentInteractions } from '../interaction/interactions';
 
 /** One surface retains dimensions while individual fixed pages scale inside it. */
 export class PageViews {
@@ -21,6 +22,7 @@ export class PageViews {
   private readonly fixed: FixedSpread;
   private section: Section | null = null;
   private visible = false;
+  private releaseInteractions: (() => void) | undefined;
   private settings: Required<PaginationOptions>;
 
   /** Validate via the iframe view and remove the temporary surface on construction failure. */
@@ -29,13 +31,14 @@ export class PageViews {
     container: HTMLElement,
     options: ViewOptions & PaginationOptions,
     private readonly themes?: Themes,
+    private readonly interactions?: ContentInteractions,
   ) {
     this.settings = paginationOptions(options);
     this.surface = createSurface(container, options);
     try {
       this.main = new IframeView(this.surface, { ...options, width: '100%', height: '100%' });
       this.resetFrame();
-      this.fixed = new FixedSpread(book, this.surface, options, themes);
+      this.fixed = new FixedSpread(book, this.surface, options, themes, interactions);
     } catch (error) {
       this.surface.remove();
       throw error;
@@ -60,8 +63,10 @@ export class PageViews {
     const content = await chapterMarkup(this.book, section, token, signal);
     this.fixed.clear();
     this.resetFrame();
+    this.releaseInteractions?.();
     this.section = null;
     const document = await this.main.load(content, token, signal);
+    this.releaseInteractions = this.interactions?.attach(document, section);
     await this.themes?.apply(document, signal);
     if (isFixed(this.book.publication, section)) {
       documentViewport(document);
@@ -127,6 +132,7 @@ export class PageViews {
   }
   /** Release every document and remove only the owned surface. */
   destroy(): void {
+    this.releaseInteractions?.();
     this.fixed.clear();
     this.main.destroy();
     this.surface.remove();

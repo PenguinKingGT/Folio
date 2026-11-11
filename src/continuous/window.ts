@@ -8,6 +8,7 @@ import { readyWindow } from './candidates';
 import type { ContinuousOptions } from './options';
 import type { ContinuousPort, ViewportSize } from './port';
 import type { Themes } from '../themes/themes';
+import type { ContentInteractions } from '../interaction/interactions';
 
 /** Preparation may retain a usable center while reporting optional neighbor failures. */
 export interface PreparedWindow {
@@ -37,6 +38,7 @@ export class ContinuousWindow {
     private readonly options: ContinuousOptions,
     private readonly changed: () => void,
     private readonly themes?: Themes,
+    private readonly interactions?: ContentInteractions,
   ) {
     this.offsets = new ChapterOffsets(book.spine.all());
   }
@@ -190,6 +192,7 @@ export class ContinuousWindow {
       this.options,
       this.changed,
       this.themes,
+      this.interactions,
     );
     try {
       await page.load(`${token}-${section.index}`, signal, size, hint);

@@ -92,7 +92,7 @@ export class TouchBinding {
 
   /** Start only a single touch on eligible content; pen/mouse input keeps native behavior. */
   private down(event: PointerEvent): void {
-    if (event.pointerType !== 'touch') {
+    if (event.pointerType !== 'touch' || event.defaultPrevented) {
       return;
     }
     this.pointers.add(event.pointerId);

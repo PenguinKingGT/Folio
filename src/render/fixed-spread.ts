@@ -10,6 +10,7 @@ import { IframeView } from './iframe-view';
 import type { ViewOptions } from './iframe-view';
 import { chapterMarkup } from './load-chapter';
 import type { Themes } from '../themes/themes';
+import type { ContentInteractions } from '../interaction/interactions';
 
 /** A rendered native document bound to its spine identity. */
 export interface RenderedPage {
@@ -58,6 +59,7 @@ export class FixedSpread {
   private companion: IframeView | null = null;
   private partner: Section | null = null;
   private state: FixedLayoutState | null = null;
+  private releaseInteractions: (() => void) | undefined;
 
   /** Bind resource ownership and a private positioned viewport. */
   constructor(
@@ -65,6 +67,7 @@ export class FixedSpread {
     private readonly surface: HTMLElement,
     private readonly options: ViewOptions,
     private readonly themes?: Themes,
+    private readonly interactions?: ContentInteractions,
   ) {}
 
   /** Expose immutable measurements only after a fixed page has been laid out. */
@@ -84,6 +87,7 @@ export class FixedSpread {
     this.companion = view;
     try {
       const document = await view.load(content, `${token}-companion`, signal);
+      this.releaseInteractions = this.interactions?.attach(document, partner);
       await this.themes?.apply(document, signal);
       signal.throwIfAborted();
       documentViewport(document);
@@ -169,6 +173,8 @@ export class FixedSpread {
 
   /** Release a previous companion before loading or destroying another chapter. */
   clear(): void {
+    this.releaseInteractions?.();
+    this.releaseInteractions = undefined;
     this.companion?.destroy();
     this.companion = null;
     this.partner = null;

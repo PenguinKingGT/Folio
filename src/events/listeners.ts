@@ -1,4 +1,4 @@
-/** Keep continuous-reader subscriptions independently owned and safe to mutate during dispatch. */
+/** Keep typed subscriptions independently owned and safe to mutate during dispatch. */
 
 /** Snapshot subscribers so registration changes affect subsequent notifications. */
 export class Listeners<T> {
