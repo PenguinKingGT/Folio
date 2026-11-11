@@ -19,12 +19,20 @@ import { Cfi } from '../cfi/cfi';
 import { mountTarget } from './mount';
 import type { FixedLayoutState, RenderedPage } from './fixed-spread';
 import type { WritingOptions } from '../layout/writing';
+import { TouchNavigation } from '../touch/navigation';
+import { touchOptions } from '../touch/options';
+import type { TouchSettings } from '../touch/options';
 
 /** Initial renderer options; layout-specific behavior is added by subsequent features. */
-export type RenditionOptions = ViewOptions & PaginationOptions & FlowOptions & WritingOptions;
+export type RenditionOptions = ViewOptions &
+  PaginationOptions &
+  FlowOptions &
+  WritingOptions &
+  TouchSettings;
 
 /** Display a book in one reusable, script-disabled iframe surface. */
 export class Rendition {
+  readonly touch: TouchNavigation;
   private readonly view: PageViews;
   private readonly layoutController: ReaderLayout;
   private readonly relocations: Relocations;
@@ -44,6 +52,7 @@ export class Rendition {
     options: RenditionOptions = {},
     private readonly onDestroy?: () => void,
   ) {
+    touchOptions(options.touch);
     this.layoutController = new ReaderLayout(
       options,
       book.publication.rendition.flow,
@@ -76,6 +85,7 @@ export class Rendition {
       },
       this.view.surface,
     );
+    this.touch = new TouchNavigation(this, options.touch);
   }
 
   /** The owned iframe is exposed for host integration; scripts remain disabled. */
@@ -239,6 +249,7 @@ export class Rendition {
     }
     this.view.document?.defaultView?.scrollTo(0, 0);
     this.relocations.report();
+    this.touch.refresh();
     return this.flowState;
   }
 
@@ -268,6 +279,7 @@ export class Rendition {
   destroy(): void {
     if (!this.destroyed) {
       this.controller?.abort();
+      this.touch.destroy();
       this.relocations.destroy();
       this.reflows.detach();
       this.view.destroy();

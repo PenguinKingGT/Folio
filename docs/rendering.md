@@ -1,5 +1,7 @@
 # Rendering
 
+Opt-in [touch navigation](./touch.md) supports swipe turns, nearest-spread snapping, and caller-owned host gesture panels (F23).
+
 ## Passive chapter views (F12)
 
 ```ts

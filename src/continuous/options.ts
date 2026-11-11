@@ -3,9 +3,11 @@ import type { ViewOptions } from '../render/iframe-view';
 import type { WritingOptions } from '../layout/writing';
 import { viewTimeout } from '../render/surface';
 import { validateWritingOptions } from '../layout/writing';
+import { touchOptions } from '../touch/options';
+import type { TouchSettings } from '../touch/options';
 
 /** Continuous readers preload a bounded number of linear neighbors on both sides. */
-export interface ContinuousOptions extends ViewOptions, WritingOptions {
+export interface ContinuousOptions extends ViewOptions, WritingOptions, TouchSettings {
   preloadBefore?: number;
   preloadAfter?: number;
   maxViews?: number;
@@ -32,5 +34,6 @@ export function continuousOptions(
   }
   viewTimeout(options.loadTimeoutMs);
   validateWritingOptions(options);
+  touchOptions(options.touch);
   return { ...options, preloadBefore, preloadAfter, maxViews };
 }

@@ -40,6 +40,8 @@ export { cfiFromNode, cfiFromRange, rangeFromCfi, nodeFromCfi } from './cfi/dom'
 export type { CfiDomOptions } from './cfi/dom';
 export { Rendition } from './render/rendition';
 export { ContinuousReader } from './continuous/reader';
+export { TouchNavigation } from './touch/navigation';
+export type { TouchOptions, TouchSettings } from './touch/options';
 export type { ContinuousOptions } from './continuous/options';
 export type { RenditionOptions } from './render/rendition';
 export type { DisplayTarget } from './render/target';

@@ -15,9 +15,11 @@ import type { ContinuousOptions } from './options';
 import { continuousLocation, visiblePages } from './location';
 import { Listeners } from './listeners';
 import { scrollToPosition } from './position';
+import { TouchNavigation } from '../touch/navigation';
 
 /** Opening remains lazy; display commits requested content and reports optional preload failures separately. */
 export class ContinuousReader {
+  readonly touch: TouchNavigation;
   private readonly port: ContinuousPort;
   private readonly window: ContinuousWindow;
   private readonly navigation: ContinuousNavigation;
@@ -58,6 +60,7 @@ export class ContinuousReader {
       },
     });
     this.observer = new ContinuousObserver(this.port, (layout) => this.flush(layout));
+    this.touch = new TouchNavigation(this, options.touch);
   }
 
   /** The real outer scroll element is exposed for host scroll and accessibility integration. */
@@ -265,6 +268,7 @@ export class ContinuousReader {
       return;
     }
     this.destroyed = true;
+    this.touch.destroy();
     this.navigation.destroy();
     this.observer.destroy();
     this.window.destroy();
