@@ -14,7 +14,7 @@ export function bookFiles(edition: '2' | '3' = '3', withNavigation = true): Map<
     manifest:
       '<item id="chapter" href="text/chapter%20one.xhtml" media-type="application/xhtml+xml"/><item id="cover" href="images/cover.jpg" media-type="image/jpeg" properties="cover-image"/>' +
       (withNavigation ? navigation : ''),
-  });
+  }).replace('>pre-paginated</meta>', '>reflowable</meta>');
   return new Map([
     ['mimetype', 'application/epub+zip'],
     [

@@ -6,6 +6,7 @@ import type { PaginationState } from '../layout/pagination';
 import { lastOffset, scrollOffset, scrollToOffset } from './position';
 import type { DisplayTarget } from './target';
 import { measureFrame } from '../layout/columns';
+import type { FixedLayoutState, RenderedPage } from './fixed-spread';
 
 /** Minimal reader surface needed by sequential navigation. */
 export interface NavigationHost {
@@ -13,6 +14,8 @@ export interface NavigationHost {
   readonly currentSection: Section | null;
   readonly flowState: FlowState | null;
   readonly pagination: PaginationState | null;
+  readonly fixedLayout: FixedLayoutState | null;
+  getRenderedPages(): readonly RenderedPage[];
   getContents(): Document | null;
   display(target?: DisplayTarget): Promise<Section>;
 }
@@ -55,7 +58,9 @@ export async function turnPage(
   if (turnWithinChapter(host, document, state, next)) {
     return section;
   }
-  const adjacent = spine.adjacent(section.index, direction);
+  const pages = host.getRenderedPages();
+  const edge = next ? pages.at(-1) : pages[0];
+  const adjacent = spine.adjacent(edge?.section.index ?? section.index, direction);
   if (adjacent === null) {
     return null;
   }

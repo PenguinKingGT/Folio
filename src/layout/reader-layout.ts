@@ -12,6 +12,7 @@ export class ReaderLayout {
   private settings: { flow: ReadingFlow; axis: ReadingAxis };
   private measured: FlowState | null = null;
   private viewport: { width: number; height: number } | null = null;
+  private fixed = false;
 
   /** Resolve publication metadata and validate options before iframe allocation. */
   constructor(
@@ -24,7 +25,7 @@ export class ReaderLayout {
 
   /** Expose pagination only while that flow is active. */
   get pagination(): PaginationState | null {
-    return this.settings.flow === 'paginated' ? this.pages.state : null;
+    return !this.fixed && this.settings.flow === 'paginated' ? this.pages.state : null;
   }
 
   /** Expose the latest measured scroll extent or page/spread extent. */
@@ -34,7 +35,7 @@ export class ReaderLayout {
 
   /** Detect stale measurements before a resize-triggered native scroll can replace the saved anchor. */
   matchesFrame(frame: HTMLIFrameElement): boolean {
-    return measureFrame(frame, (width, height) => {
+    return measureFrame(this.fixed ? (frame.parentElement ?? frame) : frame, (width, height) => {
       if (this.viewport?.width !== width || this.viewport.height !== height) {
         return false;
       }
@@ -46,6 +47,18 @@ export class ReaderLayout {
       return (
         length !== undefined && Math.max(this.measured.viewport, length) === this.measured.length
       );
+    });
+  }
+
+  /** Fixed pages use one logical viewport, regardless of their authored dimensions. */
+  useFixed(width: number, height: number): void {
+    this.fixed = true;
+    this.viewport = { width, height };
+    this.measured = Object.freeze({
+      flow: 'paginated',
+      axis: 'horizontal',
+      length: width,
+      viewport: width,
     });
   }
 
@@ -66,6 +79,7 @@ export class ReaderLayout {
     document: Document,
     options: PaginationOptions = {},
   ): PaginationState | null {
+    this.fixed = false;
     if (this.settings.flow === 'paginated') {
       const pages = this.pages.apply(frame, document, options);
       this.viewport = { width: pages.width, height: pages.height };

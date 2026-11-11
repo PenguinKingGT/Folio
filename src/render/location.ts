@@ -5,7 +5,9 @@ import { measureFrame } from '../layout/columns';
 import type { NavigationHost } from './turn';
 import { lastOffset, scrollOffset } from './position';
 import { visibleCfis } from './visible';
-import type { VisibleBoundary, VisibleLocation } from './location-types';
+import type { VisibleLocation } from './location-types';
+import { boundary } from './location-boundary';
+import { readFixedLocation } from './fixed-location';
 
 /** Read an immutable snapshot without generating a full-book progress index as a side effect. */
 export function readLocation(book: Book, host: NavigationHost): VisibleLocation | null {
@@ -14,6 +16,9 @@ export function readLocation(book: Book, host: NavigationHost): VisibleLocation 
   const state = host.flowState;
   if (document === null || section === null || state === null) {
     return null;
+  }
+  if (host.fixedLayout !== null) {
+    return readFixedLocation(book, host.getRenderedPages());
   }
   return measureFrame(host.frame, (width, height) => {
     const base = `/${book.publication.spineStep}/${(section.index + 1) * 2}[${escapeCfi(section.idref)}]`;
@@ -38,23 +43,5 @@ export function readLocation(book: Book, host: NavigationHost): VisibleLocation 
         offset >= lastOffset(state, host.pagination) - 1 &&
         book.spine.adjacent(section.index, 'next') === null,
     });
-  });
-}
-
-/** Freeze nested metadata so listeners cannot mutate another subscriber's snapshot. */
-function boundary(
-  book: Book,
-  section: { index: number; href: string },
-  cfi: string,
-  page: number,
-  total: number,
-): VisibleBoundary {
-  return Object.freeze({
-    cfi,
-    index: section.index,
-    href: section.href,
-    displayed: Object.freeze({ page, total }),
-    location: book.locations.locationFromCfi(cfi),
-    percentage: book.locations.percentageFromCfi(cfi),
   });
 }

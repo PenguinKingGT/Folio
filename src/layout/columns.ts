@@ -34,7 +34,7 @@ export function applyColumns(document: Document, geometry: PaginationGeometry): 
 
 /** Measure hidden frames without painting a temporary visible chapter. */
 export function measureFrame<T>(
-  frame: HTMLIFrameElement,
+  frame: HTMLElement,
   measure: (width: number, height: number) => T,
 ): T {
   const display = frame.style.display;

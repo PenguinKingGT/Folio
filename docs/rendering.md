@@ -31,7 +31,7 @@ Reader contents default to horizontal fixed-height CSS columns. `spread` accepts
 
 Actual column counts come from browser overflow with a one-pixel CSSOM rounding tolerance. Final-spread padding preserves its scroll target when the last spread has an empty second column. Frames are measured with temporary hidden visibility so a hidden reader remains hidden. The host must have measurable dimensions; zero-size views reject.
 
-Each chapter uses standards mode for consistent CSS columns and scrolling roots. Pagination sets document/body dimensions, margin/padding and column rules while retaining chapter text styling. Automatic resize preservation is described under F17; fixed layout and vertical writing remain under F18/F19.
+Each chapter uses standards mode for consistent CSS columns and scrolling roots. Pagination sets document/body dimensions, margin/padding and column rules while retaining chapter text styling. Automatic resize preservation is described under F17; fixed layout is described under F18; vertical writing remains under F19.
 
 ## Scrolled flow (F14)
 
@@ -90,3 +90,15 @@ A logical CFI anchor survives repeated reflows instead of drifting to successive
 Changes coalesce into one host-window animation frame. Zero-size containers defer work until measurable, and hidden readers keep their visibility state. Scheduling uses the host realm because script-disabled WebKit frames can suppress their own callbacks. Replacing or destroying a chapter removes observers, media/font/asset listeners, and queued frames.
 
 Tests exercise real host resizing, repeated spread/hidden changes, zero-size recovery, original image/font loading, native CSSOM import/origin behavior, and orientation cancellation. Chromium, Firefox and WebKit verify that both paginated and scrolled reading retain the original anchor through resize and media-query changes in both directions.
+
+## Fixed-layout XHTML (F18)
+
+Package `rendition:layout=pre-paginated` and item-level layout overrides select fixed pages. Each document requires a numeric positive `meta[name="viewport"]` width and height. The iframe retains those intrinsic dimensions so percentage and fixed-position content use the author's containing block; the whole iframe scales to fit its slot. Missing/invalid declarations reject, and mixed-layout spines restore reflow geometry when needed. This renderer accepts XHTML spine documents, including embedded SVG/images; standalone SVG/image spine documents remain unsupported.
+
+`reader.fixedLayout` reports immutable surface dimensions and primary/companion geometry; `pagination` is null for fixed pages. Fixed content remains paginated even when a scrolling flow is configured. Each spine item counts as one page. `getContents()` and `frame` refer to the requested primary page; `getRenderedPages()` returns the actually participating documents, frames, and sections in reading order. Visible locations span both documents, and next/previous commands advance beyond the entire displayed spread.
+
+Reader `spread: none/always` overrides publication preferences; auto honors `rendition:spread` and item overrides (`none`, `both`, `portrait`, `landscape`, or the normal width threshold). Physical left/right and centered page properties are honored, including legacy unprefixed side properties. Default placement starts with a lone right-hand opening page in LTR and a lone left-hand page in RTL; subsequent opposing linear fixed pages pair. Centered pages, incompatible sides, non-linear entries, and reflowable neighbors do not pair. Facing pages share one scale and touch at a common spine with no gutter; the reflowable `gap` setting does not apply.
+
+At most one potential partner is prepared alongside the primary document, including in single-page mode, so resizing and spread changes can reuse ready documents synchronously. A malformed potential partner rejects the display operation. Reader-owned positioned surfaces isolate geometry without changing host container styles; cancellation, failures, replacement, and destruction release companion views. Font/resource/resize observation remains active, and unchanged logical locations remain deduplicated after scaling.
+
+The one-page-per-item and gapless spread behavior follows [EPUB Reading Systems 3.3](https://www.w3.org/TR/epub-rs-33/#sec-fxl-layout). Tests cover native containing blocks, shared-spine geometry, physical sides, hidden/resize transitions, mixed layouts, viewport failures, retries, cancellation, and LTR/RTL rendering in all three browser engines.

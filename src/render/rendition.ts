@@ -1,8 +1,7 @@
 /** Basic reader facade: mount passive chapter documents and control their lifecycle. */
 import type { Book } from '../book/book';
 import type { Section } from '../spine/section';
-import { prepareContent } from './content';
-import { IframeView } from './iframe-view';
+import { PageViews } from './page-views';
 import type { ViewOptions } from './iframe-view';
 import { ReaderLayout } from '../layout/reader-layout';
 import type { PaginationOptions, PaginationState } from '../layout/pagination';
@@ -17,28 +16,15 @@ import { Relocations } from './relocation';
 import type { RelocatedListener, VisibleLocation } from './location-types';
 import { ReflowObserver } from '../layout/reflow-observer';
 import { Cfi } from '../cfi/cfi';
+import { mountTarget } from './mount';
+import type { FixedLayoutState, RenderedPage } from './fixed-spread';
 
 /** Initial renderer options; layout-specific behavior is added by subsequent features. */
 export type RenditionOptions = ViewOptions & PaginationOptions & FlowOptions;
 
-/** Resolve selectors only when a browser DOM is available. */
-function mountTarget(target: HTMLElement | string): HTMLElement {
-  if (typeof target !== 'string') {
-    return target;
-  }
-  if (typeof document === 'undefined') {
-    throw new TypeError('Rendering requires a browser document.');
-  }
-  const element = document.querySelector<HTMLElement>(target);
-  if (element === null) {
-    throw new TypeError(`Reader container not found: ${target}`);
-  }
-  return element;
-}
-
 /** Display a book in one reusable, script-disabled iframe surface. */
 export class Rendition {
-  private readonly view: IframeView;
+  private readonly view: PageViews;
   private readonly layoutController: ReaderLayout;
   private readonly relocations: Relocations;
   private readonly reflows: ReflowObserver;
@@ -58,12 +44,16 @@ export class Rendition {
     private readonly onDestroy?: () => void,
   ) {
     this.layoutController = new ReaderLayout(options, book.publication.rendition.flow);
-    this.view = new IframeView(mountTarget(target), options);
+    this.view = new PageViews(book, mountTarget(target), options);
     this.relocations = new Relocations(
       () => (this.layoutController.matchesFrame(this.frame) ? this.currentLocation() : null),
       this.frame.ownerDocument.defaultView,
     );
     this.relocations.subscribe((location) => {
+      if (this.fixedLayout !== null) {
+        this.anchor = null;
+        return;
+      }
       const document = this.view.document;
       const state = this.flowState;
       if (document !== null && state !== null) {
@@ -74,9 +64,13 @@ export class Rendition {
         }
       }
     });
-    this.reflows = new ReflowObserver(this.frame, () => {
-      this.layout();
-    });
+    this.reflows = new ReflowObserver(
+      this.frame,
+      () => {
+        this.layout();
+      },
+      this.view.surface,
+    );
   }
 
   /** The owned iframe is exposed for host integration; scripts remain disabled. */
@@ -103,16 +97,16 @@ export class Rendition {
       this.seek(resolved);
       return section;
     }
-    const address = this.book.resources.resolve(section.href);
-    if (address.kind !== 'local') {
-      throw new TypeError('Chapter rendering requires a local publication resource.');
-    }
-    const passive = prepareContent(await section.render(controller.signal), token);
-    const content = await this.book.resources.rewrite(passive, address.path);
-    controller.signal.throwIfAborted();
     this.relocations.detach();
     this.reflows.detach();
-    await this.view.load(content, token, controller.signal);
+    try {
+      await this.view.load(section, token, controller.signal);
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        this.watchContents();
+      }
+      throw error;
+    }
     controller.signal.throwIfAborted();
     this.current = section;
     this.anchor = null;
@@ -121,12 +115,17 @@ export class Rendition {
     }
     this.layout();
     this.seek(resolved);
+    this.watchContents();
+    return section;
+  }
+
+  /** Observe completed content, including a retained document after a failed chapter read. */
+  private watchContents(): void {
     const document = this.view.document;
     if (document !== null) {
       this.relocations.watch(document);
       this.reflows.watch(document);
     }
-    return section;
   }
 
   /** Move forward one viewport or to the next linear chapter; book end returns null. */
@@ -178,17 +177,40 @@ export class Rendition {
     return this.layoutController.pagination;
   }
 
+  /** Return scaled fixed-page geometry, or null for reflowable content. */
+  get fixedLayout(): FixedLayoutState | null {
+    return this.view.fixedLayout;
+  }
+
+  /** Return actually displayed documents in spine order, including a facing fixed page. */
+  getRenderedPages(): readonly RenderedPage[] {
+    this.assertActive();
+    return this.view.pages();
+  }
+
+  /** Choose fixed-page fitting before the configured reflowable flow. */
+  private applyLayout(document: Document, options: PaginationOptions = {}): PaginationState | null {
+    this.layoutController.configure(options);
+    const fixed = this.view.applyFixed(options);
+    if (fixed !== null) {
+      this.layoutController.useFixed(fixed.width, fixed.height);
+      return null;
+    }
+    return this.layoutController.apply(this.frame, document, options);
+  }
+
   /** Reflow current contents while retaining the last reported reading CFI; no document returns null. */
   layout(options: PaginationOptions = {}): PaginationState | null {
     this.assertActive();
     const document = this.view.document;
     if (document === null) {
       this.layoutController.configure(options);
+      this.view.configure(options);
       return null;
     }
     const anchor = this.anchor;
-    const result = this.layoutController.apply(this.frame, document, options);
-    if (anchor !== null && this.current !== null) {
+    const result = this.applyLayout(document, options);
+    if (this.fixedLayout === null && anchor !== null && this.current !== null) {
       // Keep the logical anchor across repeated reflows instead of drifting to each new page start.
       this.seek({ section: this.current, cfi: new Cfi(anchor), fragment: null }, true);
     } else {
@@ -208,7 +230,7 @@ export class Rendition {
     this.layoutController.setFlow(mode, axis);
     const document = this.view.document;
     if (document !== null) {
-      this.layoutController.apply(this.frame, document);
+      this.applyLayout(document);
     }
     this.view.document?.defaultView?.scrollTo(0, 0);
     this.relocations.report();

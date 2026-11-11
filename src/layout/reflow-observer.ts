@@ -15,6 +15,7 @@ export class ReflowObserver {
   constructor(
     private readonly frame: HTMLIFrameElement,
     private readonly reflow: () => void,
+    private readonly surface: HTMLElement = frame,
   ) {}
 
   /** Start observing a chapter; replacement invalidates queued callbacks. */
@@ -24,9 +25,9 @@ export class ReflowObserver {
     const controller = new AbortController();
     this.controller = controller;
     const options = { signal: controller.signal };
-    this.size = measureFrame(this.frame, (width, height) => `${width}:${height}`);
+    this.size = measureFrame(this.surface, (width, height) => `${width}:${height}`);
     this.resize = new ResizeObserver(() => this.measure());
-    this.resize.observe(this.frame);
+    this.resize.observe(this.surface);
     this.watchEvents(document, options);
   }
 
@@ -51,7 +52,7 @@ export class ReflowObserver {
 
   /** Ignore hidden/zero-sized observations and avoid loops from unchanged frame geometry. */
   private measure(): void {
-    const { width, height } = this.frame.getBoundingClientRect();
+    const { width, height } = this.surface.getBoundingClientRect();
     const size = `${width}:${height}`;
     if (width > 0 && height > 0 && (size !== this.size || this.dirty)) {
       this.size = size;
@@ -66,7 +67,7 @@ export class ReflowObserver {
       // Schedule in the host realm: passive WebKit frames can deny their own animation frames.
       this.pending = this.frame.ownerDocument.defaultView?.requestAnimationFrame(() => {
         this.pending = undefined;
-        measureFrame(this.frame, (width, height) => {
+        measureFrame(this.surface, (width, height) => {
           if (width > 0 && height > 0) {
             this.dirty = false;
             this.reflow();
