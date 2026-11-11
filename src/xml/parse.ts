@@ -2,12 +2,12 @@
 import { DOMParser } from '@xmldom/xmldom';
 import type { Document, Element } from '@xmldom/xmldom';
 
-/** Parse a bounded XML document without DTDs or entity declarations. */
-export function parseXml(source: string): Document {
+/** Parse bounded XML; XHTML permits external doctype declarations without fetching DTDs. */
+export function parseXml(source: string, mode: 'xml' | 'xhtml' = 'xml'): Document {
   if (source.length > 5 * 1024 * 1024) {
     throw new RangeError('XML exceeds the document size limit.');
   }
-  if (/<!DOCTYPE|<!ENTITY/i.test(source)) {
+  if (/<!ENTITY|<!DOCTYPE[^>]*\[/i.test(source) || (mode === 'xml' && /<!DOCTYPE/i.test(source))) {
     throw new TypeError('DTD and entity declarations are not supported.');
   }
   try {
@@ -15,7 +15,7 @@ export function parseXml(source: string): Document {
       onError: (_level, message) => {
         throw new TypeError(message);
       },
-    }).parseFromString(source, 'application/xml');
+    }).parseFromString(source, mode === 'xml' ? 'application/xml' : 'application/xhtml+xml');
     if (document.documentElement === null) {
       throw new TypeError('XML document has no root element.');
     }

@@ -19,3 +19,6 @@ export type {
   PackageMetadata,
   PublicationPackage,
 } from './package/types';
+export { Section } from './spine/section';
+export type { SectionLoader } from './spine/section';
+export { Spine } from './spine/spine';

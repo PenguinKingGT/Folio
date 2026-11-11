@@ -10,7 +10,7 @@ Scanned on 2026-11-11 against local epub.js `0.3.93`, commit `eee359d0790002115a
 - The TypeScript / Vite / pnpm / Oxlint / Prettier / test / CI foundation is complete; smoke tests do not count as EPUB features.
 - Decide compatibility scope before implementing optional legacy behavior. Record excluded items as Out of scope with a reason.
 
-**Progress: Done 4 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 32.** Update totals with every status change; list out-of-scope items separately.
+**Progress: Done 5 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 31.** Update totals with every status change; list out-of-scope items separately.
 
 ## Phase 1: Opening books and location primitives
 
@@ -22,7 +22,7 @@ Upstream reference: [Book](../epub.js/src/book.js), [Archive](../epub.js/src/arc
 | F02 | ZIP archives: extraction, entry access, text / Blob / Base64, resource URL creation and release                 | Done        | [Source](../src/archive/) / [Tests](../tests/unit/archive/)     |
 | F03 | Container: parse META-INF/container.xml and locate OPF                                                          | Done        | [Source](../src/container/) / [Tests](../tests/unit/container/) |
 | F04 | Package: EPUB 2/3 metadata, manifest, spine, cover and layout properties                                        | Done        | [Source](../src/package/) / [Tests](../tests/unit/package/)     |
-| F05 | Spine / Section: reading order, linear items, lookup, adjacent chapters, loading, serialization and unloading   | Not started | —                                                               |
+| F05 | Spine / Section: reading order, linear items, lookup, adjacent chapters, loading, serialization and unloading   | Done        | [Source](../src/spine/) / [Tests](../tests/unit/spine/)         |
 | F06 | Cover: EPUB 2/3 discovery, cover URL and absent-cover handling                                                  | Not started | —                                                               |
 | F07 | Resources: relative / encoded paths, canonical URLs, images / fonts, CSS url() / @import, Blob URLs             | Not started | —                                                               |
 | F08 | Navigation: EPUB 3 nav, EPUB 2 NCX, nested TOC, landmarks and href / ID lookup                                  | Not started | —                                                               |
