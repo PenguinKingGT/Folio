@@ -2,7 +2,7 @@
 
 An open-source TypeScript EPUB library that progressively replaces epub.js capabilities with traceable regression coverage.
 
-**Implemented: input normalization, request adapters, and ZIP resource access. Parsing and rendering are still in development; epub.js API compatibility is not yet guaranteed.** The local package name `folio-epub` has not been published or checked for npm availability.
+**Implemented: input normalization, request adapters, ZIP resource access, and OCF container parsing. Package parsing and rendering are still in development; epub.js API compatibility is not yet guaranteed.** The local package name `folio-epub` has not been published or checked for npm availability.
 
 ## Development
 
@@ -46,7 +46,7 @@ examples/basic/      Minimal development example
 epub.js/             Unchanged upstream reference repository
 ```
 
-[Vite library mode](https://vite.dev/guide/build#library-mode) produces ESM; TypeScript emits declarations separately. [Vitest](https://vitest.dev/guide/coverage) measures coverage. [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware), backed by `oxlint-tsgolint`, checks unsafe type operations and unhandled promises. Rules live in `oxlint.config.ts`; TypeScript also runs independently. ZIP decompression uses the MIT-licensed `fflate` dependency.
+[Vite library mode](https://vite.dev/guide/build#library-mode) produces ESM; TypeScript emits declarations separately. [Vitest](https://vitest.dev/guide/coverage) measures coverage. [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware), backed by `oxlint-tsgolint`, checks unsafe type operations and unhandled promises. Rules live in `oxlint.config.ts`; TypeScript also runs independently. ZIP decompression uses `fflate`; environment-independent XML parsing uses `@xmldom/xmldom`. Both dependencies use the MIT license.
 
 See [development guidelines](./AGENTS.md), the [migration tracker](./docs/migration.md), [input/request APIs](./docs/input.md), and [archive APIs](./docs/archive.md). All comments and documentation must be in English. Every feature requires tests and a separate verified commit.
 

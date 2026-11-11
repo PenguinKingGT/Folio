@@ -9,3 +9,5 @@ export { createRequester, HttpError } from './input/request';
 export type { Requester, RequesterOptions, RequestOptions, ResponseTypes } from './input/request';
 export { Archive } from './archive/archive';
 export type { ArchiveLimits } from './archive/unzip';
+export { parseContainer } from './container/container';
+export type { Container } from './container/container';
