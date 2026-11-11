@@ -1,20 +1,20 @@
-/** 将调用方输入规范化为归档字节或可请求的书籍地址。 */
+/** Normalize caller input into archive bytes or a requestable book address. */
 export type InputType = 'epub' | 'opf' | 'directory' | 'json' | 'base64';
 
-/** 输入支持显式指定类型；Base64 必须显式声明，避免将地址误判为归档。 */
+/** Explicit input options; Base64 requires a type hint to avoid misclassifying URLs. */
 export interface InputOptions {
   type?: InputType;
   baseUrl?: string;
 }
 
-/** 规范化后的输入，解析与解压模块通过判别字段消费。 */
+/** Normalized source discriminated by type for loading and extraction. */
 export type BookSource =
   | { type: 'binary'; data: Uint8Array }
   | { type: 'epub' | 'opf' | 'directory' | 'json'; url: string };
 
 /**
- * 识别输入；复制二进制数据以避免调用方后续修改影响加载结果。
- * @throws TypeError 输入为空、类型冲突或 Base64 非法。
+ * Identify input and copy binary data to isolate later caller mutations.
+ * @throws TypeError Input is empty, conflicts with its explicit type, or contains invalid Base64.
  */
 export function resolveInput(
   input: string | URL | ArrayBuffer | Uint8Array,
@@ -40,7 +40,7 @@ export function resolveInput(
   return { type: options.type ?? inferType(url), url };
 }
 
-/** 仅检查路径扩展名，避免查询参数和片段改变输入识别结果。 */
+/** Inspect only the path extension; ignore query parameters and fragments. */
 function inferType(url: string): 'epub' | 'opf' | 'json' | 'directory' {
   const path = url.split(/[?#]/, 1)[0] ?? '';
   const extension = /\.(epub|opf|json)$/i.exec(path)?.[1]?.toLowerCase();
@@ -50,7 +50,7 @@ function inferType(url: string): 'epub' | 'opf' | 'json' | 'directory' {
   return 'directory';
 }
 
-/** 严格解码标准 Base64；允许 MIME 中常见的 ASCII 空白及省略尾部填充。 */
+/** Decode standard Base64, allowing ASCII whitespace and omitted trailing padding. */
 function decodeBase64(value: string): Uint8Array {
   const normalized = value.replace(/[\t\n\r ]/g, '');
   if (!/^[A-Za-z0-9+/]*={0,2}$/.test(normalized)) {

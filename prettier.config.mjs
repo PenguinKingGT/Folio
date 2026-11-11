@@ -1,4 +1,4 @@
-/** 统一源码与文档格式，保持语句和控制流可读。 */
+/** Keep source and documentation formatting consistent and readable. */
 export default {
   singleQuote: true,
   trailingComma: 'all',

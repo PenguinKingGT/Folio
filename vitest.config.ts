@@ -1,4 +1,4 @@
-/** 单元测试仅收集新项目用例，覆盖率包含全部新库源码。 */
+/** Collect only new-project tests and measure coverage across all library source. */
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({

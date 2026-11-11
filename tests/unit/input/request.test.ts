@@ -1,4 +1,4 @@
-/** 使用真实本地 HTTP 服务验证请求转换、请求头及失败，不依赖外网。 */
+/** Exercise requests, headers, and failures against a real local HTTP server. */
 import { createServer } from 'node:http';
 import { afterAll, beforeAll, expect, test } from 'vitest';
 import { createRequester, HttpError } from '../../../src/index';

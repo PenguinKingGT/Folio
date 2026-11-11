@@ -1,65 +1,67 @@
-# Folio 开发约定
+# Folio Development Guidelines
 
-## 项目目标与当前状态
+## Project scope and repository
 
-Folio 是计划使用 TypeScript 重写的开源 EPUB 解析与渲染库。长期目标是逐步替代 epub.js，并针对其未解决 issue 建立可追溯的修复与回归测试。
+Folio is an open-source TypeScript rewrite of epub.js. Gradually replace its capabilities and build traceable fixes and regression tests for unresolved upstream issues.
 
-根目录是新库工程：`src/` 存放实现，`tests/` 分为单元、包产物与浏览器测试，`examples/basic/` 提供最小开发示例。`epub.js/` 是带独立 Git 仓库的上游参考源码，使用 JavaScript、Webpack 和 Karma；其中的脚本不代表新库的开发规范。
+The root contains the new library: `src/`, unit/package/browser tests under `tests/`, and `examples/basic/`. The nested `epub.js/` Git repository is an upstream reference using JavaScript, Webpack, and Karma; its scripts are not the new project's conventions.
 
-- 将 `epub.js/` 作为行为、API 和测试参考；新实现放在根目录的新工程中。除非任务明确要求，保留参考仓库原状。
-- “约 500 个 issue”是待梳理的目标范围，不是已核实的实时数量。开始梳理时查询上游实际状态并记录日期。
-- 区分 EPUB 标准要求、上游既有行为和新库设计；兼容性范围必须明确记录，不能默认所有历史行为都要保留。
+- Keep `epub.js/` unchanged unless explicitly asked to modify it. Implement the replacement in the root project.
+- The estimated 500 upstream issues are a planning scope, not a verified live count. Record the query date when inventorying issues.
+- Distinguish specification requirements, upstream behavior, and intentional design changes. Document compatibility decisions.
+- Track feature implementation in `docs/migration.md`. Implement, test, update the tracker, and commit each feature before proceeding to the next one.
 
-## 技术与工程规范
+## Engineering
 
-- 使用 TypeScript、Vite 和 pnpm；Vite 以库模式构建，新库不绑定 UI 框架，示例与核心实现分离。
-- TypeScript 开启 `strict`、`noUncheckedIndexedAccess`、`exactOptionalPropertyTypes`，对外发布类型声明。外部输入使用 `unknown` 并校验后收窄，避免 `any` 和未经验证的类型断言。
-- 统一使用 ESM。以 pnpm 管理依赖并提交 `pnpm-lock.yaml`，固定 `packageManager` 和支持的 Node.js 范围。
-- 使用 Oxlint（包含类型感知检查）、Prettier、Vitest 和覆盖率检查；涉及浏览器布局的行为使用 Playwright 在真实浏览器验证。
-- 使用根目录 `package.json` 中的检查脚本；`pnpm check` 执行完整验证，命令说明见 `README.md`。
-- CI 执行冻结锁文件安装、静态检查、测试和构建；检查失败必须返回非零退出码。
-- 引入依赖前评估必要性、包体积、许可证和维护状况。复用或修改上游代码、测试与素材时保留适用的版权声明和许可证。
+- Use TypeScript, Vite library mode, pnpm, and ESM. Keep examples separate and avoid UI framework dependencies in the library.
+- Enable `strict`, `noUncheckedIndexedAccess`, and `exactOptionalPropertyTypes`; publish declarations. Validate external `unknown` values before narrowing; avoid `any` and unchecked assertions.
+- Commit `pnpm-lock.yaml`; pin the package manager and supported Node.js range.
+- Use Oxlint with type-aware rules, Prettier, Vitest coverage, and Playwright for real-browser behavior.
+- Use scripts from `package.json`; `pnpm check` runs the full validation pipeline. See `README.md` for commands.
+- CI must use frozen-lockfile installation and fail on any unsuccessful check, test, or build.
+- Evaluate dependency necessity, bundle cost, licensing, and maintenance. Preserve applicable copyright and license notices when reusing upstream code or fixtures.
 
-## 模块边界与可维护性
+## Modules and maintainability
 
-- 按职责组织解析、归档与资源、导航与 CFI、布局与渲染、标注、兼容层等模块；按实际需求逐步建立目录，避免空壳架构。
-- 核心解析与模型尽量独立于 DOM；浏览器 API、网络和存储放在明确的适配边界，方便独立测试。
-- 对外 API 从明确的入口导出，内部模块使用具体文件路径，避免循环依赖及隐藏的全局可变状态。
-- 新增或修改的手写源码与测试文件原则上不超过 300 行；方法或函数原则上不超过 50 行，超过前优先按职责拆分。确需例外时在变更说明中解释原因，不为凑行数制造无意义封装。
-- 上述规模限制不适用于上游参考代码、锁文件、生成产物和原始测试夹具；不得借生成文件绕过限制。
-- 每行表达清晰的操作，使用一致缩进和多行控制流；不要堆叠语句、嵌套三元表达式或压缩复杂逻辑。
-- 明确异步操作的错误传播、取消和销毁语义。创建的监听器、观察器、iframe 与对象 URL 应有对应释放路径；重复释放应安全。
+- Separate parsing, archives/resources, navigation/CFI, layout/rendering, annotations, and compatibility as needed. Introduce modules for actual responsibilities rather than empty scaffolding.
+- Keep parsing and models independent of the browser DOM where practical. Put network, browser APIs, and storage behind explicit testable boundaries.
+- Export public APIs from explicit entry points. Internal imports target concrete files; avoid cycles and hidden mutable global state.
+- Keep handwritten source and test files within 300 lines and functions/methods within 50 lines. Split by responsibility first. Explain necessary exceptions in the change description rather than adding meaningless wrappers.
+- Size limits exclude unchanged upstream references, lockfiles, generated artifacts, and raw fixtures. Do not use generated code to bypass these limits.
+- Use readable multiline control flow and consistent indentation. Avoid packed statements, nested ternaries, and compressed complex logic.
+- Define error, cancellation, concurrency, and destruction behavior. Release listeners, observers, iframes, and object URLs; repeated cleanup must be safe.
 
-## 注释与文档
+## Comments and documentation
 
-- 每个手写源码及测试文件添加简洁的文件职责注释；类、方法、函数添加用途说明。公开 API 使用 TSDoc，说明输入、返回值、异常及关键副作用。
-- 在关键位置、复杂分支、兼容处理和算法处解释原因、约束与不变量；涉及标准或 issue 时注明可核查的出处。
-- 注释随实现一起更新，避免仅将语句翻译成自然语言。优先用清晰命名和模块拆分降低解释成本。
-- 项目说明与维护文档默认使用中文，代码标识符使用清晰英文。公开 API 的行为变更同步更新文档和示例。
+- **Write all comments and documentation in English.** This includes file headers, TSDoc, inline comments, Markdown, and documentation examples. Preserve upstream reference files and intentional multilingual test data.
+- Add a concise responsibility comment to each handwritten source/test file. Document classes, methods, and functions; use TSDoc for public inputs, results, errors, and side effects.
+- Explain invariants, constraints, complex branches, compatibility decisions, and algorithms at their relevant locations. Link verifiable standards or issues when applicable.
+- Keep comments consistent with implementation. Prefer clear naming and module boundaries over narrating obvious statements.
+- Update API documentation and examples when public behavior changes.
 
-## 测试质量
+## Testing
 
-- 每个功能和缺陷修复都包含对应测试，覆盖正常流程、边界、非法输入和错误路径；修改旧行为时补充回归用例。
-- 覆盖率统计包含全部新库源码及未被测试导入的文件；行、语句、函数覆盖率至少 90%，分支覆盖率至少 85%。排除项仅限声明、生成文件和测试夹具，并说明理由。
-- 以可观察的行为设计测试。解析、路径解析、CFI、导航和资源处理以单元测试为主；书籍加载至章节读取使用集成测试。
-- 分页、滚动、选区、字体加载和尺寸变化通过真实浏览器测试；DOM 模拟环境不能作为布局正确性的证据。
-- 根据支持范围建立 EPUB 2/3、不同路径编码、命名空间、RTL、竖排、重排及固定布局夹具。每个夹具注明来源与许可，优先使用可理解的最小样例。
-- EPUB 属于不可信输入：路径越界、畸形 XML、归档资源限制、脚本隔离与远程资源策略必须有行为约定及测试。
-- 测试保持确定性，使用本地夹具与可控异步条件，不依赖外部服务或固定延时；验证取消、并发加载和资源清理。
-- 不得通过跳过测试、降低阈值、吞掉异常或大量模拟被测逻辑来获得通过结果。
+- Every feature and fix needs behavior-focused tests for success, boundaries, invalid input, and errors. Add regression tests when changing existing behavior.
+- Coverage includes all new-library source, even files not imported by tests. Require at least 90% statements, lines, and functions, and 85% branches. Explain exclusions; only declarations, generated files, and raw fixtures are eligible.
+- Unit-test parsing, paths, CFI, navigation, and resources. Integration-test loading a book through reading its chapters.
+- Verify pagination, scrolling, selection, font loading, and resize behavior in real browsers. DOM emulation cannot establish layout correctness.
+- Add minimal EPUB 2/3, encoded-path, namespace, RTL, vertical-writing, reflowable, and fixed-layout fixtures as features require. Record fixture provenance and licensing.
+- Treat EPUB as untrusted input. Specify and test traversal prevention, malformed XML handling, archive limits, script isolation, and remote resource policies.
+- Keep tests deterministic with local fixtures and controlled asynchronous conditions. Test cancellation, concurrent loads, and cleanup without external services or arbitrary sleeps.
+- Do not skip tests, lower thresholds, swallow errors, or mock away the logic under test to make checks pass.
 
-## 上游 issue 处理流程
+## Upstream issues
 
-1. 阅读 issue 正文、讨论及相关实现，记录原始链接、查询日期、复现条件和预期行为；证据不足的条目标为待复现。
-2. 按解析、资源、CFI、渲染、交互、性能、类型、文档等分类，合并重复问题并标注依赖关系。优先处理数据错误、安全问题及阻塞核心阅读流程的问题。
-3. 使用最小合法夹具建立自动化复现；缺陷修复先确认测试在修复前失败，再验证修复后通过。
-4. 在边界清晰的模块中实现修复，并检查关联功能、兼容性和清理行为。
-5. 在 `docs/issues/` 记录上游编号、复现证据、本地测试路径及处理状态。区分已复现、已修复并验证、重复、设计差异和范围外；上游尚未关闭与本地已修复是两个状态。
-6. 只有存在可追溯验证时才报告修复完成；不要批量宣称解决未核查的 issue。
+1. Read the issue, discussion, and related implementation. Record its URL, query date, reproduction conditions, and expected behavior. Mark insufficient evidence as awaiting reproduction.
+2. Classify parsing, resources, CFI, rendering, interaction, performance, types, or documentation; link duplicates and dependencies. Prioritize data corruption, security, and blocked reading workflows.
+3. Create a minimal automated reproduction. Confirm the regression fails before the fix and passes afterward.
+4. Fix the responsible module and check related behavior, compatibility, and cleanup.
+5. Record issue IDs, evidence, local test paths, and status under `docs/issues/`. Distinguish reproduced, verified fix, duplicate, design difference, and out of scope. Local resolution and upstream closure are separate states.
+6. Claim resolution only with traceable verification, never for unexamined batches of issues.
 
-## 变更完成标准
+## Completion
 
-- 保持一次变更围绕明确目标，避免混入无关重构。
-- 执行已建立的格式、lint、类型、单元测试、覆盖率与构建检查；涉及浏览器行为时执行相关 E2E。
-- 尚未配置或因环境无法运行的检查，明确报告原因与验证缺口，不将未执行表述为通过。
-- 交付说明列出行为变化、验证结果和必要的兼容性限制；同步维护涉及的 API 文档与 issue 记录。
+- Keep each feature change focused; avoid unrelated refactoring.
+- Run formatting, lint, type, unit, coverage, and build checks; run relevant browser tests for browser behavior.
+- Report unavailable checks and their reasons accurately; unexecuted checks are not passing checks.
+- Update behavior documentation and issue/feature tracking, then commit the verified feature before starting another.

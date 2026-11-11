@@ -1,4 +1,4 @@
-/** 新工程的 Oxlint 规则：类型安全、可读性和源码规模约束。 */
+/** Oxlint rules for type safety, readability, and source size limits. */
 import { defineConfig } from 'oxlint';
 
 export default defineConfig({

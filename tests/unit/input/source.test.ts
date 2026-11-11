@@ -1,4 +1,4 @@
-/** 输入识别与解码用例，全部使用自造数据，无外部素材。 */
+/** Input identification and decoding tests using original, self-contained data. */
 import { expect, test } from 'vitest';
 import { resolveInput } from '../../../src/index';
 

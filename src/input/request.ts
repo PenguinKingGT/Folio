@@ -1,4 +1,4 @@
-/** 可注入 Fetch 的请求适配器，统一处理响应、HTTP 错误与取消。 */
+/** Injectable Fetch adapter with consistent responses, HTTP errors, and cancellation. */
 export interface ResponseTypes {
   text: string;
   binary: ArrayBuffer;
@@ -6,28 +6,28 @@ export interface ResponseTypes {
   json: unknown;
 }
 
-/** 请求设置；每次请求的 headers 在默认 headers 上合并覆盖。 */
+/** Per-request settings; matching headers override defaults. */
 export interface RequestOptions {
   headers?: HeadersInit;
   credentials?: RequestCredentials;
   signal?: AbortSignal;
 }
 
-/** 自定义网络实现返回标准 Response，可接入认证、缓存或宿主网络层。 */
+/** Custom transports return a standard Response for authentication, caching, or host integration. */
 export interface RequesterOptions extends RequestOptions {
   fetch?: typeof globalThis.fetch;
 }
 
-/** 根据期望的响应类型推导返回值，JSON 在边界保留 unknown。 */
+/** Infer result types from response selectors; keep external JSON unknown. */
 export type Requester = <T extends keyof ResponseTypes>(
   url: string,
   type: T,
   options?: RequestOptions,
 ) => Promise<ResponseTypes[T]>;
 
-/** 带地址与状态码的 HTTP 错误，供上层区分缺失资源和服务器故障。 */
+/** HTTP failure retaining URL and status for caller-side error handling. */
 export class HttpError extends Error {
-  /** 保留响应状态与原始请求地址，不吞掉网络层异常。 */
+  /** Preserve response status and the original request address. */
   constructor(
     public readonly url: string,
     public readonly status: number,
@@ -38,12 +38,12 @@ export class HttpError extends Error {
 }
 
 /**
- * 创建请求器；默认使用原生 fetch，失败响应及取消请求均拒绝 Promise。
- * @returns 可以重复使用的请求函数。
+ * Create a requester using native fetch by default; failures and cancellation reject.
+ * @returns A reusable request function.
  */
 export function createRequester(defaults: RequesterOptions = {}): Requester {
   const fetcher = defaults.fetch ?? globalThis.fetch.bind(globalThis);
-  /** 合并本次设置并转换响应，取消优先于数据交付。 */
+  /** Merge settings and decode the response, giving cancellation priority over delivery. */
   return async <T extends keyof ResponseTypes>(
     url: string,
     type: T,

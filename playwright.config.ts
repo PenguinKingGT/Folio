@@ -1,4 +1,4 @@
-/** 在 Chromium、Firefox 和 WebKit 中验证本地示例的模块加载。 */
+/** Verify local module loading in Chromium, Firefox, and WebKit. */
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({

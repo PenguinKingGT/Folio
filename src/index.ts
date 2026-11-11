@@ -1,9 +1,11 @@
-/** Folio 的公开入口；EPUB 能力将在独立模块中逐步实现。 */
+/** Public Folio entry point; capabilities are implemented in focused modules. */
 
-/** 当前库版本，用于消费者诊断；不表示已支持任何 EPUB 阅读功能。 */
+/** Library version for diagnostics; consult the migration tracker for supported capabilities. */
 export const version = '0.1.0';
 
 export { resolveInput } from './input/source';
 export type { BookSource, InputOptions, InputType } from './input/source';
 export { createRequester, HttpError } from './input/request';
 export type { Requester, RequesterOptions, RequestOptions, ResponseTypes } from './input/request';
+export { Archive } from './archive/archive';
+export type { ArchiveLimits } from './archive/unzip';

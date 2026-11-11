@@ -1,12 +1,12 @@
 # Folio
 
-使用 TypeScript 重写的开源 EPUB 解析与渲染库，计划逐步覆盖 epub.js 的核心能力，并为上游问题建立可追溯的回归测试。
+An open-source TypeScript EPUB library that progressively replaces epub.js capabilities with traceable regression coverage.
 
-**当前已实现输入规范化和请求适配；EPUB 解压、解析与渲染仍在开发中，尚未承诺兼容 epub.js API。** 本地包名暂定为 `folio-epub`，尚未发布或核实 npm 名称可用性。
+**Implemented: input normalization, request adapters, and ZIP resource access. Parsing and rendering are still in development; epub.js API compatibility is not yet guaranteed.** The local package name `folio-epub` has not been published or checked for npm availability.
 
-## 本地开发
+## Development
 
-使用 Node.js 24.17.0 和 pnpm 11.8.0。依赖版本与锁文件已固定。
+Use Node.js 24.17.0 and pnpm 11.8.0. Dependency versions and the lockfile are pinned.
 
 ```sh
 pnpm install --frozen-lockfile
@@ -15,41 +15,41 @@ pnpm check
 pnpm dev
 ```
 
-Linux 环境首次安装浏览器可使用 `pnpm exec playwright install --with-deps chromium firefox webkit` 安装系统依赖。开发服务中的最小示例位于 `/examples/basic/`。
+On Linux, install browser system dependencies with `pnpm exec playwright install --with-deps chromium firefox webkit`. Open `/examples/basic/` on the development server.
 
-## 常用命令
+## Commands
 
-| 命令                                | 用途                                        |
-| ----------------------------------- | ------------------------------------------- |
-| `pnpm dev`                          | 启动 Vite 开发示例                          |
-| `pnpm build`                        | 构建 ESM、source map 和 TypeScript 声明     |
-| `pnpm lint`                         | 类型感知 Oxlint 检查及文件、函数规模限制    |
-| `pnpm format` / `pnpm format:check` | 格式化 / 检查格式                           |
-| `pnpm typecheck`                    | 检查源码、示例、配置和 TypeScript 测试      |
-| `pnpm test` / `pnpm test:watch`     | 执行 / 监听单元测试                         |
-| `pnpm test:coverage`                | 检查覆盖率并生成 HTML、LCOV 报告            |
-| `pnpm test:package`                 | 构建后验证消费者导入与类型声明产物          |
-| `pnpm test:e2e`                     | 在 Chromium、Firefox、WebKit 中验证开发示例 |
-| `pnpm check`                        | 执行完整检查，与 CI 保持一致                |
-| `pnpm pack`                         | 生成本地发布包，打包前自动构建              |
+| Command                             | Purpose                                                     |
+| ----------------------------------- | ----------------------------------------------------------- |
+| `pnpm dev`                          | Run the Vite example server                                 |
+| `pnpm build`                        | Build ESM, source maps, and declarations                    |
+| `pnpm lint`                         | Type-aware Oxlint checks and file/function size limits      |
+| `pnpm format` / `pnpm format:check` | Format / check formatting                                   |
+| `pnpm typecheck`                    | Check source, examples, configuration, and TypeScript tests |
+| `pnpm test` / `pnpm test:watch`     | Run / watch unit tests                                      |
+| `pnpm test:coverage`                | Check thresholds; generate HTML and LCOV reports            |
+| `pnpm test:package`                 | Build and verify package imports and declaration artifacts  |
+| `pnpm test:e2e`                     | Test the example in Chromium, Firefox, and WebKit           |
+| `pnpm check`                        | Run the complete CI validation pipeline                     |
+| `pnpm pack`                         | Build and create a local package archive                    |
 
-覆盖率统计包含全部 `src/**/*.ts`，仅排除无运行逻辑的 `.d.ts` 声明文件。每个文件的行、语句、函数覆盖率至少 90%，分支至少 85%。功能测试随实现逐项补充，覆盖范围见迁移清单。
+Coverage includes every `src/**/*.ts` file except declaration-only `.d.ts` files. Each file must reach 90% lines, statements, and functions, and 85% branches. Feature tests grow with implementation; see the migration tracker.
 
-## 工程结构
+## Structure
 
 ```text
-src/                 新库源码和公开入口
-tests/unit/          单元测试
-tests/package/       构建产物与包入口测试
-tests/e2e/           真实浏览器测试
-examples/basic/      最小浏览器开发示例
-epub.js/             独立上游参考仓库，保留原状
+src/                 Library source and public entry point
+tests/unit/          Unit tests
+tests/package/       Package import and artifact tests
+tests/e2e/           Real-browser tests
+examples/basic/      Minimal development example
+epub.js/             Unchanged upstream reference repository
 ```
 
-库使用 [Vite 库模式](https://vite.dev/guide/build#library-mode) 生成 ESM，使用 TypeScript 单独生成类型声明。覆盖率通过 [Vitest](https://vitest.dev/guide/coverage) 检查；静态检查使用 [Oxlint 类型感知检查](https://oxc.rs/docs/guide/usage/linter/type-aware)，通过 `oxlint-tsgolint` 检测未处理 Promise 和不安全的类型操作。规则统一维护在 `oxlint.config.ts`，TypeScript 编译器继续独立执行类型检查。当前没有运行时依赖。
+[Vite library mode](https://vite.dev/guide/build#library-mode) produces ESM; TypeScript emits declarations separately. [Vitest](https://vitest.dev/guide/coverage) measures coverage. [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware), backed by `oxlint-tsgolint`, checks unsafe type operations and unhandled promises. Rules live in `oxlint.config.ts`; TypeScript also runs independently. ZIP decompression uses the MIT-licensed `fflate` dependency.
 
-开发约定见 [AGENTS.md](./AGENTS.md)，功能范围与实现进度见 [迁移清单](./docs/migration.md)。新增模块按实际需求建立，issue 修复需包含最小复现、回归测试与问题追踪记录。
+See [development guidelines](./AGENTS.md), the [migration tracker](./docs/migration.md), [input/request APIs](./docs/input.md), and [archive APIs](./docs/archive.md). All comments and documentation must be in English. Every feature requires tests and a separate verified commit.
 
-## 开源许可
+## License
 
-新项目使用 [BSD-2-Clause](./LICENSE)。`epub.js/` 中的代码与素材遵循各自原有许可；引用或复用时必须保留相应声明。初始化未复制上游实现或测试夹具。
+New project code uses [BSD-2-Clause](./LICENSE). Upstream code and assets retain their original licenses and notices. No upstream implementation or fixtures have been copied into the new library.

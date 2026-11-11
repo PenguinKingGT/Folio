@@ -1,4 +1,4 @@
-/** 从源码入口加载版本信息，验证 Vite 开发服务的浏览器集成。 */
+/** Load the source entry point to verify browser integration with Vite. */
 import { version } from '../../src/index';
 
 const status = document.querySelector('[role="status"]');
