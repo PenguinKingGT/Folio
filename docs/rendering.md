@@ -31,7 +31,7 @@ Reader contents default to horizontal fixed-height CSS columns. `spread` accepts
 
 Actual column counts come from browser overflow with a one-pixel CSSOM rounding tolerance. Final-spread padding preserves its scroll target when the last spread has an empty second column. Frames are measured with temporary hidden visibility so a hidden reader remains hidden. The host must have measurable dimensions; zero-size views reject.
 
-Each chapter uses standards mode for consistent CSS columns and scrolling roots. Pagination sets document/body dimensions, margin/padding and column rules while retaining chapter text styling. Automatic resize preservation, fixed layout and vertical writing are tracked in F17/F18/F19.
+Each chapter uses standards mode for consistent CSS columns and scrolling roots. Pagination sets document/body dimensions, margin/padding and column rules while retaining chapter text styling. Automatic resize preservation is described under F17; fixed layout and vertical writing remain under F18/F19.
 
 ## Scrolled flow (F14)
 
@@ -80,3 +80,13 @@ unsubscribe();
 Text positions come from individual native Range rectangles intersecting both viewport dimensions. Binary searches find the first/last visible UTF-16 boundaries without probing every character; surrogate pairs stay intact. Visible image/SVG/video/canvas elements participate in reading order, and empty viewports fall back to a body CFI. Hidden readers are measured without revealing content. Scrolled page numbers use viewport-sized steps with a final partial viewport; paginated numbers count visible pages/spreads.
 
 `onRelocated()` reports changed snapshots after display, navigation, layout, flow changes, and native scrolling. Native scroll notifications coalesce into animation frames; identical snapshots are suppressed. Subscribe before displaying to receive the initial position. Listeners run synchronously and should not throw. Unsubscribe handles are idempotent; chapter replacement and destruction remove native listeners and pending frames. General typed event registration remains under F28.
+
+## Position-preserving relayout (F17)
+
+Readers automatically reflow after iframe/container size changes, orientation events, captured resource load/error and media metadata events, font loading completion/failure, and changes to discovered stylesheet media conditions. Native media conditions include nested grouping rules and imports from readable stylesheets; cross-origin CSSOM rules are skipped. New dynamic styling can also request `reader.layout()` explicitly.
+
+A logical CFI anchor survives repeated reflows instead of drifting to successive page starts. Explicit `layout()` changes preserve that anchor too; paginated views show its containing page/spread and scrolled views position it along the active axis. Stale frame dimensions and scrolled extents cannot replace the cached anchor during a pending reflow. Mode changes through `flow()` retain their documented reset-to-start behavior.
+
+Changes coalesce into one host-window animation frame. Zero-size containers defer work until measurable, and hidden readers keep their visibility state. Scheduling uses the host realm because script-disabled WebKit frames can suppress their own callbacks. Replacing or destroying a chapter removes observers, media/font/asset listeners, and queued frames.
+
+Tests exercise real host resizing, repeated spread/hidden changes, zero-size recovery, original image/font loading, native CSSOM import/origin behavior, and orientation cancellation. Chromium, Firefox and WebKit verify that both paginated and scrolled reading retain the original anchor through resize and media-query changes in both directions.

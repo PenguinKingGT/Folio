@@ -11,6 +11,7 @@ export class ReaderLayout {
   private readonly pages: PaginationLayout;
   private settings: { flow: ReadingFlow; axis: ReadingAxis };
   private measured: FlowState | null = null;
+  private viewport: { width: number; height: number } | null = null;
 
   /** Resolve publication metadata and validate options before iframe allocation. */
   constructor(
@@ -29,6 +30,23 @@ export class ReaderLayout {
   /** Expose the latest measured scroll extent or page/spread extent. */
   get state(): FlowState | null {
     return this.measured;
+  }
+
+  /** Detect stale measurements before a resize-triggered native scroll can replace the saved anchor. */
+  matchesFrame(frame: HTMLIFrameElement): boolean {
+    return measureFrame(frame, (width, height) => {
+      if (this.viewport?.width !== width || this.viewport.height !== height) {
+        return false;
+      }
+      if (this.measured === null || this.measured.flow === 'paginated') {
+        return true;
+      }
+      const root = frame.contentDocument?.documentElement;
+      const length = this.measured.axis === 'horizontal' ? root?.scrollWidth : root?.scrollHeight;
+      return (
+        length !== undefined && Math.max(this.measured.viewport, length) === this.measured.length
+      );
+    });
   }
 
   /** Save validated spread configuration before a document is present. */
@@ -50,6 +68,7 @@ export class ReaderLayout {
   ): PaginationState | null {
     if (this.settings.flow === 'paginated') {
       const pages = this.pages.apply(frame, document, options);
+      this.viewport = { width: pages.width, height: pages.height };
       this.measured = Object.freeze({
         ...this.settings,
         length: pages.pageCount * pages.advance - pages.gap,
@@ -58,9 +77,10 @@ export class ReaderLayout {
       return pages;
     }
     this.pages.configure(options);
-    const extent = measureFrame(frame, (width, height) =>
-      applyScrolling(document, width, height, this.settings.axis),
-    );
+    const extent = measureFrame(frame, (width, height) => {
+      this.viewport = { width, height };
+      return applyScrolling(document, width, height, this.settings.axis);
+    });
     this.measured = Object.freeze({ ...this.settings, ...extent });
     return null;
   }

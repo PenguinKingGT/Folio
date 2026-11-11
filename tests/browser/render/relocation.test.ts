@@ -7,7 +7,7 @@ test('cancels pending work and snapshots subscribers during dispatch', async () 
   const publication = await book();
   const container = host();
   const reader = publication.renderTo(container);
-  const observer = new Relocations(() => reader.currentLocation());
+  const observer = new Relocations(() => reader.currentLocation(), window);
   const calls: string[] = [];
   let release: (() => void) | undefined;
   observer.subscribe(() => {

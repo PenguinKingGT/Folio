@@ -10,7 +10,7 @@ Scanned on 2026-11-11 against local epub.js `0.3.93`, commit `eee359d0790002115a
 - The TypeScript / Vite / pnpm / Oxlint / Prettier / test / CI foundation is complete; smoke tests do not count as EPUB features.
 - Decide compatibility scope before implementing optional legacy behavior. Record excluded items as Out of scope with a reason.
 
-**Progress: Done 17 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 19.** Update totals with every status change; list out-of-scope items separately.
+**Progress: Done 18 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 18.** Update totals with every status change; list out-of-scope items separately.
 
 ## Phase 1: Opening books and location primitives
 
@@ -41,7 +41,7 @@ Upstream reference: [Rendition](../epub.js/src/rendition.js), [Layout](../epub.j
 | F14 | Scrolled reading: scrolled-doc / scrolled-continuous flow and horizontal / vertical axes                       | Done        | [Source](../src/layout/reader-layout.ts) / [Unit](../tests/unit/layout/flow.test.ts) / [Browser](../tests/browser/render/flow.test.ts) / [Cross-engine](../tests/e2e/flow.spec.ts)        |
 | F15 | Navigation commands: chapter / href / anchor / CFI / percentage targets, next / previous pages across chapters | Done        | [Source](../src/render/target.ts) / [Unit](../tests/unit/render/target.test.ts) / [Browser](../tests/browser/render/navigation.test.ts) / [Cross-engine](../tests/e2e/navigation.spec.ts) |
 | F16 | Visible location: content-to-CFI mapping, start / end, displayed page, boundaries and relocated events         | Done        | [Source](../src/render/location.ts) / [Browser](../tests/browser/render/visible-location.test.ts) / [Cross-engine](../tests/e2e/visible-location.spec.ts)                                 |
-| F17 | Relayout: container / orientation / image / font / media-query changes while preserving reading position       | Not started | —                                                                                                                                                                                         |
+| F17 | Relayout: container / orientation / image / font / media-query changes while preserving reading position       | Done        | [Source](../src/layout/reflow-observer.ts) / [Browser](../tests/browser/render/reflow.test.ts) / [Cross-engine](../tests/e2e/reflow.spec.ts)                                              |
 | F18 | Fixed layout: pre-paginated content, viewport scaling, page sides and spreads                                  | Not started | —                                                                                                                                                                                         |
 | F19 | Reading direction: LTR / RTL, vertical writing, scroll axes and page-turn direction                            | Not started | —                                                                                                                                                                                         |
 

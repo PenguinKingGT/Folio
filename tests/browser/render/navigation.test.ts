@@ -2,7 +2,7 @@
 import { afterEach, expect, test } from 'vitest';
 import { cfiFromNode, cfiFromRange } from '../../../src/index';
 import type { Book, Rendition, RenditionOptions } from '../../../src/index';
-import { host } from './fixture';
+import { book as fixtureBook, host } from './fixture';
 import { navigationBook } from './navigation-fixture';
 
 const opened: { book: Book; container: HTMLElement }[] = [];
@@ -109,4 +109,17 @@ test('positions hidden readers without revealing their content', async () => {
   expect(offset).toBeGreaterThan(0);
   await view.next();
   expect(view.getContents()?.defaultView?.scrollX).toBeGreaterThan(offset);
+});
+
+test('seeks full Unicode scalars and terminal text offsets', async () => {
+  const publication = await fixtureBook(
+    '<html xmlns="http://www.w3.org/1999/xhtml"><head/><body><p id="unicode">😀A</p></body></html>',
+  );
+  const container = host();
+  opened.push({ book: publication, container });
+  const view = publication.renderTo(container);
+  await view.display('epubcfi(/6/2[chapter]!/4/2[unicode]/1:0)');
+  expect(view.currentSection?.index).toBe(0);
+  await view.display('epubcfi(/6/2[chapter]!/4/2[unicode]/1:3)');
+  expect(view.getContents()?.defaultView?.scrollX).toBe(0);
 });

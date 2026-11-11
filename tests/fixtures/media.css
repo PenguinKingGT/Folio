@@ -1,0 +1,6 @@
+/* Original stylesheet used to exercise native CSSOM origin restrictions. */
+@media (min-width: 100px) {
+  p {
+    color: black;
+  }
+}

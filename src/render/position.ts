@@ -33,6 +33,13 @@ function targetRect(document: Document, target: ResolvedTarget): DOMRect | null 
     range.collapse(true);
     if (range.startContainer.nodeType === 1) {
       range.selectNode(range.startContainer);
+    } else {
+      const text = range.startContainer.nodeValue ?? '';
+      if (range.startOffset < text.length) {
+        // A collapsed caret at a wrap can point to the preceding column in Firefox.
+        const length = (text.codePointAt(range.startOffset) ?? 0) > 0xffff ? 2 : 1;
+        range.setEnd(range.startContainer, Math.min(text.length, range.startOffset + length));
+      }
     }
     return (
       range.getClientRects()[0] ??

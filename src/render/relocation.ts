@@ -10,7 +10,10 @@ export class Relocations {
   private previous = '';
 
   /** Defer geometry reads until a caller or native scroll requests a snapshot. */
-  constructor(private readonly read: () => VisibleLocation | null) {}
+  constructor(
+    private readonly read: () => VisibleLocation | null,
+    private readonly scheduler: Window | null,
+  ) {}
 
   /** Register a listener; the returned unsubscribe operation is idempotent. */
   subscribe(listener: RelocatedListener): () => void {
@@ -53,7 +56,8 @@ export class Relocations {
   /** Coalesce native scroll events into one geometry read per animation frame. */
   private schedule(): void {
     if (this.pending === undefined) {
-      this.pending = this.window?.requestAnimationFrame(() => {
+      // Keep animation-frame work outside script-disabled publication documents.
+      this.pending = this.scheduler?.requestAnimationFrame(() => {
         this.pending = undefined;
         this.report();
       });
@@ -64,7 +68,7 @@ export class Relocations {
   detach(): void {
     this.controller?.abort();
     if (this.pending !== undefined) {
-      this.window?.cancelAnimationFrame(this.pending);
+      this.scheduler?.cancelAnimationFrame(this.pending);
     }
     this.pending = undefined;
     this.window = null;
