@@ -21,6 +21,10 @@ test('looks up chapters by index, ID and equivalent encoded hrefs', () => {
   expect(spine.get('#b')?.index).toBe(1);
   expect(spine.get('a.xhtml#anchor')?.idref).toBe('a');
   expect(spine.get('书.xhtml')?.idref).toBe('c');
+  expect(spine.get('epubcfi(/6/6!/4/2/1:0)')?.idref).toBe('c');
+  expect(spine.get('#epubcfi(/6/2[c]!/4/2/1:0)')?.idref).toBe('c');
+  expect(spine.get('epubcfi(/6/100!/4)')).toBeNull();
+  expect(spine.get('epubcfi(/2/4)')).toBeNull();
   for (const missing of [-1, 99, 1.5, '#missing', 'unknown.xhtml']) {
     expect(spine.get(missing)).toBeNull();
   }

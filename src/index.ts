@@ -33,3 +33,6 @@ export type { NavigationItem, Landmark } from './navigation/navigation';
 export { parseNavigation } from './navigation/parse';
 export { Book } from './book/book';
 export type { BookOptions } from './book/options';
+export { Cfi } from './cfi/cfi';
+export type { CfiData, CfiPath, CfiStep } from './cfi/types';
+export { escapeCfi } from './cfi/syntax';

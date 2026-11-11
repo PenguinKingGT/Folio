@@ -3,7 +3,7 @@
 `new Spine(publication, loader)` creates lazy `Section` instances in OPF order. The loader receives an OPF-relative href and an `AbortSignal` and returns XHTML text.
 
 - `all()` returns an independent collection including non-linear chapters.
-- `get()` selects the first linear section. Supply an index, `#idref`, or OPF-relative href to select explicitly; href fragments are ignored and Unicode encoding is normalized.
+- `get()` selects the first linear section. Supply an index, CFI, `#idref`, or OPF-relative href to select explicitly; href fragments are ignored and Unicode encoding is normalized.
 - `adjacent(index, 'next' | 'previous')` skips non-linear sections. Missing targets and reading-order boundaries return null.
 - `destroy()` releases every section and prevents further access; repeated calls are safe.
 

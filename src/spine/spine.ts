@@ -1,5 +1,6 @@
 /** Immutable reading order with indexed, ID, and encoded-href chapter lookup. */
 import type { PublicationPackage } from '../package/types';
+import { Cfi } from '../cfi/cfi';
 import { Section } from './section';
 import type { SectionLoader } from './section';
 
@@ -30,7 +31,7 @@ export class Spine {
     return this.sections.slice();
   }
 
-  /** Get the first linear section, a numeric index, #idref, or an OPF-relative href. */
+  /** Get the first linear section, index, CFI, #idref, or OPF-relative href. */
   get(target?: number | string): Section | null {
     this.assertActive();
     if (target === undefined) {
@@ -38,6 +39,11 @@ export class Spine {
     }
     if (typeof target === 'number') {
       return this.sections[target] ?? null;
+    }
+    if (target.startsWith('epubcfi(') || target.startsWith('#epubcfi(')) {
+      const cfi = new Cfi(target);
+      const asserted = this.sections.find((section) => section.idref === cfi.spineId);
+      return asserted ?? this.sections[cfi.spineIndex ?? -1] ?? null;
     }
     if (target.startsWith('#')) {
       return this.sections.find((section) => section.idref === target.slice(1)) ?? null;
