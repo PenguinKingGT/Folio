@@ -2,3 +2,8 @@
 
 /** 当前库版本，用于消费者诊断；不表示已支持任何 EPUB 阅读功能。 */
 export const version = '0.1.0';
+
+export { resolveInput } from './input/source';
+export type { BookSource, InputOptions, InputType } from './input/source';
+export { createRequester, HttpError } from './input/request';
+export type { Requester, RequesterOptions, RequestOptions, ResponseTypes } from './input/request';
