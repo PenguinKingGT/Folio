@@ -18,9 +18,10 @@ import { ReflowObserver } from '../layout/reflow-observer';
 import { Cfi } from '../cfi/cfi';
 import { mountTarget } from './mount';
 import type { FixedLayoutState, RenderedPage } from './fixed-spread';
+import type { WritingOptions } from '../layout/writing';
 
 /** Initial renderer options; layout-specific behavior is added by subsequent features. */
-export type RenditionOptions = ViewOptions & PaginationOptions & FlowOptions;
+export type RenditionOptions = ViewOptions & PaginationOptions & FlowOptions & WritingOptions;
 
 /** Display a book in one reusable, script-disabled iframe surface. */
 export class Rendition {
@@ -43,7 +44,11 @@ export class Rendition {
     options: RenditionOptions = {},
     private readonly onDestroy?: () => void,
   ) {
-    this.layoutController = new ReaderLayout(options, book.publication.rendition.flow);
+    this.layoutController = new ReaderLayout(
+      options,
+      book.publication.rendition.flow,
+      book.publication.direction,
+    );
     this.view = new PageViews(book, mountTarget(target), options);
     this.relocations = new Relocations(
       () => (this.layoutController.matchesFrame(this.frame) ? this.currentLocation() : null),
@@ -193,7 +198,7 @@ export class Rendition {
     this.layoutController.configure(options);
     const fixed = this.view.applyFixed(options);
     if (fixed !== null) {
-      this.layoutController.useFixed(fixed.width, fixed.height);
+      this.layoutController.useFixed(fixed.width, fixed.height, document);
       return null;
     }
     return this.layoutController.apply(this.frame, document, options);
@@ -227,7 +232,7 @@ export class Rendition {
   /** Switch reading modes and reflow current content; unopened readers retain configuration. */
   flow(mode: FlowMode, axis?: ReadingAxis): FlowState | null {
     this.assertActive();
-    this.layoutController.setFlow(mode, axis);
+    this.layoutController.setFlow(mode, axis, this.view.document);
     const document = this.view.document;
     if (document !== null) {
       this.applyLayout(document);

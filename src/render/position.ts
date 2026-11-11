@@ -7,7 +7,8 @@ import type { ResolvedTarget } from './target';
 /** Read the current logical offset along the active axis. */
 export function scrollOffset(document: Document, state: FlowState): number {
   const root = document.scrollingElement ?? document.documentElement;
-  return state.axis === 'horizontal' ? root.scrollLeft : root.scrollTop;
+  const offset = state.axis === 'horizontal' ? root.scrollLeft : root.scrollTop;
+  return Math.max(0, state.reverse ? -offset : offset);
 }
 
 /** Compute the final reachable viewport position, including incomplete spread padding. */
@@ -19,9 +20,10 @@ export function lastOffset(state: FlowState, pages: PaginationState | null): num
 
 /** Scroll immediately even when author CSS requests smooth scrolling. */
 export function scrollToOffset(document: Document, state: FlowState, offset: number): void {
+  const native = state.reverse ? -offset : offset;
   document.defaultView?.scrollTo({
-    left: state.axis === 'horizontal' ? offset : 0,
-    top: state.axis === 'vertical' ? offset : 0,
+    left: state.axis === 'horizontal' ? native : 0,
+    top: state.axis === 'vertical' ? native : 0,
     behavior: 'instant',
   });
 }
@@ -68,7 +70,9 @@ export function seekTarget(
   const rect = targetRect(document, target);
   let offset = 0;
   if (rect !== null) {
-    offset = scrollOffset(document, state) + (state.axis === 'horizontal' ? rect.left : rect.top);
+    const start = state.axis === 'horizontal' ? rect.left : rect.top;
+    const end = state.axis === 'horizontal' ? rect.right : rect.bottom;
+    offset = scrollOffset(document, state) + (state.reverse ? state.viewport - end : start);
     if (pages !== null) {
       offset = Math.floor((offset + 0.5) / pages.advance) * pages.advance;
     }

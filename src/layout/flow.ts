@@ -1,4 +1,6 @@
 /** Resolve reader flow modes and axes independently of a browser view. */
+import type { WritingState } from './writing';
+
 export type ReadingFlow = 'paginated' | 'scrolled-doc' | 'scrolled-continuous';
 export type FlowMode = ReadingFlow | 'auto';
 export type ReadingAxis = 'horizontal' | 'vertical';
@@ -10,7 +12,7 @@ export interface FlowOptions {
 }
 
 /** Measured logical scroll extent for the current chapter and flow. */
-export interface FlowState {
+export interface FlowState extends WritingState {
   readonly flow: ReadingFlow;
   readonly axis: ReadingAxis;
   readonly length: number;
@@ -35,9 +37,6 @@ export function resolveFlow(
   const axis = options.axis ?? (flow === 'paginated' ? 'horizontal' : 'vertical');
   if (axis !== 'horizontal' && axis !== 'vertical') {
     throw new TypeError('Unsupported reading axis.');
-  }
-  if (flow === 'paginated' && axis !== 'horizontal') {
-    throw new TypeError('Vertical pagination requires vertical writing support (F19).');
   }
   return { flow, axis };
 }

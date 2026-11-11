@@ -27,5 +27,8 @@ test('rejects unsupported flow and axis values rather than ignoring them', () =>
   expect(() => {
     Reflect.apply(resolveFlow, undefined, [{ axis: 'invalid' }]);
   }).toThrow(TypeError);
-  expect(() => resolveFlow({ flow: 'paginated', axis: 'vertical' })).toThrow('F19');
+  expect(resolveFlow({ flow: 'paginated', axis: 'vertical' })).toEqual({
+    flow: 'paginated',
+    axis: 'vertical',
+  });
 });

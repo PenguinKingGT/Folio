@@ -2,6 +2,7 @@
 import { applyColumns, measureFrame } from './columns';
 import { computePagination, paginationOptions } from './pagination';
 import type { PaginationOptions, PaginationState } from './pagination';
+import type { ReadingAxis } from './flow';
 
 /** Reusable layout controller that never retains documents or browser subscriptions. */
 export class PaginationLayout {
@@ -28,10 +29,12 @@ export class PaginationLayout {
     frame: HTMLIFrameElement,
     document: Document,
     changes: PaginationOptions = {},
+    axis: ReadingAxis = 'horizontal',
+    reverse = false,
   ): PaginationState {
     const candidate = paginationOptions({ ...this.options, ...changes });
     const state = measureFrame(frame, (width, height) =>
-      applyColumns(document, computePagination(width, height, candidate)),
+      applyColumns(document, computePagination(width, height, candidate, axis), reverse),
     );
     this.options = candidate;
     this.measured = state;

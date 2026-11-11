@@ -1,8 +1,31 @@
 /** Apply column geometry and measure real overflow, including an incomplete final spread. */
 import type { PaginationGeometry, PaginationState } from './pagination';
+import type { ReadingAxis } from './flow';
 
-/** Lay out a passive chapter as fixed-height horizontal CSS columns. */
-export function applyColumns(document: Document, geometry: PaginationGeometry): PaginationState {
+/** Supplement CSSOM dimensions when negative vertical overflow is omitted from scrollHeight. */
+function columnExtent(document: Document, axis: ReadingAxis, reverse: boolean): number {
+  const body = document.body;
+  let extent = axis === 'horizontal' ? body.scrollWidth : body.scrollHeight;
+  if (!reverse) {
+    return extent;
+  }
+  const range = document.createRange();
+  range.selectNodeContents(body);
+  const bounds = body.getBoundingClientRect();
+  const start = axis === 'horizontal' ? bounds.right : bounds.bottom;
+  for (const rect of Array.from(range.getClientRects())) {
+    const end = axis === 'horizontal' ? rect.left : rect.top;
+    extent = Math.max(extent, start - end);
+  }
+  return extent;
+}
+
+/** Lay out a passive chapter as fixed-size CSS columns along the writing mode's inline axis. */
+export function applyColumns(
+  document: Document,
+  geometry: PaginationGeometry,
+  reverse = false,
+): PaginationState {
   const root = document.documentElement;
   const body = document.body;
   root.style.width = `${geometry.width}px`;
@@ -23,12 +46,22 @@ export function applyColumns(document: Document, geometry: PaginationGeometry): 
   // CSSOM rounds scrollWidth to integer pixels; tolerate one pixel to avoid a phantom column.
   const columns = Math.max(
     geometry.columnsPerView,
-    Math.ceil((body.scrollWidth + geometry.gap - 1) / (geometry.columnWidth + geometry.gap)),
+    Math.ceil(
+      (columnExtent(document, geometry.axis, reverse) + geometry.gap - 1) /
+        (geometry.columnWidth + geometry.gap),
+    ),
   );
   const pageCount = Math.ceil(columns / geometry.columnsPerView);
   // Padding preserves the last view's scroll target even when only its first column contains text.
-  const totalWidth = pageCount * geometry.advance - geometry.gap;
-  root.style.paddingRight = `${Math.max(0, totalWidth - geometry.width)}px`;
+  const total = pageCount * geometry.advance - geometry.gap;
+  const viewport = geometry.axis === 'horizontal' ? geometry.width : geometry.height;
+  let end: 'paddingLeft' | 'paddingRight' | 'paddingTop' | 'paddingBottom' = reverse
+    ? 'paddingTop'
+    : 'paddingBottom';
+  if (geometry.axis === 'horizontal') {
+    end = reverse ? 'paddingLeft' : 'paddingRight';
+  }
+  root.style[end] = `${Math.max(0, total - viewport)}px`;
   return Object.freeze({ ...geometry, columns, pageCount });
 }
 

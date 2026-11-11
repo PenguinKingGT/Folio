@@ -1,4 +1,5 @@
 /** Pure pagination geometry, independent of DOM measurement and rendering state. */
+import type { ReadingAxis } from './flow';
 
 /** Select automatic, single-column, or forced double-column views. */
 export interface PaginationOptions {
@@ -9,9 +10,11 @@ export interface PaginationOptions {
 
 /** Geometry of one visible page/spread, with an inter-column advance. */
 export interface PaginationGeometry {
+  readonly axis: ReadingAxis;
   readonly width: number;
   readonly height: number;
   readonly columnsPerView: 1 | 2;
+  /** Inline column extent: physical width in horizontal writing, height in vertical writing. */
   readonly columnWidth: number;
   readonly gap: number;
   readonly advance: number;
@@ -50,20 +53,26 @@ export function computePagination(
   width: number,
   height: number,
   options: PaginationOptions = {},
+  axis: ReadingAxis = 'horizontal',
 ): PaginationGeometry {
   if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
     throw new RangeError('Pagination requires positive finite viewport dimensions.');
   }
   const settings = paginationOptions(options);
+  if (axis !== 'horizontal' && axis !== 'vertical') {
+    throw new TypeError('Invalid pagination axis.');
+  }
+  const extent = axis === 'horizontal' ? width : height;
   const spread =
     settings.spread === 'always' ||
-    (settings.spread === 'auto' && width >= settings.minSpreadWidth);
+    (settings.spread === 'auto' && extent >= settings.minSpreadWidth);
   const columnsPerView = spread ? 2 : 1;
-  const columnWidth = (width - (columnsPerView - 1) * settings.gap) / columnsPerView;
+  const columnWidth = (extent - (columnsPerView - 1) * settings.gap) / columnsPerView;
   if (columnWidth <= 0) {
     throw new RangeError('Column gap leaves no readable column width.');
   }
   return Object.freeze({
+    axis,
     width,
     height,
     columnsPerView,

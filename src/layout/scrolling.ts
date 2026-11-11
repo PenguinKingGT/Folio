@@ -1,45 +1,56 @@
 /** Apply native chapter scrolling, resetting pagination-only CSS when changing modes. */
 import { applyColumns } from './columns';
 import { computePagination } from './pagination';
-import type { ReadingAxis } from './flow';
+import type { WritingState } from './writing';
 
 /** Configure vertical document flow or horizontal, non-snapping column scrolling. */
 export function applyScrolling(
   document: Document,
   width: number,
   height: number,
-  axis: ReadingAxis,
+  writing: WritingState,
 ): { length: number; viewport: number } {
   const root = document.documentElement;
   const body = document.body;
-  const geometry = computePagination(width, height, { spread: 'none', gap: 0 });
-  if (axis === 'horizontal') {
-    applyColumns(document, geometry);
-    root.style.overflowX = 'auto';
-    root.style.overflowY = 'hidden';
-    // Hide only the horizontal scrollbar so it cannot cover the final line in a fixed-height column.
+  const { axis, reverse, writingMode } = writing;
+  const inline = writingMode === 'horizontal-tb' ? 'horizontal' : 'vertical';
+  if (axis === inline) {
+    applyColumns(
+      document,
+      computePagination(width, height, { spread: 'none', gap: 0 }, axis),
+      reverse,
+    );
+    // Hide the scrollbar so it cannot cover the final line of a fixed-size column.
     root.style.scrollbarWidth = 'none';
   } else {
-    root.style.width = '100%';
-    root.style.height = 'auto';
-    root.style.margin = '0';
-    root.style.padding = '0';
-    root.style.boxSizing = 'border-box';
-    root.style.overflowX = 'hidden';
-    root.style.overflowY = 'auto';
-    root.style.scrollbarWidth = '';
-    body.style.width = '100%';
-    body.style.height = 'auto';
-    body.style.margin = '0';
-    body.style.padding = '0';
-    body.style.columnWidth = 'auto';
-    body.style.columnCount = 'auto';
-    body.style.columnGap = 'normal';
-    body.style.columnFill = 'balance';
+    naturalFlow(document, axis === 'vertical');
   }
+  root.style.overflowX = axis === 'horizontal' ? 'auto' : 'hidden';
+  root.style.overflowY = axis === 'vertical' ? 'auto' : 'hidden';
   root.scrollLeft = 0;
   root.scrollTop = 0;
   const viewport = axis === 'horizontal' ? width : height;
-  const length = axis === 'horizontal' ? root.scrollWidth : root.scrollHeight;
+  const length =
+    axis === 'horizontal'
+      ? Math.max(root.scrollWidth, body.scrollWidth)
+      : Math.max(root.scrollHeight, body.scrollHeight);
   return { length: Math.max(viewport, length), viewport };
+}
+
+/** Let blocks grow along their natural axis, including leftward vertical-rl content. */
+function naturalFlow(document: Document, vertical: boolean): void {
+  const root = document.documentElement;
+  const body = document.body;
+  for (const element of [root, body]) {
+    element.style.width = vertical ? '100%' : 'auto';
+    element.style.height = vertical ? 'auto' : '100%';
+    element.style.margin = '0';
+    element.style.padding = '0';
+    element.style.boxSizing = 'border-box';
+  }
+  root.style.scrollbarWidth = vertical ? '' : 'none';
+  body.style.columnWidth = 'auto';
+  body.style.columnCount = 'auto';
+  body.style.columnGap = 'normal';
+  body.style.columnFill = 'balance';
 }
