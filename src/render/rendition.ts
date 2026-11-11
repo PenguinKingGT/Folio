@@ -12,6 +12,9 @@ import type { DisplayTarget, ResolvedTarget } from './target';
 import { seekTarget } from './position';
 import { turnPage } from './turn';
 import { measureFrame } from '../layout/columns';
+import { readLocation } from './location';
+import { Relocations } from './relocation';
+import type { RelocatedListener, VisibleLocation } from './location-types';
 
 /** Initial renderer options; layout-specific behavior is added by subsequent features. */
 export type RenditionOptions = ViewOptions & PaginationOptions & FlowOptions;
@@ -35,6 +38,7 @@ function mountTarget(target: HTMLElement | string): HTMLElement {
 export class Rendition {
   private readonly view: IframeView;
   private readonly layoutController: ReaderLayout;
+  private readonly relocations: Relocations;
   private generation = 0;
   private controller: AbortController | undefined;
   private current: Section | null = null;
@@ -50,6 +54,7 @@ export class Rendition {
   ) {
     this.layoutController = new ReaderLayout(options, book.publication.rendition.flow);
     this.view = new IframeView(mountTarget(target), options);
+    this.relocations = new Relocations(() => this.currentLocation());
   }
 
   /** The owned iframe is exposed for host integration; scripts remain disabled. */
@@ -83,6 +88,7 @@ export class Rendition {
     const passive = prepareContent(await section.render(controller.signal), token);
     const content = await this.book.resources.rewrite(passive, address.path);
     controller.signal.throwIfAborted();
+    this.relocations.detach();
     await this.view.load(content, token, controller.signal);
     controller.signal.throwIfAborted();
     this.current = section;
@@ -91,19 +97,27 @@ export class Rendition {
     }
     this.layout();
     this.seek(resolved);
+    const document = this.view.document;
+    if (document !== null) {
+      this.relocations.watch(document);
+    }
     return section;
   }
 
   /** Move forward one viewport or to the next linear chapter; book end returns null. */
-  next(): Promise<Section | null> {
+  async next(): Promise<Section | null> {
     this.assertActive();
-    return turnPage(this, this.book.spine, 'next');
+    const result = await turnPage(this, this.book.spine, 'next');
+    this.relocations.report();
+    return result;
   }
 
   /** Move backward one viewport or to the previous chapter's final viewport. */
-  prev(): Promise<Section | null> {
+  async prev(): Promise<Section | null> {
     this.assertActive();
-    return turnPage(this, this.book.spine, 'previous');
+    const result = await turnPage(this, this.book.spine, 'previous');
+    this.relocations.report();
+    return result;
   }
 
   /** Position a resolved destination after its chapter has acquired layout metrics. */
@@ -112,7 +126,20 @@ export class Rendition {
     const state = this.flowState;
     if (document !== null && state !== null) {
       measureFrame(this.frame, () => seekTarget(document, state, this.pagination, target));
+      this.relocations.report();
     }
+  }
+
+  /** Measure visible CFIs, displayed viewport, and linear publication boundaries; unopened readers return null. */
+  currentLocation(): VisibleLocation | null {
+    this.assertActive();
+    return readLocation(this.book, this);
+  }
+
+  /** Subscribe to changed reading positions; callbacks run synchronously and return an unsubscribe handle. */
+  onRelocated(listener: RelocatedListener): () => void {
+    this.assertActive();
+    return this.relocations.subscribe(listener);
   }
 
   /** Return measured column geometry and visible page/spread count. */
@@ -128,7 +155,9 @@ export class Rendition {
       this.layoutController.configure(options);
       return null;
     }
-    return this.layoutController.apply(this.frame, document, options);
+    const result = this.layoutController.apply(this.frame, document, options);
+    this.relocations.report();
+    return result;
   }
 
   /** Return the active chapter's logical scroll extent after layout. */
@@ -140,8 +169,12 @@ export class Rendition {
   flow(mode: FlowMode, axis?: ReadingAxis): FlowState | null {
     this.assertActive();
     this.layoutController.setFlow(mode, axis);
-    this.layout();
+    const document = this.view.document;
+    if (document !== null) {
+      this.layoutController.apply(this.frame, document);
+    }
     this.view.document?.defaultView?.scrollTo(0, 0);
+    this.relocations.report();
     return this.flowState;
   }
 
@@ -171,6 +204,7 @@ export class Rendition {
   destroy(): void {
     if (!this.destroyed) {
       this.controller?.abort();
+      this.relocations.destroy();
       this.view.destroy();
       this.current = null;
       this.destroyed = true;

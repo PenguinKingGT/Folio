@@ -63,3 +63,20 @@ CFIs resolve native content positions, including the start of a range. Paginatio
 Percentage values are finite numbers from zero through one. They use `book.locations` samples and generate the default character index if needed; generate a finer index first for greater precision. An empty reading corpus rejects. New display requests cancel pending destination resolution and chapter loading.
 
 `next()` and `prev()` return the displayed Section, or null at the publication boundary. They move one page/spread or one scrolling viewport, clamp partial final viewports, and cross linear chapters while skipping non-linear entries. Moving backward into a chapter lands on its final viewport. An unopened reader starts at the first linear chapter. RTL and vertical-writing page directions remain under F19.
+
+## Visible reading location (F16)
+
+```ts
+const unsubscribe = reader.onRelocated((location) => {
+  console.log(location.start.cfi, location.start.displayed.page);
+});
+await reader.display();
+const location = reader.currentLocation();
+unsubscribe();
+```
+
+`currentLocation()` returns null before display. Afterwards it measures immutable `start` and `end` boundaries in DOM reading order. Each boundary includes a CFI, spine index, href, displayed viewport number and total, plus sampled location and percentage when `book.locations` has an index. Reading a visible location never generates that index. `atStart` and `atEnd` describe the linear publication boundaries.
+
+Text positions come from individual native Range rectangles intersecting both viewport dimensions. Binary searches find the first/last visible UTF-16 boundaries without probing every character; surrogate pairs stay intact. Visible image/SVG/video/canvas elements participate in reading order, and empty viewports fall back to a body CFI. Hidden readers are measured without revealing content. Scrolled page numbers use viewport-sized steps with a final partial viewport; paginated numbers count visible pages/spreads.
+
+`onRelocated()` reports changed snapshots after display, navigation, layout, flow changes, and native scrolling. Native scroll notifications coalesce into animation frames; identical snapshots are suppressed. Subscribe before displaying to receive the initial position. Listeners run synchronously and should not throw. Unsubscribe handles are idempotent; chapter replacement and destruction remove native listeners and pending frames. General typed event registration remains under F28.

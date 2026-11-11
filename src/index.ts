@@ -41,6 +41,7 @@ export type { CfiDomOptions } from './cfi/dom';
 export { Rendition } from './render/rendition';
 export type { RenditionOptions } from './render/rendition';
 export type { DisplayTarget } from './render/target';
+export type { VisibleBoundary, VisibleLocation, RelocatedListener } from './render/location-types';
 export { computePagination } from './layout/pagination';
 export type { PaginationOptions, PaginationGeometry, PaginationState } from './layout/pagination';
 export { resolveFlow } from './layout/flow';

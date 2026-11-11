@@ -89,8 +89,8 @@ test('scrolls by viewport on either axis and clamps the last partial viewport', 
   await view.prev();
   expect(view.getContents()?.defaultView?.scrollX).toBeGreaterThan(0);
   view.destroy();
-  expect(() => view.next()).toThrow('destroyed');
-  expect(() => view.prev()).toThrow('destroyed');
+  await expect(view.next()).rejects.toThrow('destroyed');
+  await expect(view.prev()).rejects.toThrow('destroyed');
 });
 
 test('positions hidden readers without revealing their content', async () => {
