@@ -43,6 +43,15 @@ export { ContinuousReader } from './continuous/reader';
 export { TouchNavigation } from './touch/navigation';
 export { Themes } from './themes/themes';
 export { ContentInteractions } from './interaction/interactions';
+export { Annotations } from './annotations/annotations';
+export type {
+  Annotation,
+  AnnotationType,
+  AnnotationStyle,
+  AnnotationOptions,
+  AnnotationUpdate,
+  AnnotationClick,
+} from './annotations/types';
 export type {
   ContentSelection,
   ContentInput,

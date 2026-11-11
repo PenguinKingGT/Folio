@@ -31,3 +31,5 @@ Geometry is bounded to 1,000,000 CSS pixels per chapter and 16,000,000 per estim
 `themes` supports the same [reader style APIs](./themes.md) as the bounded reader, including updates to every currently loaded neighbor and persistence through trimming/reloading.
 
 `interactions` supports [selection, input, and hyperlink APIs](./interactions.md) across visible/preloaded native documents. Visible chapter membership uses shared logical offsets so rounded browser rectangles cannot introduce a phantom preceding chapter at an exact boundary.
+
+`annotations` paints [CFI highlights, underlines, and marks](./annotations.md) in a clipped host overlay. Registrations survive trimming and restore when their chapters reenter the viewport.

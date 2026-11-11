@@ -18,6 +18,7 @@ import { scrollToPosition } from './position';
 import { TouchNavigation } from '../touch/navigation';
 import { Themes } from '../themes/themes';
 import { ContentInteractions } from '../interaction/interactions';
+import { Annotations } from '../annotations/annotations';
 
 /** Opening remains lazy; display commits requested content and reports optional preload failures separately. */
 export class ContinuousReader {
@@ -27,6 +28,8 @@ export class ContinuousReader {
   readonly themes: Themes;
   /** Reader-owned native selections, input events, and controlled links. */
   readonly interactions: ContentInteractions;
+  /** Reader-owned CFI annotations rendered in a host overlay. */
+  readonly annotations: Annotations;
   private readonly port: ContinuousPort;
   private readonly window: ContinuousWindow;
   private readonly navigation: ContinuousNavigation;
@@ -76,6 +79,7 @@ export class ContinuousReader {
     });
     this.observer = new ContinuousObserver(this.port, (layout) => this.flush(layout));
     this.touch = new TouchNavigation(this, options.touch);
+    this.annotations = new Annotations(book, this, this.port.surface);
   }
 
   /** The real outer scroll element is exposed for host scroll and accessibility integration. */
@@ -141,6 +145,7 @@ export class ContinuousReader {
   layout(): void {
     this.assertActive();
     this.navigation.layout();
+    this.annotations.refresh();
   }
   /** Reveal ready content without changing scroll position or loading policy. */
   show(): void {
@@ -272,6 +277,7 @@ export class ContinuousReader {
     }
     this.themes.destroy();
     this.interactions.destroy();
+    this.annotations.destroy();
     this.destroyed = true;
     this.touch.destroy();
     this.navigation.destroy();

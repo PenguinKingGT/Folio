@@ -23,6 +23,7 @@ import type { TouchSettings } from '../touch/options';
 import { Themes } from '../themes/themes';
 import { RenditionAnchor } from './reading-anchor';
 import { ContentInteractions } from '../interaction/interactions';
+import { Annotations } from '../annotations/annotations';
 
 /** Initial renderer options; layout-specific behavior is added by subsequent features. */
 export type RenditionOptions = ViewOptions &
@@ -43,6 +44,8 @@ export class Rendition {
   readonly themes: Themes;
   /** Reader-owned selection snapshots, native input forwarding, and controlled links. */
   readonly interactions: ContentInteractions;
+  /** Reader-owned CFI annotations rendered in a host overlay. */
+  readonly annotations: Annotations;
   private readonly readingAnchor: RenditionAnchor;
   private generation = 0;
   private controller: AbortController | undefined;
@@ -84,6 +87,7 @@ export class Rendition {
       this.view.surface,
     );
     this.touch = new TouchNavigation(this, options.touch);
+    this.annotations = new Annotations(book, this, this.view.surface);
   }
 
   /** The owned iframe is exposed for host integration; scripts remain disabled. */
@@ -216,6 +220,7 @@ export class Rendition {
     } else {
       this.relocations.report();
     }
+    this.annotations.refresh();
     return result;
   }
 
@@ -235,6 +240,7 @@ export class Rendition {
     this.view.document?.defaultView?.scrollTo(0, 0);
     this.relocations.report();
     this.touch.refresh();
+    this.annotations.refresh();
     return this.flowState;
   }
 
@@ -251,6 +257,7 @@ export class Rendition {
     if (this.current !== null) {
       this.view.show();
     }
+    this.annotations.refresh();
   }
 
   /** Hide current content and keep later display operations hidden until show(). */
@@ -258,6 +265,7 @@ export class Rendition {
     this.assertActive();
     this.visible = false;
     this.view.hide();
+    this.annotations.refresh();
   }
 
   /** Cancel display work and detach the view; book-owned resources remain reusable. */
@@ -266,6 +274,7 @@ export class Rendition {
       this.controller?.abort();
       this.touch.destroy();
       this.interactions.destroy();
+      this.annotations.destroy();
       this.themes.destroy();
       this.relocations.destroy();
       this.reflows.detach();

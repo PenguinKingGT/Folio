@@ -6,6 +6,8 @@ Opt-in [touch navigation](./touch.md) supports swipe turns, nearest-spread snapp
 
 [Content interactions](./interactions.md) expose native selection/CFI snapshots, keyboard/pointer forwarding, and controlled hyperlink activation (F25). Chapter hyperlinks remain passive until activated through the reader.
 
+[CFI annotations](./annotations.md) add highlight, underline, and mark overlays with reader-scoped registrations and host mouse/keyboard activation (F26).
+
 ## Passive chapter views (F12)
 
 ```ts
