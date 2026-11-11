@@ -12,6 +12,7 @@ import { measureFrame } from '../layout/columns';
 import { isFixed } from '../layout/fixed-model';
 import { documentViewport } from '../layout/fixed-document';
 import { createSurface } from './surface';
+import type { Themes } from '../themes/themes';
 
 /** One surface retains dimensions while individual fixed pages scale inside it. */
 export class PageViews {
@@ -27,13 +28,14 @@ export class PageViews {
     private readonly book: Book,
     container: HTMLElement,
     options: ViewOptions & PaginationOptions,
+    private readonly themes?: Themes,
   ) {
     this.settings = paginationOptions(options);
     this.surface = createSurface(container, options);
     try {
       this.main = new IframeView(this.surface, { ...options, width: '100%', height: '100%' });
       this.resetFrame();
-      this.fixed = new FixedSpread(book, this.surface, options);
+      this.fixed = new FixedSpread(book, this.surface, options, themes);
     } catch (error) {
       this.surface.remove();
       throw error;
@@ -60,6 +62,7 @@ export class PageViews {
     this.resetFrame();
     this.section = null;
     const document = await this.main.load(content, token, signal);
+    await this.themes?.apply(document, signal);
     if (isFixed(this.book.publication, section)) {
       documentViewport(document);
     }
@@ -88,6 +91,12 @@ export class PageViews {
   pages(): readonly RenderedPage[] {
     const primary = this.primaryPage();
     return primary === null ? [] : this.fixed.pages(primary);
+  }
+
+  /** Include a hidden prepared companion when updating reader styles. */
+  loadedPages(): readonly RenderedPage[] {
+    const primary = this.primaryPage();
+    return primary === null ? [] : this.fixed.loaded(primary);
   }
 
   /** Bind a loaded document to the last completed chapter load. */

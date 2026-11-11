@@ -7,10 +7,8 @@ import { ReaderLayout } from '../layout/reader-layout';
 import type { PaginationOptions, PaginationState } from '../layout/pagination';
 import type { FlowMode, FlowOptions, FlowState, ReadingAxis } from '../layout/flow';
 import { resolveDisplayTarget } from './target';
-import type { DisplayTarget, ResolvedTarget } from './target';
-import { seekTarget, scrollOffset } from './position';
+import type { DisplayTarget } from './target';
 import { turnPage } from './turn';
-import { measureFrame } from '../layout/columns';
 import { readLocation } from './location';
 import { Relocations } from './relocation';
 import type { RelocatedListener, VisibleLocation } from './location-types';
@@ -22,6 +20,8 @@ import type { WritingOptions } from '../layout/writing';
 import { TouchNavigation } from '../touch/navigation';
 import { touchOptions } from '../touch/options';
 import type { TouchSettings } from '../touch/options';
+import { Themes } from '../themes/themes';
+import { RenditionAnchor } from './reading-anchor';
 
 /** Initial renderer options; layout-specific behavior is added by subsequent features. */
 export type RenditionOptions = ViewOptions &
@@ -32,13 +32,15 @@ export type RenditionOptions = ViewOptions &
 
 /** Display a book in one reusable, script-disabled iframe surface. */
 export class Rendition {
+  /** Reader-owned opt-in pagination gesture bindings. */
   readonly touch: TouchNavigation;
   private readonly view: PageViews;
   private readonly layoutController: ReaderLayout;
   private readonly relocations: Relocations;
   private readonly reflows: ReflowObserver;
-  private anchor: string | null = null;
-  private anchorOffset = 0;
+  /** Reader-owned default, named, and override styles. */
+  readonly themes: Themes;
+  private readonly readingAnchor: RenditionAnchor;
   private generation = 0;
   private controller: AbortController | undefined;
   private current: Section | null = null;
@@ -58,26 +60,18 @@ export class Rendition {
       book.publication.rendition.flow,
       book.publication.direction,
     );
-    this.view = new PageViews(book, mountTarget(target), options);
+    this.themes = new Themes(book, {
+      documents: () => this.view.loadedPages().map((page) => page.document),
+      layout: () => {
+        this.layout();
+      },
+    });
+    this.view = new PageViews(book, mountTarget(target), options, this.themes);
     this.relocations = new Relocations(
       () => (this.layoutController.matchesFrame(this.frame) ? this.currentLocation() : null),
       this.frame.ownerDocument.defaultView,
     );
-    this.relocations.subscribe((location) => {
-      if (this.fixedLayout !== null) {
-        this.anchor = null;
-        return;
-      }
-      const document = this.view.document;
-      const state = this.flowState;
-      if (document !== null && state !== null) {
-        const offset = measureFrame(this.frame, () => scrollOffset(document, state));
-        if (this.anchor === null || offset !== this.anchorOffset) {
-          this.anchor = location.start.cfi;
-          this.anchorOffset = offset;
-        }
-      }
-    });
+    this.readingAnchor = new RenditionAnchor(this, this.relocations);
     this.reflows = new ReflowObserver(
       this.frame,
       () => {
@@ -109,7 +103,7 @@ export class Rendition {
     controller.signal.throwIfAborted();
     const section = resolved.section;
     if (section === this.current && this.view.document !== null) {
-      this.seek(resolved);
+      this.readingAnchor.seek(resolved);
       return section;
     }
     this.relocations.detach();
@@ -124,12 +118,12 @@ export class Rendition {
     }
     controller.signal.throwIfAborted();
     this.current = section;
-    this.anchor = null;
+    this.readingAnchor.cfi = null;
     if (this.visible) {
       this.view.show();
     }
     this.layout();
-    this.seek(resolved);
+    this.readingAnchor.seek(resolved);
     this.watchContents();
     return section;
   }
@@ -157,22 +151,6 @@ export class Rendition {
     const result = await turnPage(this, this.book.spine, 'previous');
     this.relocations.report();
     return result;
-  }
-
-  /** Position a resolved destination after its chapter has acquired layout metrics. */
-  private seek(target: ResolvedTarget, preserveAnchor = false): void {
-    const document = this.view.document;
-    const state = this.flowState;
-    if (document !== null && state !== null) {
-      measureFrame(this.frame, () => {
-        seekTarget(document, state, this.pagination, target);
-        this.anchorOffset = scrollOffset(document, state);
-      });
-      if (!preserveAnchor) {
-        this.anchor = target.cfi?.collapse().toString() ?? null;
-      }
-      this.relocations.report();
-    }
   }
 
   /** Measure visible CFIs, displayed viewport, and linear publication boundaries; unopened readers return null. */
@@ -223,11 +201,14 @@ export class Rendition {
       this.view.configure(options);
       return null;
     }
-    const anchor = this.anchor;
+    const anchor = this.readingAnchor.cfi;
     const result = this.applyLayout(document, options);
     if (this.fixedLayout === null && anchor !== null && this.current !== null) {
       // Keep the logical anchor across repeated reflows instead of drifting to each new page start.
-      this.seek({ section: this.current, cfi: new Cfi(anchor), fragment: null }, true);
+      this.readingAnchor.seek(
+        { section: this.current, cfi: new Cfi(anchor), fragment: null },
+        true,
+      );
     } else {
       this.relocations.report();
     }
@@ -280,6 +261,7 @@ export class Rendition {
     if (!this.destroyed) {
       this.controller?.abort();
       this.touch.destroy();
+      this.themes.destroy();
       this.relocations.destroy();
       this.reflows.detach();
       this.view.destroy();

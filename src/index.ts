@@ -41,6 +41,8 @@ export type { CfiDomOptions } from './cfi/dom';
 export { Rendition } from './render/rendition';
 export { ContinuousReader } from './continuous/reader';
 export { TouchNavigation } from './touch/navigation';
+export { Themes } from './themes/themes';
+export type { ThemeRules, ThemeSource, OverrideOptions } from './themes/types';
 export type { TouchOptions, TouchSettings } from './touch/options';
 export type { ContinuousOptions } from './continuous/options';
 export type { RenditionOptions } from './render/rendition';

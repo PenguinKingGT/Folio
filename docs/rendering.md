@@ -2,6 +2,8 @@
 
 Opt-in [touch navigation](./touch.md) supports swipe turns, nearest-spread snapping, and caller-owned host gesture panels (F23).
 
+[Themes and reader styles](./themes.md) support CSS/URL/rule registration, switching, and persistent font/style overrides in both reader kinds (F24).
+
 ## Passive chapter views (F12)
 
 ```ts

@@ -16,10 +16,14 @@ import { continuousLocation, visiblePages } from './location';
 import { Listeners } from './listeners';
 import { scrollToPosition } from './position';
 import { TouchNavigation } from '../touch/navigation';
+import { Themes } from '../themes/themes';
 
 /** Opening remains lazy; display commits requested content and reports optional preload failures separately. */
 export class ContinuousReader {
+  /** Reader-owned opt-in pagination gesture bindings. */
   readonly touch: TouchNavigation;
+  /** Reader-owned default, named, and override styles. */
+  readonly themes: Themes;
   private readonly port: ContinuousPort;
   private readonly window: ContinuousWindow;
   private readonly navigation: ContinuousNavigation;
@@ -43,9 +47,12 @@ export class ContinuousReader {
   ) {
     const settings = continuousOptions(options);
     this.port = new ContinuousPort(mountTarget(target), settings);
-    this.window = new ContinuousWindow(book, this.port, settings, () =>
-      this.observer.schedule(true),
-    );
+    this.themes = new Themes(book, {
+      documents: () => this.getLoadedPages().map((page) => page.document),
+      layout: () => this.layout(),
+    });
+    const changed = () => this.observer.schedule(true);
+    this.window = new ContinuousWindow(book, this.port, settings, changed, this.themes);
     this.navigation = new ContinuousNavigation(book, this.port, this.window, settings, {
       snapshot: () => this.snapshot,
       measure: () => this.currentLocation(),
@@ -267,6 +274,7 @@ export class ContinuousReader {
     if (this.destroyed) {
       return;
     }
+    this.themes.destroy();
     this.destroyed = true;
     this.touch.destroy();
     this.navigation.destroy();

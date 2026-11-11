@@ -33,7 +33,19 @@ export class ReflowObserver {
 
   /** Asset events are captured because image loads do not bubble. */
   private watchEvents(document: Document, options: { signal: AbortSignal }): void {
-    const schedule = () => this.schedule();
+    const schedule = (event?: Event) => {
+      const target = event?.target;
+      const realm = document.defaultView;
+      // Theme mutations already reflow explicitly; delayed style loads must not undo newer native scrolls.
+      if (
+        realm !== null &&
+        target instanceof realm.HTMLStyleElement &&
+        target.hasAttribute('data-folio-theme')
+      ) {
+        return;
+      }
+      this.schedule();
+    };
     document.addEventListener('load', schedule, { ...options, capture: true });
     document.addEventListener('error', schedule, { ...options, capture: true });
     document.addEventListener('loadedmetadata', schedule, { ...options, capture: true });

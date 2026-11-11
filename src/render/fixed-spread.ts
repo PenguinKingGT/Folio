@@ -9,6 +9,7 @@ import { applyFixedDocument, documentViewport } from '../layout/fixed-document';
 import { IframeView } from './iframe-view';
 import type { ViewOptions } from './iframe-view';
 import { chapterMarkup } from './load-chapter';
+import type { Themes } from '../themes/themes';
 
 /** A rendered native document bound to its spine identity. */
 export interface RenderedPage {
@@ -63,6 +64,7 @@ export class FixedSpread {
     private readonly book: Book,
     private readonly surface: HTMLElement,
     private readonly options: ViewOptions,
+    private readonly themes?: Themes,
   ) {}
 
   /** Expose immutable measurements only after a fixed page has been laid out. */
@@ -82,6 +84,7 @@ export class FixedSpread {
     this.companion = view;
     try {
       const document = await view.load(content, `${token}-companion`, signal);
+      await this.themes?.apply(document, signal);
       signal.throwIfAborted();
       documentViewport(document);
       this.partner = partner;
@@ -147,6 +150,12 @@ export class FixedSpread {
         : [companion, primary];
     }
     return [primary];
+  }
+
+  /** Return all ready documents, including a companion hidden by single-page fitting. */
+  loaded(primary: RenderedPage): readonly RenderedPage[] {
+    const companion = this.partnerPage();
+    return companion === null ? [primary] : [primary, companion];
   }
 
   /** Keep preloaded companions hidden until the chosen spread mode uses them. */

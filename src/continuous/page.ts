@@ -13,6 +13,7 @@ import type { ContinuousOptions } from './options';
 import type { ViewportSize } from './port';
 import type { RenderedPage } from '../render/fixed-spread';
 import { mediaQueries } from '../layout/media-queries';
+import type { Themes } from '../themes/themes';
 
 /** Page metrics are measured in outer scrollport CSS pixels. */
 export interface ContinuousMetrics {
@@ -40,6 +41,7 @@ export class ContinuousPage {
     parent: HTMLElement,
     options: ContinuousOptions,
     private readonly changed: () => void,
+    private readonly themes?: Themes,
   ) {
     this.cell = parent.ownerDocument.createElement('div');
     this.cell.style.cssText = 'position:absolute;left:0;top:0;overflow:hidden;visibility:hidden;';
@@ -64,6 +66,7 @@ export class ContinuousPage {
     this.cell.style.height = `${size.height}px`;
     const markup = await chapterMarkup(this.book, this.section, token, signal);
     await this.view.load(markup, token, signal);
+    await this.themes?.apply(this.rendered().document, signal);
     signal.throwIfAborted();
     this.view.show();
     this.layout(size, hint);
