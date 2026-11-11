@@ -1,4 +1,5 @@
 /** Publication navigation models and lookup independent of rendering. */
+import type { PrintPageLink } from '../pages/types';
 
 /** A nested table-of-contents item; grouping labels may have no link. */
 export interface NavigationItem {
@@ -24,6 +25,7 @@ export class Navigation {
   constructor(
     readonly toc: readonly NavigationItem[],
     readonly landmarks: readonly Landmark[] = [],
+    readonly pages: readonly PrintPageLink[] = [],
   ) {
     const pending = [...toc];
     for (let index = 0; index < pending.length; index += 1) {

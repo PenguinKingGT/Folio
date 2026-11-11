@@ -3,6 +3,7 @@ import type { Element } from '@xmldom/xmldom';
 import { children } from '../xml/parse';
 import { Navigation } from './navigation';
 import type { NavigationItem } from './navigation';
+import { parseNcxPages } from '../pages/parse-ncx';
 
 export const ncxNamespace = 'http://www.daisy.org/z3986/2005/ncx/';
 
@@ -24,12 +25,12 @@ function parsePoints(parent: Element, depth: number): NavigationItem[] {
   });
 }
 
-/** Read the NCX navMap; pageList is handled separately by the print-page feature. */
+/** Read the NCX navMap and optional print-page navigation. */
 export function parseNcx(root: Element): Navigation {
   const maps = children(root, 'navMap', ncxNamespace);
   const map = maps[0];
   if (maps.length !== 1 || map === undefined) {
     throw new TypeError('NCX requires exactly one navMap.');
   }
-  return new Navigation(parsePoints(map, 0));
+  return new Navigation(parsePoints(map, 0), [], parseNcxPages(root));
 }

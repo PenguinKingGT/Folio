@@ -52,6 +52,8 @@ export { resolveFlow } from './layout/flow';
 export type { ReadingFlow, FlowMode, ReadingAxis, FlowOptions, FlowState } from './layout/flow';
 export type { WritingMode, TextDirection, WritingOptions, WritingState } from './layout/writing';
 export { Locations } from './locations/locations';
+export { PageList } from './pages/page-list';
+export type { PrintPageLink, PrintPage, PrintPageResolver } from './pages/types';
 export type {
   LocationOptions,
   LocationUnit,

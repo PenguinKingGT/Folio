@@ -3,6 +3,7 @@ import type { Element } from '@xmldom/xmldom';
 import { children } from '../xml/parse';
 import { Navigation } from './navigation';
 import type { Landmark, NavigationItem } from './navigation';
+import { parseNavPages } from '../pages/parse-nav';
 
 const xhtml = 'http://www.w3.org/1999/xhtml';
 const ops = 'http://www.idpf.org/2007/ops';
@@ -37,7 +38,7 @@ function parseList(list: Element, depth: number): NavigationItem[] {
   });
 }
 
-/** Parse TOC and optional semantic landmarks from an XHTML navigation document. */
+/** Parse TOC, optional semantic landmarks, and print-page links from XHTML navigation. */
 export function parseNav(root: Element): Navigation {
   const navs = Array.from(root.getElementsByTagNameNS(xhtml, 'nav'));
   const toc = navs.filter((nav) => types(nav).includes('toc'));
@@ -55,5 +56,5 @@ export function parseNav(root: Element): Navigation {
       landmarks.push({ types: types(anchor), href, label: (anchor.textContent || '').trim() });
     }
   }
-  return new Navigation(parseList(list, 0), landmarks);
+  return new Navigation(parseList(list, 0), landmarks, parseNavPages(root));
 }

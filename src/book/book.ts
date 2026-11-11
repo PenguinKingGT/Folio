@@ -14,6 +14,8 @@ import type { PublicationSource } from './source';
 import { Rendition } from '../render/rendition';
 import type { RenditionOptions } from '../render/rendition';
 import { Locations } from '../locations/locations';
+import { createPageList } from './pages';
+import type { PageList } from '../pages/page-list';
 
 /** An opened publication does not create iframes or depend on browser globals. */
 export class Book {
@@ -22,6 +24,7 @@ export class Book {
   readonly resources: Resources;
   readonly cover: Cover;
   readonly locations: Locations;
+  readonly pageList: PageList;
 
   /** Compose already validated source components; open() owns failure cleanup. */
   private constructor(
@@ -43,6 +46,7 @@ export class Book {
       async (href, signal) =>
         new Blob([Uint8Array.from(await this.bytes(href, source.packagePath, signal))]),
     );
+    this.pageList = createPageList(this);
   }
 
   /**
@@ -118,6 +122,7 @@ export class Book {
     }
     this.renditions.clear();
     this.locations.destroy();
+    this.pageList.destroy();
     this.source.destroy();
     this.spine.destroy();
     this.cover.destroy();

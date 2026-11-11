@@ -1,6 +1,6 @@
 /** Prepare passive chapter content with a reader-owned CSP before assigning iframe srcdoc. */
 const xhtml = 'http://www.w3.org/1999/xhtml';
-import { passiveBlockedTags } from '../content/policy';
+import { passiveElementRemoved } from '../content/policy';
 const policy =
   "default-src 'none'; script-src 'none'; style-src 'unsafe-inline' blob:; img-src blob: data:; font-src blob: data:; media-src blob: data:; frame-src 'none'; object-src 'none'; connect-src 'none'; form-action 'none'; base-uri 'none'";
 
@@ -46,10 +46,7 @@ function activeUrl(value: string): boolean {
 function makePassive(document: Document): void {
   for (const element of Array.from(document.getElementsByTagName('*'))) {
     const name = element.localName.toLowerCase();
-    const refresh =
-      name === 'meta' &&
-      (element.getAttribute('http-equiv') || '').trim().toLowerCase() === 'refresh';
-    if (passiveBlockedTags.has(name) || refresh) {
+    if (passiveElementRemoved(name, element.getAttribute('http-equiv'))) {
       element.remove();
       continue;
     }

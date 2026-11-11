@@ -4,7 +4,7 @@ import { parseXml, children } from '../xml/parse';
 import { escapeCfi } from '../cfi/syntax';
 import { serializeCfiPath } from '../cfi/path';
 import type { CfiStep } from '../cfi/types';
-import { passiveBlockedTags } from '../content/policy';
+import { passiveElementRemoved } from '../content/policy';
 import { lowerBound } from './search';
 
 /** Map logical text slots into a reading corpus that includes block separators. */
@@ -90,10 +90,7 @@ function collect(
   for (const node of Array.from(parent.childNodes)) {
     if (element(node)) {
       const name = (node.localName || node.nodeName).toLowerCase();
-      const refresh =
-        name === 'meta' &&
-        (node.getAttribute('http-equiv') || '').trim().toLowerCase() === 'refresh';
-      if (passiveBlockedTags.has(name) || refresh) {
+      if (passiveElementRemoved(name, node.getAttribute('http-equiv'))) {
         continue;
       }
       flush();
