@@ -16,10 +16,12 @@ import type { RenditionOptions } from '../render/rendition';
 import { Locations } from '../locations/locations';
 import { createPageList } from './pages';
 import type { PageList } from '../pages/page-list';
+import { ContinuousReader } from '../continuous/reader';
+import type { ContinuousOptions } from '../continuous/options';
 
 /** An opened publication does not create iframes or depend on browser globals. */
 export class Book {
-  private readonly renditions = new Set<Rendition>();
+  private readonly renditions = new Set<Rendition | ContinuousReader>();
   readonly spine: Spine;
   readonly resources: Resources;
   readonly cover: Cover;
@@ -113,6 +115,19 @@ export class Book {
     });
     this.renditions.add(rendition);
     return rendition;
+  }
+
+  /** Mount a virtualized continuous scroll reader with independently owned passive chapter views. */
+  renderContinuous(
+    target: HTMLElement | string,
+    options: ContinuousOptions = {},
+  ): ContinuousReader {
+    this.source.signal.throwIfAborted();
+    const reader: ContinuousReader = new ContinuousReader(this, target, options, () => {
+      this.renditions.delete(reader);
+    });
+    this.renditions.add(reader);
+    return reader;
   }
 
   /** Release chapters, cover, transformed resources, producer requests, and source storage. */

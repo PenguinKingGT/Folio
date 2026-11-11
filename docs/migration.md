@@ -10,7 +10,7 @@ Scanned on 2026-11-11 against local epub.js `0.3.93`, commit `eee359d0790002115a
 - The TypeScript / Vite / pnpm / Oxlint / Prettier / test / CI foundation is complete; smoke tests do not count as EPUB features.
 - Decide compatibility scope before implementing optional legacy behavior. Record excluded items as Out of scope with a reason.
 
-**Progress: Done 21 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 15.** Update totals with every status change; list out-of-scope items separately.
+**Progress: Done 22 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 14.** Update totals with every status change; list out-of-scope items separately.
 
 ## Phase 1: Opening books and location primitives
 
@@ -53,7 +53,7 @@ Upstream reference: [Locations](../epub.js/src/locations.js), [PageList](../epub
 | --- | --------------------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | F20 | Progress: character / word locations, CFI / index / percentage conversion, current position, save / restore     | Done        | [Source](../src/locations/) / [Unit](../tests/unit/locations/) / [Browser](../tests/browser/render/locations.test.ts) / [Cross-engine](../tests/e2e/locations.spec.ts) |
 | F21 | Print pages: nav page-list / NCX pageList, page / CFI / percentage conversion                                   | Done        | [Source](../src/pages/) / [Unit](../tests/unit/pages/) / [Browser](../tests/browser/render/print-pages.test.ts) / [Cross-engine](../tests/e2e/print-pages.spec.ts)     |
-| F22 | Continuous views: seamless chapters, preloading, trimming and scroll-position compensation                      | Not started | —                                                                                                                                                                      |
+| F22 | Continuous views: seamless chapters, preloading, trimming and scroll-position compensation                      | Done        | [Source](../src/continuous/) / [Unit](../tests/unit/continuous/) / [Browser](../tests/browser/continuous/) / [Cross-engine](../tests/e2e/continuous.spec.ts)           |
 | F23 | Touch: swipe navigation, scroll snapping and mobile interaction                                                 | Not started | —                                                                                                                                                                      |
 | F24 | Themes: CSS / URL / rule registration, switching, font / size and style overrides                               | Not started | —                                                                                                                                                                      |
 | F25 | Content interaction: selection / Range / CFI events, input forwarding, internal and external links              | Not started | —                                                                                                                                                                      |

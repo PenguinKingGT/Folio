@@ -35,6 +35,8 @@ Each chapter uses standards mode for consistent CSS columns and scrolling roots.
 
 ## Scrolled flow (F14)
 
+For seamless multi-chapter scrolling, use [Book.renderContinuous()](./continuous.md) (F22). The `renderTo()` flow settings described here retain a bounded chapter/spread window, including its `scrolled-continuous` metadata alias.
+
 Set `flow` to `auto` (default), `paginated`, `scrolled-doc`, or `scrolled-continuous`. Auto honors recognized OPF rendition:flow metadata and otherwise selects pagination. Scrolled modes default to the natural block axis (vertical for horizontal text, horizontal for vertical text). Explicit axes select either natural flow or non-snapping inline columns; see F19 for direction handling.
 
 `reader.flow(mode, axis?)` switches current/future content and returns measured `flowState`, or null before display. Mode changes reset scroll position. `flowState` contains effective flow, axis, content length and viewport length. `pagination` is null while scrolling; spread settings remain available when switching back.

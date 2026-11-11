@@ -29,7 +29,7 @@ export function scrollToOffset(document: Document, state: FlowState, offset: num
 }
 
 /** Resolve a native rectangle; element CFIs and text carets both identify reading destinations. */
-function targetRect(document: Document, target: ResolvedTarget): DOMRect | null {
+export function targetRect(document: Document, target: ResolvedTarget): DOMRect | null {
   if (target.cfi !== null) {
     const range = rangeFromCfi(document, target.cfi);
     range.collapse(true);

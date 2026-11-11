@@ -11,6 +11,7 @@ import type { PaginationOptions } from '../layout/pagination';
 import { measureFrame } from '../layout/columns';
 import { isFixed } from '../layout/fixed-model';
 import { documentViewport } from '../layout/fixed-document';
+import { createSurface } from './surface';
 
 /** One surface retains dimensions while individual fixed pages scale inside it. */
 export class PageViews {
@@ -28,14 +29,9 @@ export class PageViews {
     options: ViewOptions & PaginationOptions,
   ) {
     this.settings = paginationOptions(options);
-    this.surface = container.ownerDocument.createElement('div');
-    this.surface.style.position = 'relative';
-    this.surface.style.overflow = 'hidden';
-    container.appendChild(this.surface);
+    this.surface = createSurface(container, options);
     try {
-      this.main = new IframeView(this.surface, options);
-      this.surface.style.width = this.main.frame.style.width;
-      this.surface.style.height = this.main.frame.style.height;
+      this.main = new IframeView(this.surface, { ...options, width: '100%', height: '100%' });
       this.resetFrame();
       this.fixed = new FixedSpread(book, this.surface, options);
     } catch (error) {

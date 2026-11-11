@@ -23,3 +23,5 @@ Network requests preserve custom fetch implementations, default headers, credent
 `destroy()` cancels producers and releases archive data, chapters, cover and transformed URLs; repeated calls are safe. Opening failures clean up partially created sources. No iframe, reader UI, or global browser DOM is created. Integration fixtures are authored locally under the project license.
 
 `pageList` exposes lazy printed-page indexing independently of character/word `locations`. See [printed-page APIs](./pages.md) for label, CFI, and ordinal percentage conversion. Opening a book does not resolve page-break anchors or load their chapter bodies.
+
+`renderContinuous(target, options?)` creates a book-owned [continuous reader](./continuous.md) with seamless chapter scrolling, bounded preloading, trimming, and reading-position compensation. `renderTo()` retains the bounded chapter/spread reader.

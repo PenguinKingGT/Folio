@@ -39,6 +39,8 @@ export { escapeCfi } from './cfi/syntax';
 export { cfiFromNode, cfiFromRange, rangeFromCfi, nodeFromCfi } from './cfi/dom';
 export type { CfiDomOptions } from './cfi/dom';
 export { Rendition } from './render/rendition';
+export { ContinuousReader } from './continuous/reader';
+export type { ContinuousOptions } from './continuous/options';
 export type { RenditionOptions } from './render/rendition';
 export type { DisplayTarget } from './render/target';
 export type { PageSide } from './layout/fixed-model';

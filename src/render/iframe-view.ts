@@ -1,26 +1,12 @@
 /** Own an iframe surface and its in-flight document load independently of book resources. */
 import { loadFrame } from './frame-load';
+import { setDimension, viewTimeout } from './surface';
 
 /** Basic view dimensions; pagination and scrolling options are separate layout features. */
 export interface ViewOptions {
   width?: number | string;
   height?: number | string;
   loadTimeoutMs?: number;
-}
-
-/** Convert numeric pixels or validate a CSS length through the browser's own style parser. */
-function dimension(
-  frame: HTMLIFrameElement,
-  property: 'width' | 'height',
-  value: number | string,
-): void {
-  if (typeof value === 'number' && (!Number.isFinite(value) || value <= 0)) {
-    throw new RangeError(`${property} must be a positive finite size.`);
-  }
-  frame.style[property] = typeof value === 'number' ? `${value}px` : value;
-  if (frame.style[property] === '') {
-    throw new TypeError(`Invalid CSS ${property}.`);
-  }
 }
 
 /** Passive same-origin iframe permits host DOM measurement while denying publication scripts. */
@@ -36,17 +22,14 @@ export class IframeView {
     if (!container.isConnected || container.namespaceURI !== 'http://www.w3.org/1999/xhtml') {
       throw new TypeError('The reader container must be an attached HTML element.');
     }
-    this.timeout = options.loadTimeoutMs ?? 15_000;
-    if (!Number.isFinite(this.timeout) || this.timeout <= 0) {
-      throw new RangeError('loadTimeoutMs must be positive and finite.');
-    }
+    this.timeout = viewTimeout(options.loadTimeoutMs);
     this.frame = container.ownerDocument.createElement('iframe');
     this.frame.setAttribute('sandbox', 'allow-same-origin');
     this.frame.setAttribute('title', 'EPUB content');
     this.frame.referrerPolicy = 'no-referrer';
     this.frame.style.border = '0';
-    dimension(this.frame, 'width', options.width ?? '100%');
-    dimension(this.frame, 'height', options.height ?? '100%');
+    setDimension(this.frame, 'width', options.width ?? '100%');
+    setDimension(this.frame, 'height', options.height ?? '100%');
     this.hide();
     container.appendChild(this.frame);
   }

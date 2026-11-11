@@ -25,6 +25,16 @@ interface Declaration {
   applied: string;
 }
 
+/** Validate typography overrides before any reader-owned DOM is allocated. */
+export function validateWritingOptions(options: WritingOptions): void {
+  if (
+    !['auto', 'ltr', 'rtl'].includes(options.direction ?? 'auto') ||
+    !['auto', 'horizontal-tb', 'vertical-rl', 'vertical-lr'].includes(options.writingMode ?? 'auto')
+  ) {
+    throw new TypeError('Unsupported direction or writing mode.');
+  }
+}
+
 /** Apply defaults while retaining author direction and body-only vertical declarations. */
 export class WritingLayout {
   private readonly injected = new WeakMap<Document, Map<string, Declaration>>();
@@ -34,14 +44,7 @@ export class WritingLayout {
     private readonly options: WritingOptions = {},
     private readonly fallback = 'default',
   ) {
-    if (
-      !['auto', 'ltr', 'rtl'].includes(options.direction ?? 'auto') ||
-      !['auto', 'horizontal-tb', 'vertical-rl', 'vertical-lr'].includes(
-        options.writingMode ?? 'auto',
-      )
-    ) {
-      throw new TypeError('Unsupported direction or writing mode.');
-    }
+    validateWritingOptions(options);
   }
 
   /** Resolve typography afresh on every layout so author media queries can change it. */
