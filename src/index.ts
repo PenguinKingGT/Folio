@@ -38,3 +38,5 @@ export type { CfiData, CfiPath, CfiStep } from './cfi/types';
 export { escapeCfi } from './cfi/syntax';
 export { cfiFromNode, cfiFromRange, rangeFromCfi, nodeFromCfi } from './cfi/dom';
 export type { CfiDomOptions } from './cfi/dom';
+export { Rendition } from './render/rendition';
+export type { RenditionOptions } from './render/rendition';

@@ -76,3 +76,9 @@ test('rejects unsupported input modes, resource limits and pre-cancelled loads',
   await expect(book.bytes('images/cover.jpg', undefined, controller.signal)).rejects.toThrow();
   book.destroy();
 });
+
+test('keeps headless loading usable while rejecting rendering without a browser document', async () => {
+  const book = await Book.open(bookZip());
+  expect(() => book.renderTo('#reader')).toThrow('browser document');
+  book.destroy();
+});

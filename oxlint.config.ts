@@ -19,6 +19,7 @@ export default defineConfig({
     'coverage/**',
     'playwright-report/**',
     'test-results/**',
+    '.vitest/**',
   ],
   rules: {
     'max-lines': ['error', { max: 300 }],

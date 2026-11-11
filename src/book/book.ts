@@ -11,9 +11,12 @@ import { loadNavigation } from './navigation';
 import type { BookOptions } from './options';
 import { openSource } from './source';
 import type { PublicationSource } from './source';
+import { Rendition } from '../render/rendition';
+import type { RenditionOptions } from '../render/rendition';
 
 /** An opened publication does not create iframes or depend on browser globals. */
 export class Book {
+  private readonly renditions = new Set<Rendition>();
   readonly spine: Spine;
   readonly resources: Resources;
   readonly cover: Cover;
@@ -93,8 +96,22 @@ export class Book {
     return new TextDecoder('utf-8', { fatal: true }).decode(await this.bytes(href, from, signal));
   }
 
+  /** Mount a passive reader surface; opening and headless reads remain browser-independent. */
+  renderTo(target: HTMLElement | string, options: RenditionOptions = {}): Rendition {
+    this.source.signal.throwIfAborted();
+    const rendition: Rendition = new Rendition(this, target, options, () => {
+      this.renditions.delete(rendition);
+    });
+    this.renditions.add(rendition);
+    return rendition;
+  }
+
   /** Release chapters, cover, transformed resources, producer requests, and source storage. */
   destroy(): void {
+    for (const rendition of this.renditions) {
+      rendition.destroy();
+    }
+    this.renditions.clear();
     this.source.destroy();
     this.spine.destroy();
     this.cover.destroy();
