@@ -4,9 +4,11 @@ import type { Section } from '../spine/section';
 import { prepareContent } from './content';
 import { IframeView } from './iframe-view';
 import type { ViewOptions } from './iframe-view';
+import { PaginationLayout } from '../layout/pagination-layout';
+import type { PaginationOptions, PaginationState } from '../layout/pagination';
 
 /** Initial renderer options; layout-specific behavior is added by subsequent features. */
-export type RenditionOptions = ViewOptions;
+export type RenditionOptions = ViewOptions & PaginationOptions;
 
 /** Resolve selectors only when a browser DOM is available. */
 function mountTarget(target: HTMLElement | string): HTMLElement {
@@ -26,6 +28,7 @@ function mountTarget(target: HTMLElement | string): HTMLElement {
 /** Display a book in one reusable, script-disabled iframe surface. */
 export class Rendition {
   private readonly view: IframeView;
+  private readonly paginationLayout: PaginationLayout;
   private generation = 0;
   private controller: AbortController | undefined;
   private current: Section | null = null;
@@ -39,6 +42,7 @@ export class Rendition {
     options: RenditionOptions = {},
     private readonly onDestroy?: () => void,
   ) {
+    this.paginationLayout = new PaginationLayout(options);
     this.view = new IframeView(mountTarget(target), options);
   }
 
@@ -76,7 +80,24 @@ export class Rendition {
     if (this.visible) {
       this.view.show();
     }
+    this.layout();
     return section;
+  }
+
+  /** Return measured column geometry and visible page/spread count. */
+  get pagination(): PaginationState | null {
+    return this.paginationLayout.state;
+  }
+
+  /** Configure spread behavior and reflow current contents; no document returns null. */
+  layout(options: PaginationOptions = {}): PaginationState | null {
+    this.assertActive();
+    const document = this.view.document;
+    if (document === null) {
+      this.paginationLayout.configure(options);
+      return null;
+    }
+    return this.paginationLayout.apply(this.frame, document, options);
   }
 
   /** Return native chapter contents, or null before the first successful display. */

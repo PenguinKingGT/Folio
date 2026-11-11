@@ -94,5 +94,6 @@ export function prepareContent(source: string, token: string): string {
   csp.setAttribute('content', policy);
   head.insertBefore(csp, head.firstChild);
   root.setAttribute('data-folio-document', token);
-  return new XMLSerializer().serializeToString(document);
+  // Standards mode keeps CSS columns and the browser scrolling root consistent across engines.
+  return '<!DOCTYPE html>' + new XMLSerializer().serializeToString(root);
 }
