@@ -22,3 +22,5 @@ export type {
 export { Section } from './spine/section';
 export type { SectionLoader } from './spine/section';
 export { Spine } from './spine/spine';
+export { Cover } from './cover/cover';
+export type { CoverLoader } from './cover/cover';

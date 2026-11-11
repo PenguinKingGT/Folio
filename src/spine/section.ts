@@ -3,7 +3,7 @@ import { XMLSerializer } from '@xmldom/xmldom';
 import type { Document } from '@xmldom/xmldom';
 import type { ManifestItem, SpineItem } from '../package/types';
 import { parseXml } from '../xml/parse';
-import { withAbort } from './cancellation';
+import { withAbort } from '../async/cancellation';
 
 /** Load OPF-relative chapter content; the producer must honor the supplied signal. */
 export type SectionLoader = (href: string, signal: AbortSignal) => Promise<string>;

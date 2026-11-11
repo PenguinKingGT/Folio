@@ -1,4 +1,4 @@
-/** Per-consumer cancellation must not abort a shared chapter load. */
+/** Per-consumer cancellation must not abort shared resource producers. */
 
 /** Race a shared operation with one caller's signal, removing listeners on every outcome. */
 export function withAbort<T>(operation: Promise<T>, signal?: AbortSignal): Promise<T> {
