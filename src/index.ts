@@ -36,3 +36,5 @@ export type { BookOptions } from './book/options';
 export { Cfi } from './cfi/cfi';
 export type { CfiData, CfiPath, CfiStep } from './cfi/types';
 export { escapeCfi } from './cfi/syntax';
+export { cfiFromNode, cfiFromRange, rangeFromCfi, nodeFromCfi } from './cfi/dom';
+export type { CfiDomOptions } from './cfi/dom';

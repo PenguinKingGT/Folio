@@ -26,7 +26,7 @@ On Linux, install browser system dependencies with `pnpm exec playwright install
 | `pnpm lint`                         | Type-aware Oxlint checks and file/function size limits      |
 | `pnpm format` / `pnpm format:check` | Format / check formatting                                   |
 | `pnpm typecheck`                    | Check source, examples, configuration, and TypeScript tests |
-| `pnpm test` / `pnpm test:watch`     | Run / watch unit tests                                      |
+| `pnpm test` / `pnpm test:watch`     | Run / watch unit and native-browser tests                   |
 | `pnpm test:coverage`                | Check thresholds; generate HTML and LCOV reports            |
 | `pnpm test:package`                 | Build and verify package imports and declaration artifacts  |
 | `pnpm test:e2e`                     | Test the example in Chromium, Firefox, and WebKit           |
@@ -39,7 +39,8 @@ Coverage includes every `src/**/*.ts` file except declaration-only `.d.ts` files
 
 ```text
 src/                 Library source and public entry point
-tests/unit/          Unit tests
+tests/unit/          Node unit tests
+tests/browser/       Native Chromium tests with merged coverage
 tests/package/       Package import and artifact tests
 tests/e2e/           Real-browser tests
 examples/basic/      Minimal development example

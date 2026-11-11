@@ -43,7 +43,7 @@ The root contains the new library: `src/`, unit/package/browser tests under `tes
 
 - Every feature and fix needs behavior-focused tests for success, boundaries, invalid input, and errors. Add regression tests when changing existing behavior.
 - Coverage includes all new-library source, even files not imported by tests. Require at least 90% statements, lines, and functions, and 85% branches. Explain exclusions; only declarations, generated files, and raw fixtures are eligible.
-- Unit-test parsing, paths, CFI, navigation, and resources. Integration-test loading a book through reading its chapters.
+- Unit-test parsing, paths, CFI, navigation, and resources. Use `tests/browser/` for native DOM unit coverage; Vitest merges it with Node coverage. Integration-test loading a book through reading its chapters.
 - Verify pagination, scrolling, selection, font loading, and resize behavior in real browsers. DOM emulation cannot establish layout correctness.
 - Add minimal EPUB 2/3, encoded-path, namespace, RTL, vertical-writing, reflowable, and fixed-layout fixtures as features require. Record fixture provenance and licensing.
 - Treat EPUB as untrusted input. Specify and test traversal prevention, malformed XML handling, archive limits, script isolation, and remote resource policies.
