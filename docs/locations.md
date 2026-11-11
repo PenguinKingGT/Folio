@@ -3,7 +3,9 @@
 ```ts
 await book.locations.generate({ unit: 'characters', breakSize: 150 });
 const cfi = book.locations.cfiFromPercentage(0.5);
-book.locations.setCurrent(cfi ?? 0);
+if (cfi !== null) {
+  book.locations.setCurrent(cfi);
+}
 const saved = book.locations.save();
 book.locations.load(saved);
 ```
@@ -22,4 +24,4 @@ CFIs use the actual OPF spine step and itemref IDs. Corpus extraction shares the
 
 New generations supersede older ones; cancellation and failures do not publish partial results. Cancelled waits reject promptly even if a custom producer ignores its signal. Destroying the book cancels indexing and releases samples.
 
-Indexes are limited to 100,000 samples and serialized snapshots to 10 MiB of UTF-16 code units. Choose coarser intervals for large books. Snapshots identify a publication by its identifier; source-content changes are not fingerprinted, so callers must regenerate after editing book content. Empty text/word corpora produce no locations.
+Indexes are limited to 100,000 samples and serialized snapshots to 10,485,760 UTF-16 code units. Choose coarser intervals for large books. Snapshots identify a publication by its identifier; source-content changes are not fingerprinted, so callers must regenerate after editing book content. Empty text/word corpora produce no locations. Saved samples must belong to linear chapters, matching generated indexes and lookup behavior.

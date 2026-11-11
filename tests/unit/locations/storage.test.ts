@@ -84,3 +84,14 @@ test('caps persisted JSON size and preserves declared snapshots independently', 
   expect(index.current).toBe(0);
   expect(Object.isFrozen(index.entries[0])).toBe(true);
 });
+
+test('rejects saved points inside non-linear chapters', () => {
+  const index = locations();
+  expect(() =>
+    index.load({
+      ...snapshot(),
+      total: 0,
+      locations: [{ cfi: 'epubcfi(/6/4[note]!/4/2/1:0)', position: 0 }],
+    }),
+  ).toThrow('invalid CFIs');
+});

@@ -41,6 +41,7 @@ function locationsFrom(
       base?.steps.length !== 2 ||
       base.steps[0]?.value !== publication.spineStep ||
       item === undefined ||
+      !item.linear ||
       (cfi.spineId !== null && cfi.spineId !== item.idref) ||
       (previous !== undefined && previous.compare(cfi) >= 0)
     ) {
