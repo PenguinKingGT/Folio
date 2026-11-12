@@ -15,8 +15,9 @@ export class RenditionObservations {
     surface: HTMLElement,
     read: () => VisibleLocation | null,
     layout: () => void,
+    scrolled?: () => void,
   ) {
-    this.relocations = new Relocations(read, frame.ownerDocument.defaultView);
+    this.relocations = new Relocations(read, frame.ownerDocument.defaultView, scrolled);
     this.reflows = new ReflowObserver(frame, layout, surface);
   }
 

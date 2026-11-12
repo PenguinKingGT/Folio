@@ -4,6 +4,8 @@ Query date: **2026-11-12**. Repository: [futurepress/epub.js](https://github.com
 
 ## What needs work
 
+Prioritize current, reproducible reading blockers, security/data-loss defects, resource leaks, and significant performance or cross-browser regressions. Questions, obsolete-version reports, and already-correct behavior remain triage entries; they do not automatically require implementation changes or dedicated new tests. Reuse existing evidence when it establishes the requested behavior.
+
 The [priority assessment](./upstream-priority.md) lists concrete reports, expected behavior, proposed changes or verification tasks, and local inspection targets. Start with security boundaries, loading failures, resize/display races, scrolling correctness, and data loss. A report against epub.js does not establish that Folio has the same defect.
 
 - **Implementation candidates:** [#950 metadata preservation](./950-repeated-metadata.md) now has a local fix; investigate reported navigation, position, annotations and lifecycle defects with issue-specific tests. An existing F01–F36 capability is not sufficient evidence of resolution.
@@ -39,25 +41,26 @@ The feature tracker remains complete for its original scoped migration. This iss
 
 ## Local verification progress
 
-| Issue | Local result                                                  | Evidence                                                  |
-| ----- | ------------------------------------------------------------- | --------------------------------------------------------- |
-| #950  | Implementation fixed                                          | [Repeated metadata](./950-repeated-metadata.md)           |
-| #1384 | Existing behavior verified                                    | [Initial resize](./1384-initial-resize.md)                |
-| #1367 | Explicit-base behavior verified                               | [Nested navigation](./1367-nested-navigation.md)          |
-| #837  | Existing behavior verified                                    | [Cross-node search](./837-cross-node-search.md)           |
-| #1264 | Existing behavior verified                                    | [Print labels](./1264-print-page-labels.md)               |
-| #933  | Unload contract verified                                      | [Unload hooks](./933-unload-hooks.md)                     |
-| #1326 | Font-boundary behavior verified                               | [Previous page after reflow](./1326-font-boundary.md)     |
-| #1200 | Malformed input rejected; valid ordering verified             | [CFI comparison](./1200-cfi-order.md)                     |
-| #1416 | Delayed native reversal verified                              | [Scroll anchoring](./1416-scroll-reversal.md)             |
-| #1408 | Late updates verified; actual Android WebView pending         | [Distant navigation](./1408-late-navigation.md)           |
-| #425  | Source retention fixed; original large-book heap case pending | [Frame source release](./425-retained-frame-source.md)    |
-| #1415 | Cross-paragraph underline geometry fixed                      | [Text-line fragments](./1415-paragraph-underlines.md)     |
-| #1405 | Bounded parallel location reads implemented                   | [Parallel generation](./1405-parallel-locations.md)       |
-| #1420 | Inert empty XHTML subset normalized safely                    | [DOCTYPE compatibility](./1420-empty-doctype.md)          |
-| #1197 | Production audit verified; original advisory mapping pending  | [XML dependency baseline](./1197-xml-dependency-audit.md) |
-| #915  | Exact dotted/undotted image identity verified                 | [PNG filename regression](./915-image-filenames.md)       |
-| #951  | Leading-digit image ID identity verified                      | [Manifest ID regression](./951-image-manifest-ids.md)     |
-| #734  | Inline PNG data URI decoding verified                         | [Embedded images](./734-inline-images.md)                 |
+| Issue | Local result                                                              | Evidence                                                        |
+| ----- | ------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| #950  | Implementation fixed                                                      | [Repeated metadata](./950-repeated-metadata.md)                 |
+| #1384 | Existing behavior verified                                                | [Initial resize](./1384-initial-resize.md)                      |
+| #1367 | Explicit-base behavior verified                                           | [Nested navigation](./1367-nested-navigation.md)                |
+| #837  | Existing behavior verified                                                | [Cross-node search](./837-cross-node-search.md)                 |
+| #1264 | Existing behavior verified                                                | [Print labels](./1264-print-page-labels.md)                     |
+| #933  | Unload contract verified                                                  | [Unload hooks](./933-unload-hooks.md)                           |
+| #1326 | Font-boundary behavior verified                                           | [Previous page after reflow](./1326-font-boundary.md)           |
+| #1200 | Malformed input rejected; valid ordering verified                         | [CFI comparison](./1200-cfi-order.md)                           |
+| #1416 | Delayed native reversal verified                                          | [Scroll anchoring](./1416-scroll-reversal.md)                   |
+| #1408 | Late updates verified; actual Android WebView pending                     | [Distant navigation](./1408-late-navigation.md)                 |
+| #425  | Source retention fixed; original large-book heap case pending             | [Frame source release](./425-retained-frame-source.md)          |
+| #1415 | Cross-paragraph underline geometry fixed                                  | [Text-line fragments](./1415-paragraph-underlines.md)           |
+| #1405 | Bounded parallel location reads implemented                               | [Parallel generation](./1405-parallel-locations.md)             |
+| #1420 | Inert empty XHTML subset normalized safely                                | [DOCTYPE compatibility](./1420-empty-doctype.md)                |
+| #1197 | Production audit verified; original advisory mapping pending              | [XML dependency baseline](./1197-xml-dependency-audit.md)       |
+| #915  | Exact dotted/undotted image identity verified                             | [PNG filename regression](./915-image-filenames.md)             |
+| #951  | Leading-digit image ID identity verified                                  | [Manifest ID regression](./951-image-manifest-ids.md)           |
+| #734  | Inline PNG data URI decoding verified                                     | [Embedded images](./734-inline-images.md)                       |
+| #1164 | Current WebKit scroll observation fixed; continuous trim/restore verified | [Native scroll annotations](./1164-native-annotation-scroll.md) |
 
 Other inventory entries are not claimed locally resolved. No upstream issue has been closed by this work.

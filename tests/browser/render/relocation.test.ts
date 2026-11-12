@@ -40,3 +40,39 @@ test('cancels pending work and snapshots subscribers during dispatch', async () 
     container.remove();
   }
 });
+
+test('unchanged CFI snapshots still notify geometry consumers after native scroll events', async () => {
+  const publication = await book();
+  const container = host();
+  const reader = publication.renderTo(container);
+  let changes = 0;
+  let geometry = 0;
+  await reader.display();
+  const location = reader.currentLocation();
+  const observer = new Relocations(
+    () => location,
+    window,
+    () => {
+      geometry++;
+    },
+  );
+  observer.subscribe(() => {
+    changes++;
+  });
+  try {
+    const contents = reader.getContents();
+    if (!contents) {
+      throw new Error('Missing native chapter.');
+    }
+    observer.watch(contents);
+    expect(changes).toBe(1);
+    expect(observer.report()).toBe(false);
+    contents.defaultView?.dispatchEvent(new Event('scroll'));
+    await expect.poll(() => geometry).toBe(1);
+    expect(changes).toBe(1);
+  } finally {
+    observer.destroy();
+    publication.destroy();
+    container.remove();
+  }
+});

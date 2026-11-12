@@ -104,3 +104,5 @@ Local issue progress: [#950 repeated metadata](./issues/950-repeated-metadata.md
 [#1405 location generation](./issues/1405-parallel-locations.md) now supports bounded parallel reads while retaining ordered atomic sampling.
 
 [#1420 empty DOCTYPE](./issues/1420-empty-doctype.md) narrows the earlier DTD exclusion only for inert bare XHTML empty subsets, with headless/native/scripted regressions and entity rejection retained.
+
+[#1164 annotation investigation](./issues/1164-native-annotation-scroll.md) fixed current WebKit native-scroll observation while retaining script isolation and verifying continuous frame-trim restoration.

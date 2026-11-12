@@ -83,6 +83,7 @@ export class Rendition extends ReaderEvents {
       () => {
         this.layout();
       },
+      () => this.annotations.refresh(),
     );
     this.readingAnchor = new RenditionAnchor(this, this.observations.relocations);
     this.touch = new TouchNavigation(this, options.touch);

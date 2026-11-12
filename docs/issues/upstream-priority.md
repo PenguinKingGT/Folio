@@ -39,3 +39,5 @@ For every implementation: first add a minimal failing regression, then modify th
 
 - [#1415 cross-paragraph underlines](./1415-paragraph-underlines.md): native paragraph rectangles and cross-axis merging collapsed individual text lines; locally fixed with failing-then-passing native regressions.
 - [#1405 location generation](./1405-parallel-locations.md): serial chapter reads prevented overlapping I/O; locally changed to bounded prefetch with deterministic ordered sampling and cancellation regressions.
+
+- [#1164 review](./1164-native-annotation-scroll.md): fixed a current WebKit native-scroll observation defect found during annotation investigation; authored continuous trim/restoration is separately verified.

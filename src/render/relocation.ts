@@ -1,4 +1,5 @@
 /** Observe native chapter scrolling and deduplicate immutable relocation notifications. */
+import { NativeScrollMonitor, nativeScrollCallbacks } from './native-scroll';
 import type { RelocatedListener, VisibleLocation } from './location-types';
 
 /** Own native listeners, animation-frame work, and subscriber lifetime for one reader. */
@@ -8,12 +9,14 @@ export class Relocations {
   private controller: AbortController | undefined;
   private pending: number | undefined;
   private previous = '';
+  private monitor: NativeScrollMonitor | undefined;
   private generation = 0;
 
   /** Defer geometry reads until a caller or native scroll requests a snapshot. */
   constructor(
     private readonly read: () => VisibleLocation | null,
     private readonly scheduler: Window | null,
+    private readonly scrolled?: () => void,
   ) {}
 
   /** Register a listener; the returned unsubscribe operation is idempotent. */
@@ -29,22 +32,26 @@ export class Relocations {
     this.detach();
     this.window = document.defaultView;
     this.controller = new AbortController();
-    this.window?.addEventListener('scroll', () => this.schedule(), {
+    const changed = () => this.schedule();
+    this.window?.addEventListener('scroll', changed, {
       passive: true,
       signal: this.controller.signal,
     });
+    if (this.window !== null && !nativeScrollCallbacks(document)) {
+      this.monitor = new NativeScrollMonitor(this.window, this.scheduler, changed);
+    }
     this.report();
   }
 
-  /** Publish only changed snapshots; synchronous reader commands can report immediately. */
-  report(): void {
+  /** Publish only changed snapshots and return whether subscribers received one; synchronous commands can report immediately. */
+  report(): boolean {
     if (this.window === null || this.listeners.size === 0) {
-      return;
+      return false;
     }
     const location = this.read();
     const key = JSON.stringify(location);
     if (location === null || key === this.previous) {
-      return;
+      return false;
     }
     this.previous = key;
     // Snapshot subscribers so callbacks can unsubscribe or subscribe during dispatch.
@@ -56,6 +63,7 @@ export class Relocations {
       }
       listener(location);
     }
+    return true;
   }
 
   /** Coalesce native scroll events into one geometry read per animation frame. */
@@ -64,7 +72,9 @@ export class Relocations {
       // Keep animation-frame work outside script-disabled publication documents.
       this.pending = this.scheduler?.requestAnimationFrame(() => {
         this.pending = undefined;
-        this.report();
+        if (!this.report()) {
+          this.scrolled?.();
+        }
       });
     }
   }
@@ -72,6 +82,8 @@ export class Relocations {
   /** Stop old-document observations and cancel pending work before replacing an iframe document. */
   detach(): void {
     this.controller?.abort();
+    this.monitor?.destroy();
+    this.monitor = undefined;
     if (this.pending !== undefined) {
       this.scheduler?.cancelAnimationFrame(this.pending);
     }
