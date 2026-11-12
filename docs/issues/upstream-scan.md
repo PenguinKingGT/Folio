@@ -40,3 +40,5 @@ The feature tracker remains complete for its original scoped migration. This iss
 ## Local verification progress
 
 Three issue-specific assessments are recorded: [#950](./950-repeated-metadata.md) has a local implementation fix; [#1384](./1384-initial-resize.md) and [#1367](./1367-nested-navigation.md) verify existing behavior under documented APIs. The other inventory entries are not claimed locally resolved.
+
+[#837 cross-node search](./837-cross-node-search.md) also has verified existing behavior using the existing exact-match CFI regression suite.
