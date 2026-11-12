@@ -1,12 +1,14 @@
 /** Allow trusted host view customization while retaining an attached passive iframe contract. */
 import { IframeView } from './iframe-view';
 import type { ViewOptions } from './iframe-view';
+import { validateViewMode } from './view-mode';
 
 /** Factories may subclass the public iframe view to customize native presentation and lifecycle. */
 export type ViewFactory = (container: HTMLElement, options: ViewOptions) => IframeView;
 
 /** Validate ownership before a customized view can load publication markup. */
 export function createView(container: HTMLElement, options: ViewOptions): IframeView {
+  validateViewMode(options.view);
   if (options.createView !== undefined && typeof options.createView !== 'function') {
     throw new TypeError('View factories must be functions.');
   }

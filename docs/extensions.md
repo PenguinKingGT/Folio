@@ -54,4 +54,6 @@ const reader = book.renderWith(
 
 Built-in reader options accept `createView(container, options)`, returning an `IframeView` or host subclass. The frame must belong to that attached container/document and retain exactly `sandbox="allow-same-origin"`. Invalid returned views are rejected and their owned frame is removed. Factories apply to bounded primary/facing pages and every continuous preload. A subclass must preserve document-load cancellation, ownership, passive policy, and cleanup contracts; host code remains responsible for modifications made after validation. A factory throwing before it returns must release resources it allocated itself.
 
+Built-in `view` selectors accept only `iframe`; see the [inline compatibility decision](./view-compatibility.md) for non-iframe manager boundaries and explicit legacy-option rejection.
+
 Tests cover asynchronous ordering, invalid inputs, snapshot mutation, cancellation, retry, unload failures, custom ownership, passive frame validation, fixed companions, and both reader modes in Chromium, Firefox, and WebKit. Exported context/factory types support extension authors without reaching into internal modules.

@@ -5,6 +5,7 @@ import { viewTimeout } from '../render/surface';
 import { validateWritingOptions } from '../layout/writing';
 import { touchOptions } from '../touch/options';
 import type { TouchSettings } from '../touch/options';
+import { validateViewMode } from '../render/view-mode';
 
 /** Continuous readers preload a bounded number of linear neighbors on both sides. */
 export interface ContinuousOptions extends ViewOptions, WritingOptions, TouchSettings {
@@ -17,6 +18,7 @@ export interface ContinuousOptions extends ViewOptions, WritingOptions, TouchSet
 export function continuousOptions(
   options: ContinuousOptions,
 ): ContinuousOptions & { preloadBefore: number; preloadAfter: number } {
+  validateViewMode(options.view);
   const preloadBefore = options.preloadBefore ?? 1;
   const preloadAfter = options.preloadAfter ?? 1;
   const maxViews = options.maxViews ?? 32;

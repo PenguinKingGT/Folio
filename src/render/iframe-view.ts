@@ -1,10 +1,12 @@
 /** Own an iframe surface and its in-flight document load independently of book resources. */
 import { loadFrame } from './frame-load';
 import type { ViewFactory } from './view-factory';
+import { validateViewMode } from './view-mode';
 import { setDimension, viewTimeout } from './surface';
 
 /** Basic view dimensions; pagination and scrolling options are separate layout features. */
 export interface ViewOptions {
+  view?: 'iframe';
   width?: number | string;
   height?: number | string;
   loadTimeoutMs?: number;
@@ -21,6 +23,7 @@ export class IframeView {
 
   /** Create one hidden view in an attached host container. */
   constructor(container: HTMLElement, options: ViewOptions = {}) {
+    validateViewMode(options.view);
     if (!container.isConnected || container.namespaceURI !== 'http://www.w3.org/1999/xhtml') {
       throw new TypeError('The reader container must be an attached HTML element.');
     }
