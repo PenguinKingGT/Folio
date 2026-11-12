@@ -56,5 +56,6 @@ The feature tracker remains complete for its original scoped migration. This iss
 | #1405 | Bounded parallel location reads implemented                   | [Parallel generation](./1405-parallel-locations.md)       |
 | #1420 | Inert empty XHTML subset normalized safely                    | [DOCTYPE compatibility](./1420-empty-doctype.md)          |
 | #1197 | Production audit verified; original advisory mapping pending  | [XML dependency baseline](./1197-xml-dependency-audit.md) |
+| #915  | Exact dotted/undotted image identity verified                 | [PNG filename regression](./915-image-filenames.md)       |
 
 Other inventory entries are not claimed locally resolved. No upstream issue has been closed by this work.
