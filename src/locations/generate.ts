@@ -1,4 +1,5 @@
 /** Build bounded, monotonic character/word locations across linear chapters. */
+import { chapterSources } from './chapters';
 import { Cfi } from '../cfi/cfi';
 import { escapeCfi } from '../cfi/syntax';
 import type { PublicationPackage } from '../package/types';
@@ -92,13 +93,13 @@ export async function generateLocations(
   }
   const state: Generation = { locations: [], total: 0, lastCfi: null };
   const words = segmenter(publication.metadata.language);
-  for (const item of publication.spine.filter((entry) => entry.linear)) {
-    signal.throwIfAborted();
-    const resource = publication.manifest.get(item.idref);
-    if (resource === undefined) {
-      throw new TypeError('Location chapter is missing from the manifest.');
-    }
-    const corpus = chapterCorpus(await load(resource.href, signal));
+  for await (const { item, source } of chapterSources(
+    publication,
+    load,
+    signal,
+    options.concurrency,
+  )) {
+    const corpus = chapterCorpus(source);
     signal.throwIfAborted();
     const base = `/${publication.spineStep}/${(item.index + 1) * 2}[${escapeCfi(item.idref)}]`;
     if (unit === 'characters') {

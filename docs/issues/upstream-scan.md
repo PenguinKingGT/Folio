@@ -53,5 +53,6 @@ The feature tracker remains complete for its original scoped migration. This iss
 | #1408 | Late updates verified; actual Android WebView pending         | [Distant navigation](./1408-late-navigation.md)        |
 | #425  | Source retention fixed; original large-book heap case pending | [Frame source release](./425-retained-frame-source.md) |
 | #1415 | Cross-paragraph underline geometry fixed                      | [Text-line fragments](./1415-paragraph-underlines.md)  |
+| #1405 | Bounded parallel location reads implemented                   | [Parallel generation](./1405-parallel-locations.md)    |
 
 Other inventory entries are not claimed locally resolved. No upstream issue has been closed by this work.

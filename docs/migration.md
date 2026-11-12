@@ -100,3 +100,5 @@ Local issue progress: [#950 repeated metadata](./issues/950-repeated-metadata.md
 [#425 source retention](./issues/425-retained-frame-source.md) has a local teardown fix and repeated open/close regression coverage; the original large-book heap report remains only partially reproduced.
 
 [#1415 paragraph underlines](./issues/1415-paragraph-underlines.md) has a local text-fragment and writing-axis merging fix with normal/tight-line regressions.
+
+[#1405 location generation](./issues/1405-parallel-locations.md) now supports bounded parallel reads while retaining ordered atomic sampling.

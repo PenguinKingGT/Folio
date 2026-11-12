@@ -8,7 +8,7 @@ This is preliminary report triage, not a verified Folio defect list. Titles/bodi
 
 | Issue                                                       | Report                                                                  | Initial route                                                                         | Comments |
 | ----------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | -------- |
-| [#1405](https://github.com/futurepress/epub.js/issues/1405) | book.locations.generate() asynchronous replacement                      | Change candidate; reproduce first                                                     | 0        |
+| [#1405](https://github.com/futurepress/epub.js/issues/1405) | book.locations.generate() asynchronous replacement                      | [Locally verified parallel-I/O fix](../1405-parallel-locations.md)                    | 0        |
 | [#1337](https://github.com/futurepress/epub.js/issues/1337) | open file is too slow                                                   | Change candidate; reproduce first                                                     | 0        |
 | [#1293](https://github.com/futurepress/epub.js/issues/1293) | How to listen the chapter end ？ this project is has been this hooks ？ | Question / scope review                                                               | 0        |
 | [#1261](https://github.com/futurepress/epub.js/issues/1261) | Lags when flipping throughthe page in epub                              | Change candidate; reproduce first                                                     | 0        |

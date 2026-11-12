@@ -11,6 +11,8 @@ export interface ReadingLocation {
 export interface LocationOptions {
   unit?: LocationUnit;
   breakSize?: number;
+  /** Maximum parallel chapter reads, from 1 through 16; defaults to 4. */
+  concurrency?: number;
   signal?: AbortSignal;
 }
 

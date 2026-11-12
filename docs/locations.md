@@ -10,7 +10,7 @@ const saved = book.locations.save();
 book.locations.load(saved);
 ```
 
-`Book.locations` is a headless `Locations` instance. Explicit generation reads linear spine chapters without retaining their Section DOM caches. Options include `unit` (`characters` by default, or `words`), positive integer `breakSize` (150 characters / 50 words by default), and an AbortSignal.
+`Book.locations` is a headless `Locations` instance. Explicit generation reads linear spine chapters without retaining their Section DOM caches. Options include `unit` (`characters` by default, or `words`), positive integer `breakSize` (150 characters / 50 words by default), an AbortSignal, and `concurrency` (default 4, integer 1–16; use 1 for serial reads).
 
 - `entries`, `length`, `total`, `unit`, `breakSize`, and `current` describe the current immutable sampled index. Total counts reading units, not samples.
 - `locationFromCfi()` finds a preceding sample; unknown/non-linear chapters and empty indexes return null.
@@ -25,3 +25,5 @@ CFIs use the actual OPF spine step and itemref IDs. Corpus extraction shares the
 New generations supersede older ones; cancellation and failures do not publish partial results. Cancelled waits reject promptly even if a custom producer ignores its signal. Destroying the book cancels indexing and releases samples.
 
 Indexes are limited to 100,000 samples and serialized snapshots to 10,485,760 UTF-16 code units. Choose coarser intervals for large books. Snapshots identify a publication by its identifier; source-content changes are not fingerprinted, so callers must regenerate after editing book content. Empty text/word corpora produce no locations. Saved samples must belong to linear chapters, matching generated indexes and lookup behavior.
+
+Chapter I/O uses a bounded prefetch window and samples results in spine order. Completed-but-unconsumed markup is bounded too; a failed read cancels other generation consumers without publishing partial samples. Parsing/segmentation remain on the calling thread, and concurrency is not part of saved-index identity. See [#1405 evidence](./issues/1405-parallel-locations.md).

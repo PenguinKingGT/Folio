@@ -3,6 +3,7 @@ import { expect, test } from 'vitest';
 import { Locations } from '../../../src/index';
 import { lowerBound } from '../../../src/locations/search';
 import { withAbort } from '../../../src/async/cancellation';
+import { gate } from '../extensions/fixture';
 import { chapter, locations, publication } from './fixture';
 
 test('binary search handles boundaries and refuses sparse data instead of looping', () => {
@@ -38,15 +39,18 @@ test('cancelled and failed generations retain the previous table', async () => {
 test('a newer generation supersedes an older ignored-cancellation producer', async () => {
   let finish: ((value: string) => void) | undefined;
   let reads = 0;
+  const started = gate();
   const pending = new Promise<string>((resolve) => {
     finish = resolve;
   });
   const index = new Locations(publication(), () => {
     reads += 1;
+    started.release();
     return reads === 1 ? pending : Promise.resolve(chapter('<p>New content</p>'));
   });
   const older = index.generate();
   const rejected = expect(older).rejects.toThrow();
+  await started.promise;
   await index.generate({ unit: 'words' });
   const current = index.entries;
   finish?.(chapter('<p>Old content</p>'));

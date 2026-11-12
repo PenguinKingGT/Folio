@@ -34,3 +34,8 @@ P1 means data loss, blocked reading, security boundaries, or unstable navigation
 - Security: [shared XML constraints](../../src/xml/constraints.ts), [security policy](../security.md) and [scripted reading boundaries](../scripted-reading.md) describe intentional differences. [#695](https://github.com/futurepress/epub.js/issues/695) requests content-copy prevention, which is a distinct host/service concern, not the malicious-content threat in #987; its [discussion](https://github.com/futurepress/epub.js/issues/695#issuecomment-368005384) also acknowledges client-access limitations.
 
 For every implementation: first add a minimal failing regression, then modify the responsible module, run `pnpm check`, record test paths and status, and commit that fix separately. A locally verified row does not imply upstream closure.
+
+## Additional confirmed defects from ongoing triage
+
+- [#1415 cross-paragraph underlines](./1415-paragraph-underlines.md): native paragraph rectangles and cross-axis merging collapsed individual text lines; locally fixed with failing-then-passing native regressions.
+- [#1405 location generation](./1405-parallel-locations.md): serial chapter reads prevented overlapping I/O; locally changed to bounded prefetch with deterministic ordered sampling and cancellation regressions.
