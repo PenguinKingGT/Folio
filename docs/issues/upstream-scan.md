@@ -36,3 +36,7 @@ Priority items distinguish **Change candidate**, **Awaiting reproduction**, **De
 For each implementation task, record an original reproduction fixture, a test that fails before the fix, the passing regression, relevant browser engines, and the local commit. Keep upstream state separate from local verification. Missing attachments, platform details or unresolved discussion must remain explicit evidence gaps.
 
 The feature tracker remains complete for its original scoped migration. This issue inventory is a separate backlog and may reveal missing subfeatures. The local repository remains the implementation target; the nested upstream checkout has not been modified.
+
+## Local verification progress
+
+Three issue-specific assessments are recorded: [#950](./950-repeated-metadata.md) has a local implementation fix; [#1384](./1384-initial-resize.md) and [#1367](./1367-nested-navigation.md) verify existing behavior under documented APIs. The other inventory entries are not claimed locally resolved.

@@ -94,3 +94,5 @@ The [2026-11-12 open-issue scan](./issues/upstream-scan.md) inventories 486 open
 Local issue progress: [#950 repeated metadata](./issues/950-repeated-metadata.md) now has issue-specific regression coverage and a local fix.
 
 [#1384 initial resize](./issues/1384-initial-resize.md) has verified existing behavior in Chromium, Firefox and WebKit, with dedicated pending-display regression tests.
+
+[#1367 nested TOC links](./issues/1367-nested-navigation.md) has verified explicit-base navigation for EPUB 2/3 in all three native engines.

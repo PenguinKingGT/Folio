@@ -10,3 +10,5 @@
 Malformed documents, missing TOC/list or NCX navMap, unlabeled entries, missing link destinations, duplicate IDs, and nesting beyond 64 levels reject instead of silently flattening or truncating the directory. NCX playOrder does not override document order. NCX pageList is tracked under F21.
 
 Navigation hrefs remain relative to their navigation document. Resolve them against that document before passing them to OPF-relative chapter lookup. Active-link handling and external-link routing belong to F15/F25.
+
+For nested TOC documents, pass `reader.display({ href: item.href, from: navigationPath })`, where `navigationPath` is the local path obtained by resolving the manifest nav/NCX href through `book.resources.resolve()`. See [#1367 examples and regression evidence](./issues/1367-nested-navigation.md).
