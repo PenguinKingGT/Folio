@@ -58,5 +58,6 @@ The feature tracker remains complete for its original scoped migration. This iss
 | #1197 | Production audit verified; original advisory mapping pending  | [XML dependency baseline](./1197-xml-dependency-audit.md) |
 | #915  | Exact dotted/undotted image identity verified                 | [PNG filename regression](./915-image-filenames.md)       |
 | #951  | Leading-digit image ID identity verified                      | [Manifest ID regression](./951-image-manifest-ids.md)     |
+| #734  | Inline PNG data URI decoding verified                         | [Embedded images](./734-inline-images.md)                 |
 
 Other inventory entries are not claimed locally resolved. No upstream issue has been closed by this work.
