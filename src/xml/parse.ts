@@ -5,13 +5,13 @@ import type { Document, Element } from '@xmldom/xmldom';
 
 /** Parse bounded XML; XHTML permits external doctype declarations without fetching DTDs. */
 export function parseXml(source: string, mode: 'xml' | 'xhtml' = 'xml'): Document {
-  validateXmlSource(source, mode);
+  const input = validateXmlSource(source, mode);
   try {
     const document = new DOMParser({
       onError: (_level, message) => {
         throw new TypeError(message);
       },
-    }).parseFromString(source, mode === 'xml' ? 'application/xml' : 'application/xhtml+xml');
+    }).parseFromString(input, mode === 'xml' ? 'application/xml' : 'application/xhtml+xml');
     if (document.documentElement === null) {
       throw new TypeError('XML document has no root element.');
     }

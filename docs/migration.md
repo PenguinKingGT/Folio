@@ -102,3 +102,5 @@ Local issue progress: [#950 repeated metadata](./issues/950-repeated-metadata.md
 [#1415 paragraph underlines](./issues/1415-paragraph-underlines.md) has a local text-fragment and writing-axis merging fix with normal/tight-line regressions.
 
 [#1405 location generation](./issues/1405-parallel-locations.md) now supports bounded parallel reads while retaining ordered atomic sampling.
+
+[#1420 empty DOCTYPE](./issues/1420-empty-doctype.md) narrows the earlier DTD exclusion only for inert bare XHTML empty subsets, with headless/native/scripted regressions and entity rejection retained.

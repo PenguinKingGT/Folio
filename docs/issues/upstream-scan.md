@@ -8,7 +8,7 @@ The [priority assessment](./upstream-priority.md) lists concrete reports, expect
 
 - **Implementation candidates:** [#950 metadata preservation](./950-repeated-metadata.md) now has a local fix; investigate reported navigation, position, annotations and lifecycle defects with issue-specific tests. An existing F01–F36 capability is not sufficient evidence of resolution.
 - **Verification first:** reproduce each candidate against Folio and the referenced upstream behavior with an original minimal fixture. Read remaining discussion before changing code. If Folio already behaves correctly, record that specific test instead of changing code unnecessarily.
-- **Compatibility decisions:** inline publisher HTML (#1381 and related reports) remains excluded by [F33](../view-compatibility.md). Internal DTD/entity subsets in #1420 conflict with [F36](../security.md); do not copy the upstream workaround without a separate policy decision. Optional empty-subset compatibility should be considered separately from entity expansion.
+- **Compatibility decisions:** inline publisher HTML (#1381 and related reports) remains excluded by [F33](../view-compatibility.md). [#1420](./1420-empty-doctype.md) now permits only inert empty bare XHTML subsets after a compatibility review; other DTD/entity subsets remain excluded under [F36](../security.md).
 - **Scope additions:** SMIL/media-overlay playback (#1043, #1289) and publisher alternate-stylesheet selection (#586) need explicit scope/API decisions. Parsing a manifest overlay attribute or registering host themes is not equivalent to implementing those features.
 - **Host/infrastructure work:** signing cookies/CORS, DRM/password handling, native context menus, page-turn animations and third-party website maintenance must be separated from reproducible core defects. A question is not automatically out of scope.
 
@@ -54,5 +54,6 @@ The feature tracker remains complete for its original scoped migration. This iss
 | #425  | Source retention fixed; original large-book heap case pending | [Frame source release](./425-retained-frame-source.md) |
 | #1415 | Cross-paragraph underline geometry fixed                      | [Text-line fragments](./1415-paragraph-underlines.md)  |
 | #1405 | Bounded parallel location reads implemented                   | [Parallel generation](./1405-parallel-locations.md)    |
+| #1420 | Inert empty XHTML subset normalized safely                    | [DOCTYPE compatibility](./1420-empty-doctype.md)       |
 
 Other inventory entries are not claimed locally resolved. No upstream issue has been closed by this work.

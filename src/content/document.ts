@@ -39,8 +39,8 @@ export function nativeContent(source: string): {
   root: Element;
   head: Element;
 } {
-  validateXmlSource(source, 'xhtml');
-  const document = new DOMParser().parseFromString(source, 'application/xhtml+xml');
+  const input = validateXmlSource(source, 'xhtml');
+  const document = new DOMParser().parseFromString(input, 'application/xhtml+xml');
   normalizePrefixes(document);
   const root = document.documentElement;
   if (
