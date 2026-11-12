@@ -39,21 +39,22 @@ The feature tracker remains complete for its original scoped migration. This iss
 
 ## Local verification progress
 
-| Issue | Local result                                                  | Evidence                                               |
-| ----- | ------------------------------------------------------------- | ------------------------------------------------------ |
-| #950  | Implementation fixed                                          | [Repeated metadata](./950-repeated-metadata.md)        |
-| #1384 | Existing behavior verified                                    | [Initial resize](./1384-initial-resize.md)             |
-| #1367 | Explicit-base behavior verified                               | [Nested navigation](./1367-nested-navigation.md)       |
-| #837  | Existing behavior verified                                    | [Cross-node search](./837-cross-node-search.md)        |
-| #1264 | Existing behavior verified                                    | [Print labels](./1264-print-page-labels.md)            |
-| #933  | Unload contract verified                                      | [Unload hooks](./933-unload-hooks.md)                  |
-| #1326 | Font-boundary behavior verified                               | [Previous page after reflow](./1326-font-boundary.md)  |
-| #1200 | Malformed input rejected; valid ordering verified             | [CFI comparison](./1200-cfi-order.md)                  |
-| #1416 | Delayed native reversal verified                              | [Scroll anchoring](./1416-scroll-reversal.md)          |
-| #1408 | Late updates verified; actual Android WebView pending         | [Distant navigation](./1408-late-navigation.md)        |
-| #425  | Source retention fixed; original large-book heap case pending | [Frame source release](./425-retained-frame-source.md) |
-| #1415 | Cross-paragraph underline geometry fixed                      | [Text-line fragments](./1415-paragraph-underlines.md)  |
-| #1405 | Bounded parallel location reads implemented                   | [Parallel generation](./1405-parallel-locations.md)    |
-| #1420 | Inert empty XHTML subset normalized safely                    | [DOCTYPE compatibility](./1420-empty-doctype.md)       |
+| Issue | Local result                                                  | Evidence                                                  |
+| ----- | ------------------------------------------------------------- | --------------------------------------------------------- |
+| #950  | Implementation fixed                                          | [Repeated metadata](./950-repeated-metadata.md)           |
+| #1384 | Existing behavior verified                                    | [Initial resize](./1384-initial-resize.md)                |
+| #1367 | Explicit-base behavior verified                               | [Nested navigation](./1367-nested-navigation.md)          |
+| #837  | Existing behavior verified                                    | [Cross-node search](./837-cross-node-search.md)           |
+| #1264 | Existing behavior verified                                    | [Print labels](./1264-print-page-labels.md)               |
+| #933  | Unload contract verified                                      | [Unload hooks](./933-unload-hooks.md)                     |
+| #1326 | Font-boundary behavior verified                               | [Previous page after reflow](./1326-font-boundary.md)     |
+| #1200 | Malformed input rejected; valid ordering verified             | [CFI comparison](./1200-cfi-order.md)                     |
+| #1416 | Delayed native reversal verified                              | [Scroll anchoring](./1416-scroll-reversal.md)             |
+| #1408 | Late updates verified; actual Android WebView pending         | [Distant navigation](./1408-late-navigation.md)           |
+| #425  | Source retention fixed; original large-book heap case pending | [Frame source release](./425-retained-frame-source.md)    |
+| #1415 | Cross-paragraph underline geometry fixed                      | [Text-line fragments](./1415-paragraph-underlines.md)     |
+| #1405 | Bounded parallel location reads implemented                   | [Parallel generation](./1405-parallel-locations.md)       |
+| #1420 | Inert empty XHTML subset normalized safely                    | [DOCTYPE compatibility](./1420-empty-doctype.md)          |
+| #1197 | Production audit verified; original advisory mapping pending  | [XML dependency baseline](./1197-xml-dependency-audit.md) |
 
 Other inventory entries are not claimed locally resolved. No upstream issue has been closed by this work.
