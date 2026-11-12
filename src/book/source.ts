@@ -10,6 +10,8 @@ import type { BookOptions } from './options';
 
 /** Open publication source with its own cancellation and resource lifetime. */
 export interface PublicationSource {
+  kind: 'archive' | 'directory' | 'document';
+  contains?: (path: string) => boolean;
   packagePath: string;
   package: { format: 'opf' | 'json'; source: string };
   read: ResourceReader;
@@ -35,6 +37,8 @@ function archiveSource(
   try {
     const { packagePath } = parseContainer(archive.getText('META-INF/container.xml'));
     return {
+      kind: 'archive',
+      contains: (path) => archive.list().includes(path),
       packagePath,
       package: { format: 'opf', source: archive.getText(packagePath) },
       request,
@@ -77,6 +81,7 @@ async function networkSource(
   }
   const packageXml = await request(packageUrl.href, 'text', { signal });
   return {
+    kind: directory ? 'directory' : 'document',
     packagePath,
     package: { format, source: packageXml },
     request,

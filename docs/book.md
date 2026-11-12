@@ -31,3 +31,5 @@ Network requests preserve custom fetch implementations, default headers, credent
 `hooks` and `renderWith()` expose trusted [host extensions](./extensions.md). Use `destroyAsync()` when asynchronous view-unload callbacks must finish before shared assets are released.
 
 `offline` loading options enable [persistent offline responses](./offline.md). `prefetchResources(signal?)` reads every declared manifest resource through the configured transport and returns its completed count; extracted directory books can use it to prepare unvisited chapters for offline use.
+
+`displayOptions` exposes discovered [legacy Apple preferences](./display-options.md). Missing layout defaults can be supplied by the vendor file; modern OPF metadata and explicit reader settings retain precedence.

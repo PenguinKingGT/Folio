@@ -1,4 +1,5 @@
 /** Public loading options composed from the input, transport, and resource boundaries. */
+import type { ApplePlatform } from '../display-options/types';
 import type { OfflineStore } from '../offline/store';
 import type { ArchiveLimits } from '../archive/unzip';
 import type { RequesterOptions } from '../input/request';
@@ -9,4 +10,6 @@ import type { ResourceOptions } from '../resources/resources';
 export interface BookOptions extends InputOptions, RequesterOptions, ResourceOptions {
   archiveLimits?: ArchiveLimits;
   offline?: OfflineStore;
+  appleDisplayOptions?: boolean;
+  applePlatform?: ApplePlatform;
 }

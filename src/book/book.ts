@@ -7,6 +7,9 @@ import { disposeAll, isAbortError } from '../events/errors';
 import type { BookEventMap } from '../events/types';
 import { parsePackage } from '../package/package';
 import { parseJsonManifest } from '../manifest/parse';
+import { loadDisplayOptions, validateDisplayOptions } from './display-options';
+import { applyAppleDisplayOptions } from '../display-options/apply';
+import type { AppleDisplayOptions } from '../display-options/types';
 import type { PublicationPackage } from '../package/types';
 import type { Navigation } from '../navigation/navigation';
 import { Resources } from '../resources/resources';
@@ -44,6 +47,7 @@ export class Book extends EventEmitter<BookEventMap> {
     readonly publication: PublicationPackage,
     readonly navigation: Navigation,
     options: BookOptions,
+    readonly displayOptions: AppleDisplayOptions | null,
   ) {
     super();
     this.locations = new Locations(this.publication, (href, signal) =>
@@ -72,14 +76,17 @@ export class Book extends EventEmitter<BookEventMap> {
     input: string | URL | ArrayBuffer | Uint8Array,
     options: BookOptions = {},
   ): Promise<Book> {
+    validateDisplayOptions(options);
     const source = await openSource(input, options);
     try {
       const json =
         source.package.format === 'json' ? parseJsonManifest(source.package.source) : undefined;
-      const publication = json?.publication ?? parsePackage(source.package.source);
+      const parsed = json?.publication ?? parsePackage(source.package.source);
+      const displayOptions = await loadDisplayOptions(source, parsed, options);
+      const publication = applyAppleDisplayOptions(parsed, displayOptions);
       const navigation = json?.navigation ?? (await loadNavigation(publication, source));
       source.signal.throwIfAborted();
-      return new Book(source, publication, navigation, options);
+      return new Book(source, publication, navigation, options, displayOptions);
     } catch (error) {
       source.destroy();
       throw error;

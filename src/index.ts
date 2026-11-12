@@ -108,3 +108,6 @@ export type { OfflineOptions, OfflineEventMap } from './offline/types';
 
 export { parseJsonManifest } from './manifest/parse';
 export type { JsonPublication } from './manifest/parse';
+
+export { parseAppleDisplayOptions } from './display-options/parse';
+export type { AppleDisplayOptions, ApplePlatform } from './display-options/types';
