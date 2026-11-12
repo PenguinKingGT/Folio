@@ -6,6 +6,7 @@ import type { ManagedReader, ReaderFactory } from '../extensions/types';
 import { disposeAll, isAbortError } from '../events/errors';
 import type { BookEventMap } from '../events/types';
 import { parsePackage } from '../package/package';
+import { parseJsonManifest } from '../manifest/parse';
 import type { PublicationPackage } from '../package/types';
 import type { Navigation } from '../navigation/navigation';
 import { Resources } from '../resources/resources';
@@ -73,8 +74,10 @@ export class Book extends EventEmitter<BookEventMap> {
   ): Promise<Book> {
     const source = await openSource(input, options);
     try {
-      const publication = parsePackage(source.packageXml);
-      const navigation = await loadNavigation(publication, source);
+      const json =
+        source.package.format === 'json' ? parseJsonManifest(source.package.source) : undefined;
+      const publication = json?.publication ?? parsePackage(source.package.source);
+      const navigation = json?.navigation ?? (await loadNavigation(publication, source));
       source.signal.throwIfAborted();
       return new Book(source, publication, navigation, options);
     } catch (error) {

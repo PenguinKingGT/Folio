@@ -11,7 +11,7 @@ import type { BookOptions } from './options';
 /** Open publication source with its own cancellation and resource lifetime. */
 export interface PublicationSource {
   packagePath: string;
-  packageXml: string;
+  package: { format: 'opf' | 'json'; source: string };
   read: ResourceReader;
   request: Requester;
   signal: AbortSignal;
@@ -36,7 +36,7 @@ function archiveSource(
     const { packagePath } = parseContainer(archive.getText('META-INF/container.xml'));
     return {
       packagePath,
-      packageXml: archive.getText(packagePath),
+      package: { format: 'opf', source: archive.getText(packagePath) },
       request,
       signal,
       read: (path, consumer) => {
@@ -54,13 +54,14 @@ function archiveSource(
   }
 }
 
-/** Discover OPF relative to a directory container, or use a direct OPF URL as given. */
+/** Discover a directory OPF or read a direct OPF/JSON document against its origin-root byte provider. */
 async function networkSource(
   url: URL,
   directory: boolean,
   request: Requester,
   controller: AbortController,
   signal: AbortSignal,
+  format: 'opf' | 'json' = 'opf',
 ): Promise<PublicationSource> {
   let root = new URL('/', url);
   let packagePath = decodeURIComponent(url.pathname.slice(1));
@@ -77,7 +78,7 @@ async function networkSource(
   const packageXml = await request(packageUrl.href, 'text', { signal });
   return {
     packagePath,
-    packageXml,
+    package: { format, source: packageXml },
     request,
     signal,
     read: async (path, consumer) =>
@@ -90,7 +91,7 @@ async function networkSource(
   };
 }
 
-/** Resolve an input and open its byte source; JSON manifests are implemented separately in F31. */
+/** Resolve an input and open archive or URL-backed OPF/JSON publication data behind one byte boundary. */
 export async function openSource(
   input: string | URL | ArrayBuffer | Uint8Array,
   options: BookOptions,
@@ -111,9 +112,6 @@ export async function openSource(
     if (source.type === 'binary') {
       return archiveSource(source.data, options, request, controller, signal);
     }
-    if (source.type === 'json') {
-      throw new TypeError('JSON manifests are not implemented yet (F31).');
-    }
     const base = typeof location === 'undefined' ? undefined : location.href;
     const url = new URL(source.url, base);
     if (source.type === 'epub') {
@@ -125,7 +123,14 @@ export async function openSource(
         signal,
       );
     }
-    return await networkSource(url, source.type === 'directory', request, controller, signal);
+    return await networkSource(
+      url,
+      source.type === 'directory',
+      request,
+      controller,
+      signal,
+      source.type === 'json' ? 'json' : 'opf',
+    );
   } catch (error) {
     controller.abort();
     throw error;

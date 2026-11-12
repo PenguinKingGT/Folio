@@ -64,7 +64,7 @@ test('rejects corrupt containers, invalid packages and invalid navigation', asyn
 });
 
 test('rejects unsupported input modes, resource limits and pre-cancelled loads', async () => {
-  await expect(Book.open('manifest.json')).rejects.toThrow('F31');
+  await expect(Book.open('manifest.json')).rejects.toThrow('Invalid URL');
   await expect(Book.open(bookZip(), { archiveLimits: { maxEntries: 1 } })).rejects.toThrow(
     RangeError,
   );

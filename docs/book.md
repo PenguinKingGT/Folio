@@ -12,7 +12,7 @@ const coverUrl = await book.cover.url();
 book.destroy();
 ```
 
-`Book.open(input, options?)` accepts the F01 inputs and transport settings plus archive limits and resource policy. It opens binary/Base64 EPUB archives, EPUB URLs, extracted directories, and direct OPF URLs. Relative network inputs use `baseUrl` or the browser location; Node callers must provide an absolute URL or base. JSON manifests remain tracked under F31.
+`Book.open(input, options?)` accepts the F01 inputs and transport settings plus archive limits and resource policy. It opens binary/Base64 EPUB archives, EPUB URLs, extracted directories, and direct OPF URLs. Relative network inputs use `baseUrl` or the browser location; Node callers must provide an absolute URL or base. JSON URLs use the supported [manifest compatibility schema](./json-manifests.md).
 
 Opening reads the container, package and declared navigation. Chapter XHTML remains lazy. `publication` contains parsed metadata/manifest/spine, `navigation` contains the TOC, landmarks, and optional raw print-page links, and `packagePath` identifies the container-relative OPF. `section()` delegates indexed/ID/href lookup to the spine.
 

@@ -105,3 +105,6 @@ export type { ViewFactory } from './render/view-factory';
 
 export { OfflineStore, OfflineMissError } from './offline/store';
 export type { OfflineOptions, OfflineEventMap } from './offline/types';
+
+export { parseJsonManifest } from './manifest/parse';
+export type { JsonPublication } from './manifest/parse';
