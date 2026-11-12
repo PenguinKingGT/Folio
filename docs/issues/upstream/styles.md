@@ -1,0 +1,39 @@
+# Themes, fonts and publisher CSS
+
+Snapshot: 2026-11-12. Source: [futurepress/epub.js open issues](https://github.com/futurepress/epub.js/issues?q=is%3Aissue+is%3Aopen).
+
+Feature mapping: F07, F17, F24. Folio inspection targets: `src/themes/, src/resources/`.
+
+This is preliminary report triage, not a verified Folio defect list. Titles/bodies were collected; discussions were reviewed only for the priority items linked from the [scan overview](../upstream-scan.md). A candidate requires a local reproduction before code changes. Question routing is provisional; questions may contain real defects. Comment counts help identify unread discussion.
+
+| Issue                                                       | Report                                                                                                 | Initial route                     | Comments |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------- | -------- |
+| [#1403](https://github.com/futurepress/epub.js/issues/1403) | White background on dark mode                                                                          | Change candidate; reproduce first | 0        |
+| [#1402](https://github.com/futurepress/epub.js/issues/1402) | Restrict Themes from applying to certain tags                                                          | Change candidate; reproduce first | 0        |
+| [#1326](https://github.com/futurepress/epub.js/issues/1326) | changing fontsize and then hitting 'prev' from beginning of a section displays wrong pages             | Change candidate; reproduce first | 2        |
+| [#1323](https://github.com/futurepress/epub.js/issues/1323) | I am facing an issue to view epub file font with signed Cookies but it is working with Safari browser. | Change candidate; reproduce first | 0        |
+| [#1299](https://github.com/futurepress/epub.js/issues/1299) | how can I change line-height ?                                                                         | Question / scope review           | 1        |
+| [#1247](https://github.com/futurepress/epub.js/issues/1247) | is possible i use @media(max-width 991px) in rendition.themes.default ?                                | Question / scope review           | 0        |
+| [#1208](https://github.com/futurepress/epub.js/issues/1208) | Setting the theme and then changing it back will not update                                            | Change candidate; reproduce first | 8        |
+| [#1199](https://github.com/futurepress/epub.js/issues/1199) | Issue while reducing Font Size                                                                         | Change candidate; reproduce first | 0        |
+| [#1194](https://github.com/futurepress/epub.js/issues/1194) | rendition.display(cfi) doesn't show correct location sometimes after changing font size                | Change candidate; reproduce first | 3        |
+| [#1142](https://github.com/futurepress/epub.js/issues/1142) | How to get font-size,weight from each chapter for automation testing                                   | Question / scope review           | 0        |
+| [#1136](https://github.com/futurepress/epub.js/issues/1136) | change default font                                                                                    | Change candidate; reproduce first | 1        |
+| [#1101](https://github.com/futurepress/epub.js/issues/1101) | The theme does not render correctly                                                                    | Change candidate; reproduce first | 8        |
+| [#1076](https://github.com/futurepress/epub.js/issues/1076) | rendition.themes.select() replaces the previously applied style                                        | Change candidate; reproduce first | 1        |
+| [#1071](https://github.com/futurepress/epub.js/issues/1071) | Publisher font-family prevents reader font overrides                                                   | Change candidate; reproduce first | 1        |
+| [#1035](https://github.com/futurepress/epub.js/issues/1035) | Issue in assigning font-family for safari webview                                                      | Change candidate; reproduce first | 0        |
+| [#1019](https://github.com/futurepress/epub.js/issues/1019) | Dark Mode, Fullscreen scale and reading modes                                                          | Change candidate; reproduce first | 7        |
+| [#1007](https://github.com/futurepress/epub.js/issues/1007) | Retaining book positing while increasing font-size?                                                    | Question / scope review           | 2        |
+| [#982](https://github.com/futurepress/epub.js/issues/982)   | rendition.currentLocation() does not update when font size is changed                                  | Change candidate; reproduce first | 14       |
+| [#974](https://github.com/futurepress/epub.js/issues/974)   | Does not display the correct location (thru CFI) when font size is large                               | Question / scope review           | 5        |
+| [#923](https://github.com/futurepress/epub.js/issues/923)   | Failed to decode downloaded font                                                                       | Change candidate; reproduce first | 4        |
+| [#880](https://github.com/futurepress/epub.js/issues/880)   | How to change default injected CSS                                                                     | Question / scope review           | 1        |
+| [#788](https://github.com/futurepress/epub.js/issues/788)   | use a custom font in the book.                                                                         | Change candidate; reproduce first | 2        |
+| [#704](https://github.com/futurepress/epub.js/issues/704)   | Night mode                                                                                             | Change candidate; reproduce first | 1        |
+| [#675](https://github.com/futurepress/epub.js/issues/675)   | Up/Down Size Font Affect Last Page Pagination                                                          | Change candidate; reproduce first | 0        |
+| [#637](https://github.com/futurepress/epub.js/issues/637)   | View changes on font size change.                                                                      | Change candidate; reproduce first | 2        |
+| [#601](https://github.com/futurepress/epub.js/issues/601)   | In Rendition Themes are not Loding, coming as Undefined.                                               | Change candidate; reproduce first | 0        |
+| [#586](https://github.com/futurepress/epub.js/issues/586)   | Feature Request: Alternate Stylesheet                                                                  | Change candidate; reproduce first | 1        |
+| [#558](https://github.com/futurepress/epub.js/issues/558)   | Problem with gotoCFI with custom font in epub                                                          | Change candidate; reproduce first | 1        |
+| [#330](https://github.com/futurepress/epub.js/issues/330)   | Ios cuts off the last few pages of a paragraph after changing the font size                            | Change candidate; reproduce first | 8        |

@@ -86,3 +86,7 @@ Upstream reference: [Store](../epub.js/src/store.js), [DisplayOptions](../epub.j
 ## Explicit compatibility exclusions
 
 - F33: Built-in inline publisher HTML insertion is out of scope; iframe selectors are validated explicitly. Trusted host-owned non-iframe managers can use `Book.renderWith()`. See the [compatibility decision](./view-compatibility.md).
+
+## Upstream issue backlog
+
+The [2026-11-12 open-issue scan](./issues/upstream-scan.md) inventories 486 open issues separately from this scoped feature checklist. See its priority assessment and categorized backlog; feature completion does not imply issue-specific regression verification.
