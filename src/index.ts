@@ -102,3 +102,6 @@ export type {
 export { IframeView } from './render/iframe-view';
 export type { ViewOptions } from './render/iframe-view';
 export type { ViewFactory } from './render/view-factory';
+
+export { OfflineStore, OfflineMissError } from './offline/store';
+export type { OfflineOptions, OfflineEventMap } from './offline/types';

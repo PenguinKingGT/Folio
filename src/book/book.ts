@@ -133,6 +133,20 @@ export class Book extends EventEmitter<BookEventMap> {
     return new TextDecoder('utf-8', { fatal: true }).decode(await this.bytes(href, from, signal));
   }
 
+  /** Read declared resources sequentially through the configured transport, including persistent offline caching. */
+  async prefetchResources(signal?: AbortSignal): Promise<number> {
+    const combined =
+      signal === undefined ? this.source.signal : AbortSignal.any([signal, this.source.signal]);
+    combined.throwIfAborted();
+    let loaded = 0;
+    for (const item of this.publication.manifest.values()) {
+      await this.bytes(item.href, this.packagePath, combined);
+      combined.throwIfAborted();
+      loaded += 1;
+    }
+    return loaded;
+  }
+
   /** Mount a passive reader surface; opening and headless reads remain browser-independent. */
   renderTo(target: HTMLElement | string, options: RenditionOptions = {}): Rendition {
     this.assertCanRender();

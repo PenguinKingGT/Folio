@@ -29,3 +29,5 @@ Network requests preserve custom fetch implementations, default headers, credent
 `Section.search()` and its `find()` alias provide [headless chapter search](./search.md) with cross-node matches, excerpts, and full range CFIs. Callers choose how to aggregate chapters and retain results.
 
 `hooks` and `renderWith()` expose trusted [host extensions](./extensions.md). Use `destroyAsync()` when asynchronous view-unload callbacks must finish before shared assets are released.
+
+`offline` loading options enable [persistent offline responses](./offline.md). `prefetchResources(signal?)` reads every declared manifest resource through the configured transport and returns its completed count; extracted directory books can use it to prepare unvisited chapters for offline use.

@@ -101,7 +101,11 @@ export async function openSource(
       ? controller.signal
       : AbortSignal.any([controller.signal, options.signal]);
   signal.throwIfAborted();
-  const request = createRequester(options);
+  const fetcher = options.fetch ?? globalThis.fetch.bind(globalThis);
+  const request = createRequester({
+    ...options,
+    fetch: options.offline === undefined ? fetcher : options.offline.wrap(fetcher),
+  });
   const source = resolveInput(input, options);
   try {
     if (source.type === 'binary') {
