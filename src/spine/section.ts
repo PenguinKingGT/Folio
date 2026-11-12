@@ -13,6 +13,9 @@ import type { PublicationHooks } from '../extensions/publication';
 /** Load OPF-relative chapter content; the producer must honor the supplied signal. */
 export type SectionLoader = (href: string, signal: AbortSignal) => Promise<string>;
 
+/** Lazy content state is derived from actual cached/pending ownership rather than a second mutable state machine. */
+export type SectionState = 'unloaded' | 'loading' | 'loaded' | 'destroyed';
+
 /** A section keeps its immutable reading-order identity independent of its loaded DOM. */
 export class Section {
   readonly index: number;
@@ -43,6 +46,17 @@ export class Section {
     this.href = resource.href;
     this.linear = item.linear;
     this.properties = Object.freeze([...resource.properties, ...item.properties]);
+  }
+
+  /** A cancelled consumer does not change the state of a still-shared producer. */
+  get state(): SectionState {
+    if (this.destroyed) {
+      return 'destroyed';
+    }
+    if (this.document !== undefined) {
+      return 'loaded';
+    }
+    return this.pending === undefined ? 'unloaded' : 'loading';
   }
 
   /** Load or reuse the XHTML DOM; one consumer's cancellation leaves other consumers intact. */

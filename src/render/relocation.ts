@@ -8,6 +8,7 @@ export class Relocations {
   private controller: AbortController | undefined;
   private pending: number | undefined;
   private previous = '';
+  private generation = 0;
 
   /** Defer geometry reads until a caller or native scroll requests a snapshot. */
   constructor(
@@ -47,8 +48,12 @@ export class Relocations {
     }
     this.previous = key;
     // Snapshot subscribers so callbacks can unsubscribe or subscribe during dispatch.
+    const generation = this.generation;
     const listeners = Array.from(this.listeners);
     for (const listener of listeners) {
+      if (generation !== this.generation) {
+        break;
+      }
       listener(location);
     }
   }
@@ -78,6 +83,7 @@ export class Relocations {
   /** Detach observations and release every subscriber; safe to repeat. */
   destroy(): void {
     this.detach();
+    this.generation++;
     this.listeners.clear();
   }
 }

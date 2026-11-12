@@ -4,7 +4,7 @@ import type { Section } from '../spine/section';
 import { resolveDisplayTarget } from '../render/target';
 import { mountTarget } from '../render/mount';
 import { EventEmitter } from '../events/emitter';
-import { isAbortError } from '../events/errors';
+import { isAbortError, disposeAll } from '../async/lifecycle';
 import { withAbort } from '../async/cancellation';
 import { ScriptedFrame } from './frame';
 import { scriptedSettings } from './options';
@@ -144,8 +144,7 @@ export class ScriptedReader extends EventEmitter<ScriptedEventMap> {
       this.controller?.abort();
       this.view.destroy();
       this.current = null;
-      this.onDestroy?.();
-      this.finishEvents('destroyed', undefined);
+      disposeAll([() => this.onDestroy?.(), () => this.finishEvents('destroyed', undefined)]);
     }
   }
   /** Reject APIs consistently after either reader or book destruction. */

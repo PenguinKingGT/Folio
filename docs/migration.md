@@ -10,7 +10,7 @@ Scanned on 2026-11-11 against local epub.js `0.3.93`, commit `eee359d0790002115a
 - The TypeScript / Vite / pnpm / Oxlint / Prettier / test / CI foundation is complete; smoke tests do not count as EPUB features.
 - Decide compatibility scope before implementing optional legacy behavior. Record excluded items as Out of scope with a reason.
 
-**Progress: Done 34 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 2.** Update totals with every status change; list out-of-scope items separately.
+**Progress: Done 35 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 1.** Update totals with every status change; list out-of-scope items separately.
 
 ## Phase 1: Opening books and location primitives
 
@@ -73,7 +73,7 @@ Upstream reference: [Store](../epub.js/src/store.js), [DisplayOptions](../epub.j
 | F32 | Apple display options: fixed-layout, open-to-spread, orientation-lock, interactive and applicable behavior        | Done        | [API](./display-options.md) / [Source](../src/display-options/) / [Unit](../tests/unit/display-options/) / [Native](../tests/browser/display-options/) / [Cross-engine](../tests/e2e/display-options.spec.ts)                             |
 | F33 | Inline view compatibility: determine supported non-iframe rendering and isolation boundaries                      | Done        | [Decision](./view-compatibility.md) / [Guard](../src/render/view-mode.ts) / [Unit](../tests/unit/render/view-mode.test.ts) / [Native](../tests/browser/render/view-mode.test.ts) / [Cross-engine](../tests/e2e/view-mode.spec.ts)         |
 | F34 | Script compatibility: explicitly authorized scripts / popups, injection and navigator.epubReadingSystem           | Done        | [API](./scripted-reading.md) / [Source](../src/scripted/) / [Unit](../tests/unit/scripted/) / [Native](../tests/browser/scripted/) / [Cross-engine](../tests/e2e/scripted.spec.ts) / [Built consumer](../tests/package/scripted.test.mjs) |
-| F35 | Lifecycle: load states, errors, task queues, concurrency / cancellation, idempotent cleanup of observers and URLs | Not started | —                                                                                                                                                                                                                                         |
+| F35 | Lifecycle: load states, errors, task queues, concurrency / cancellation, idempotent cleanup of observers and URLs | Done        | [API](./lifecycle.md) / [Regressions](./issues/lifecycle-regressions.md) / [Unit](../tests/unit/lifecycle/) / [Native](../tests/browser/lifecycle/) / [Cross-engine](../tests/e2e/lifecycle.spec.ts)                                      |
 | F36 | Untrusted input hardening: traversal, malformed XML, archive limits, remote resources and script isolation        | Not started | —                                                                                                                                                                                                                                         |
 
 ## Acceptance and issues

@@ -1,4 +1,5 @@
 /** Own one bounded companion view and apply fixed-page geometry to actual facing documents. */
+import { disposeAll, errorAfterCleanup } from '../async/lifecycle';
 import type { Book } from '../book/book';
 import type { Section } from '../spine/section';
 import type { PaginationOptions } from '../layout/pagination';
@@ -7,7 +8,7 @@ import type { FixedGeometry } from '../layout/fixed-geometry';
 import { isFixed, pageSides, renditionValue, spreadPartner } from '../layout/fixed-model';
 import { applyFixedDocument, documentViewport } from '../layout/fixed-document';
 import type { IframeView } from './iframe-view';
-import { createView } from './view-factory';
+import { createView, destroyView } from './view-factory';
 import { loadViewContent } from './view-content';
 import type { ViewOptions } from './iframe-view';
 import { chapterMarkup } from './load-chapter';
@@ -104,10 +105,11 @@ export class FixedSpread {
       documentViewport(document);
       this.partner = partner;
     } catch (error) {
-      if (this.companion === view) {
-        this.clear();
-      }
-      throw error;
+      throw errorAfterCleanup(error, () => {
+        if (this.companion === view) {
+          this.clear();
+        }
+      });
     }
   }
 
@@ -184,11 +186,12 @@ export class FixedSpread {
 
   /** Release a previous companion before loading or destroying another chapter. */
   clear(): void {
-    this.releaseInteractions?.();
+    const release = this.releaseInteractions;
+    const companion = this.companion;
     this.releaseInteractions = undefined;
-    this.companion?.destroy();
     this.companion = null;
     this.partner = null;
     this.state = null;
+    disposeAll([() => release?.(), () => destroyView(companion)]);
   }
 }

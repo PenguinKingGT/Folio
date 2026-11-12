@@ -1,4 +1,5 @@
 /** Prepare bounded chapter windows off-flow and install only ready contiguous pages around the target. */
+import { disposeAll, errorAfterCleanup } from '../async/lifecycle';
 import type { Book } from '../book/book';
 import type { Section } from '../spine/section';
 import type { WritingState } from '../layout/writing';
@@ -87,8 +88,7 @@ export class ContinuousWindow {
       }
       return { pages, errors };
     } catch (error) {
-      this.discard(pages);
-      throw error;
+      throw errorAfterCleanup(error, () => this.discard(pages));
     }
   }
 
@@ -198,8 +198,7 @@ export class ContinuousWindow {
       await page.load(`${token}-${section.index}`, signal, size, hint);
       return page;
     } catch (error) {
-      page.destroy();
-      throw error;
+      throw errorAfterCleanup(error, () => page.destroy());
     }
   }
 
@@ -237,18 +236,17 @@ export class ContinuousWindow {
 
   /** Dispose staged candidates without destroying a page committed by a newer operation. */
   discard(pages: readonly ContinuousPage[]): void {
-    for (const page of pages) {
-      if (this.pages.get(page.section.index) !== page) {
-        page.destroy();
-      }
-    }
+    disposeAll(
+      pages
+        .filter((page) => this.pages.get(page.section.index) !== page)
+        .map((page) => () => page.destroy()),
+    );
   }
 
   /** Release every ready view; pending preparations are cancelled by the reader's controller. */
   destroy(): void {
-    for (const page of this.pages.values()) {
-      page.destroy();
-    }
+    const pages = Array.from(this.pages.values());
     this.pages.clear();
+    disposeAll(pages.map((page) => () => page.destroy()));
   }
 }

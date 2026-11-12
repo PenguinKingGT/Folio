@@ -1,7 +1,7 @@
 /** Public layout-independent reading progress, generation, lookup, and persistence. */
 import { Cfi } from '../cfi/cfi';
 import { EventEmitter } from '../events/emitter';
-import { isAbortError } from '../events/errors';
+import { isAbortError } from '../async/lifecycle';
 import type { LocationsEventMap } from '../events/types';
 import { withAbort } from '../async/cancellation';
 import type { PublicationPackage } from '../package/types';
@@ -9,6 +9,9 @@ import { generateLocations } from './generate';
 import { lowerBound } from './search';
 import { loadLocations } from './storage';
 import type { LocationLoader, LocationOptions, LocationSnapshot, ReadingLocation } from './types';
+
+/** Generation state preserves the last valid snapshot across failures and aborted attempts. */
+export type LocationsState = 'empty' | 'generating' | 'ready' | 'destroyed';
 
 /** Own one atomically replaceable character/word index for a publication. */
 export class Locations extends EventEmitter<LocationsEventMap> {
@@ -31,6 +34,17 @@ export class Locations extends EventEmitter<LocationsEventMap> {
       current: null,
       locations: Object.freeze([]),
     };
+  }
+
+  /** Expose generation and cleanup state while keeping the immutable entries available during replacement. */
+  get state(): LocationsState {
+    if (this.destroyed) {
+      return 'destroyed';
+    }
+    if (this.generating !== undefined) {
+      return 'generating';
+    }
+    return this.length === 0 ? 'empty' : 'ready';
   }
 
   /** Return the immutable sampled positions in reading order. */
@@ -83,18 +97,24 @@ export class Locations extends EventEmitter<LocationsEventMap> {
     this.generating?.abort();
     const controller = new AbortController();
     this.generating = controller;
-    const signal =
-      options.signal === undefined
-        ? controller.signal
-        : AbortSignal.any([controller.signal, options.signal]);
-    signal.throwIfAborted();
-    const snapshot = await withAbort(
-      generateLocations(this.publication, this.loadChapter, options, signal),
-      signal,
-    );
-    signal.throwIfAborted();
-    this.snapshot = snapshot;
-    return snapshot.locations;
+    try {
+      const signal =
+        options.signal === undefined
+          ? controller.signal
+          : AbortSignal.any([controller.signal, options.signal]);
+      signal.throwIfAborted();
+      const snapshot = await withAbort(
+        generateLocations(this.publication, this.loadChapter, options, signal),
+        signal,
+      );
+      signal.throwIfAborted();
+      this.snapshot = snapshot;
+      return snapshot.locations;
+    } finally {
+      if (this.generating === controller) {
+        this.generating = undefined;
+      }
+    }
   }
 
   /** Find the nearest preceding sample by structural CFI ordering; empty indexes return null. */
@@ -187,6 +207,7 @@ export class Locations extends EventEmitter<LocationsEventMap> {
     this.assertActive();
     const snapshot = loadLocations(input, this.publication);
     this.generating?.abort();
+    this.generating = undefined;
     this.snapshot = snapshot;
     this.emit('restored', snapshot.locations);
     return snapshot.locations;
@@ -198,6 +219,7 @@ export class Locations extends EventEmitter<LocationsEventMap> {
       return;
     }
     this.generating?.abort();
+    this.generating = undefined;
     this.snapshot = { ...this.snapshot, locations: Object.freeze([]), total: 0, current: null };
     this.destroyed = true;
     this.finishEvents('destroyed', undefined);

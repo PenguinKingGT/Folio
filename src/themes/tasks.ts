@@ -1,4 +1,5 @@
 /** Serialize latest-intent theme mutations without leaving rejected background promises unobserved. */
+import { withAbort } from '../async/cancellation';
 
 /** Cancellation stops obsolete consumers; publication resources keep their own shared ownership. */
 export class ThemeTasks {
@@ -13,9 +14,16 @@ export class ThemeTasks {
       return Promise.reject(new Error('Themes have been destroyed.'));
     }
     this.controller?.abort();
-    this.controller = new AbortController();
+    const controller = new AbortController();
+    this.controller = controller;
     this.version += 1;
-    this.pending = task(this.controller.signal);
+    this.pending = withAbort(
+      Promise.resolve().then(() => {
+        controller.signal.throwIfAborted();
+        return task(controller.signal);
+      }),
+      controller.signal,
+    );
     void this.pending.catch(() => {});
     return this.pending;
   }

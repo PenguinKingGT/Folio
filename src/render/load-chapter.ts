@@ -15,7 +15,7 @@ export async function chapterMarkup(
     throw new TypeError('Chapter rendering requires a local publication resource.');
   }
   const passive = prepareContent(await section.render(signal), token);
-  const content = await book.resources.rewrite(passive, address.path);
+  const content = await book.resources.rewrite(passive, address.path, signal);
   signal.throwIfAborted();
   return content;
 }

@@ -1,4 +1,6 @@
 /** Injectable Fetch adapter with consistent responses, HTTP errors, and cancellation. */
+import { withAbort } from '../async/cancellation';
+import { readResponse } from './response';
 export interface ResponseTypes {
   text: string;
   binary: ArrayBuffer;
@@ -51,25 +53,26 @@ export function createRequester(defaults: RequesterOptions = {}): Requester {
   ): Promise<ResponseTypes[T]> => {
     const headers = new Headers(defaults.headers);
     new Headers(options.headers).forEach((value, key) => headers.set(key, value));
-    const signal = options.signal ?? defaults.signal;
+    let signal = options.signal ?? defaults.signal;
+    if (options.signal !== undefined && defaults.signal !== undefined) {
+      signal = AbortSignal.any([defaults.signal, options.signal]);
+    }
     signal?.throwIfAborted();
-    const response = await fetcher(url, {
-      headers,
-      credentials: options.credentials ?? defaults.credentials ?? 'same-origin',
-      ...(signal === undefined ? {} : { signal }),
-    });
+    const response = await withAbort(
+      Promise.resolve().then(() => {
+        signal?.throwIfAborted();
+        return fetcher(url, {
+          headers,
+          credentials: options.credentials ?? defaults.credentials ?? 'same-origin',
+          ...(signal === undefined ? {} : { signal }),
+        });
+      }),
+      signal,
+    );
     signal?.throwIfAborted();
     if (!response.ok) {
       throw new HttpError(url, response.status);
     }
-    const readers: { [K in keyof ResponseTypes]: () => Promise<ResponseTypes[K]> } = {
-      text: (): Promise<string> => response.text(),
-      binary: (): Promise<ArrayBuffer> => response.arrayBuffer(),
-      blob: (): Promise<Blob> => response.blob(),
-      json: (): Promise<unknown> => response.json(),
-    };
-    const result = await readers[type]();
-    signal?.throwIfAborted();
-    return result;
+    return readResponse(response, type, signal);
   };
 }

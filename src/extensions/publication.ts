@@ -1,7 +1,7 @@
 /** Own publication-wide extension pipelines and observable asynchronous view-unload work. */
 import { AsyncHook } from './hook';
 import type { SectionContent, SectionSerialization, ViewContext } from './types';
-import { isAbortError } from '../events/errors';
+import { isAbortError } from '../async/lifecycle';
 
 /** Views detach synchronously; unload callbacks can finish asynchronously through whenIdle(). */
 export class PublicationHooks {
@@ -11,7 +11,28 @@ export class PublicationHooks {
   readonly unload = new AsyncHook<ViewContext>();
   private readonly pending = new Set<Promise<void>>();
   private readonly failures: unknown[] = [];
+  private readonly staging = new Set<() => void>();
   private destroyed = false;
+
+  /** Keep cancellation-triggered unload work within the same observable native preparation lifetime. */
+  trackView(): () => void {
+    if (this.destroyed) {
+      throw new Error('Publication hooks have been destroyed.');
+    }
+    let resolve: (() => void) | undefined;
+    const operation = new Promise<void>((finish) => {
+      resolve = finish;
+    });
+    const finish = () => {
+      if (this.staging.delete(finish)) {
+        this.pending.delete(operation);
+        resolve?.();
+      }
+    };
+    this.pending.add(operation);
+    this.staging.add(finish);
+    return finish;
+  }
 
   /** Retain the native context until its asynchronous cleanup settles, without delaying frame removal. */
   release(context: ViewContext): void {
@@ -46,6 +67,9 @@ export class PublicationHooks {
   /** Cancel unawaited extension work and release callbacks when synchronous book cleanup is requested. */
   destroy(): void {
     this.destroyed = true;
+    for (const finish of Array.from(this.staging)) {
+      finish();
+    }
     this.content.destroy();
     this.serialize.destroy();
     this.render.destroy();

@@ -16,6 +16,7 @@ import { continuousLocation, visiblePages } from './location';
 import { ContinuousEvents } from './events';
 import { turnContinuous } from './turn';
 import { ReaderEvents } from '../events/reader';
+import { disposeAll } from '../async/lifecycle';
 import { TouchNavigation } from '../touch/navigation';
 import { Themes } from '../themes/themes';
 import { ContentInteractions } from '../interaction/interactions';
@@ -53,7 +54,7 @@ export class ContinuousReader extends ReaderEvents {
     const settings = continuousOptions(options);
     this.port = new ContinuousPort(mountTarget(target), settings);
     this.themes = new Themes(book, {
-      documents: () => this.getLoadedPages().map((page) => page.document),
+      documents: () => this.window.all().map((page) => page.rendered().document),
       layout: () => this.layout(),
     });
     const changed = () => this.observer.schedule(true);
@@ -260,20 +261,22 @@ export class ContinuousReader extends ReaderEvents {
     if (this.destroyed) {
       return;
     }
-    this.themes.destroy();
-    this.interactions.destroy();
-    this.annotations.destroy();
     this.destroyed = true;
-    this.touch.destroy();
-    this.navigation.destroy();
-    this.observer.destroy();
-    this.window.destroy();
-    this.port.destroy();
-    this.events.destroy();
     this.snapshot = null;
     this.current = null;
-    this.onDestroy?.();
-    this.destroyEvents();
+    disposeAll([
+      () => this.themes.destroy(),
+      () => this.interactions.destroy(),
+      () => this.annotations.destroy(),
+      () => this.touch.destroy(),
+      () => this.navigation.destroy(),
+      () => this.observer.destroy(),
+      () => this.window.destroy(),
+      () => this.port.destroy(),
+      () => this.events.destroy(),
+      () => this.onDestroy?.(),
+      () => this.destroyEvents(),
+    ]);
   }
 
   /** Fail consistently after reader or book destruction. */

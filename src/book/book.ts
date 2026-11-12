@@ -3,7 +3,7 @@ import { Cover } from '../cover/cover';
 import { EventEmitter } from '../events/emitter';
 import { PublicationHooks } from '../extensions/publication';
 import type { ManagedReader, ReaderFactory } from '../extensions/types';
-import { disposeAll, isAbortError } from '../events/errors';
+import { disposeAll, disposeAsync, isAbortError } from '../async/lifecycle';
 import type { BookEventMap } from '../events/types';
 import { parsePackage } from '../package/package';
 import { parseJsonManifest } from '../manifest/parse';
@@ -29,6 +29,9 @@ import { ContinuousReader } from '../continuous/reader';
 import type { ContinuousOptions } from '../continuous/options';
 import { ScriptedReader } from '../scripted/reader';
 import type { ScriptedOptions } from '../scripted/options';
+
+/** Observable lifetime remains readable after cleanup without attempting another source read. */
+export type BookState = 'open' | 'closing' | 'destroyed';
 
 /** An opened publication does not create iframes or depend on browser globals. */
 export class Book extends EventEmitter<BookEventMap> {
@@ -93,6 +96,14 @@ export class Book extends EventEmitter<BookEventMap> {
       source.destroy();
       throw error;
     }
+  }
+
+  /** Report the owned lifetime without exposing mutable controllers or pending cleanup promises. */
+  get state(): BookState {
+    if (this.destroyed) {
+      return 'destroyed';
+    }
+    return this.closing ? 'closing' : 'open';
   }
 
   /** Container-relative OPF path, used as the default base for publication references. */
@@ -231,15 +242,11 @@ export class Book extends EventEmitter<BookEventMap> {
   private async closeAsync(): Promise<void> {
     const readers = Array.from(this.renditions);
     this.renditions.clear();
-    try {
-      disposeAll(readers.map((reader) => () => reader.destroy()));
-    } finally {
-      try {
-        await this.hooks.whenIdle();
-      } finally {
-        this.destroy();
-      }
-    }
+    await disposeAsync([
+      () => disposeAll(readers.map((reader) => () => reader.destroy())),
+      () => this.hooks.whenIdle(),
+      () => this.destroy(),
+    ]);
   }
 
   /** Cleanup hooks may read assets, but a closing book cannot acquire another reader. */

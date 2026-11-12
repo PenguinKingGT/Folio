@@ -41,7 +41,12 @@ export class Cover {
       this.controller = new AbortController();
       this.pending = this.produce(this.path, this.controller.signal);
     }
-    return withAbort(this.pending, signal);
+    let consumer = signal;
+    if (this.controller !== undefined) {
+      const producer = this.controller.signal;
+      consumer = signal === undefined ? producer : AbortSignal.any([producer, signal]);
+    }
+    return withAbort(this.pending, consumer);
   }
 
   /** Release the cached URL and cancel pending work; a subsequent url() starts fresh. */

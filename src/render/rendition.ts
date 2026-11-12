@@ -10,9 +10,9 @@ import { resolveDisplayTarget } from './target';
 import type { DisplayTarget } from './target';
 import { turnPage } from './turn';
 import { readLocation } from './location';
-import { Relocations } from './relocation';
+import { RenditionObservations } from './observations';
+import { disposeAll } from '../async/lifecycle';
 import type { RelocatedListener, VisibleLocation } from './location-types';
-import { ReflowObserver } from '../layout/reflow-observer';
 import { Cfi } from '../cfi/cfi';
 import { mountTarget } from './mount';
 import type { FixedLayoutState, RenderedPage } from './fixed-spread';
@@ -40,8 +40,7 @@ export class Rendition extends ReaderEvents {
   readonly touch: TouchNavigation;
   private readonly view: PageViews;
   private readonly layoutController: ReaderLayout;
-  private readonly relocations: Relocations;
-  private readonly reflows: ReflowObserver;
+  private readonly observations: RenditionObservations;
   /** Reader-owned default, named, and override styles. */
   readonly themes: Themes;
   /** Reader-owned selection snapshots, native input forwarding, and controlled links. */
@@ -77,18 +76,15 @@ export class Rendition extends ReaderEvents {
     });
     this.interactions = new ContentInteractions(book, this);
     this.view = new PageViews(book, mountTarget(target), options, this.themes, this.interactions);
-    this.relocations = new Relocations(
-      () => (this.layoutController.matchesFrame(this.frame) ? this.currentLocation() : null),
-      this.frame.ownerDocument.defaultView,
-    );
-    this.readingAnchor = new RenditionAnchor(this, this.relocations);
-    this.reflows = new ReflowObserver(
+    this.observations = new RenditionObservations(
       this.frame,
+      this.view.surface,
+      () => (this.layoutController.matchesFrame(this.frame) ? this.currentLocation() : null),
       () => {
         this.layout();
       },
-      this.view.surface,
     );
+    this.readingAnchor = new RenditionAnchor(this, this.observations.relocations);
     this.touch = new TouchNavigation(this, options.touch);
     this.annotations = new Annotations(book, this, this.view.surface);
     this.connectEvents(this);
@@ -121,15 +117,15 @@ export class Rendition extends ReaderEvents {
     const section = resolved.section;
     if (section === this.current && this.view.document !== null) {
       this.readingAnchor.seek(resolved);
+      controller.signal.throwIfAborted();
       return section;
     }
-    this.relocations.detach();
-    this.reflows.detach();
+    this.observations.detach();
     try {
       await this.view.load(section, token, controller.signal);
     } catch (error) {
       if (!controller.signal.aborted) {
-        this.watchContents();
+        this.observations.watch(this.view.document);
       }
       throw error;
     }
@@ -141,24 +137,16 @@ export class Rendition extends ReaderEvents {
     }
     this.layout();
     this.readingAnchor.seek(resolved);
-    this.watchContents();
+    this.observations.watch(this.view.document);
+    controller.signal.throwIfAborted();
     return section;
-  }
-
-  /** Observe completed content, including a retained document after a failed chapter read. */
-  private watchContents(): void {
-    const document = this.view.document;
-    if (document !== null) {
-      this.relocations.watch(document);
-      this.reflows.watch(document);
-    }
   }
 
   /** Move forward one viewport or to the next linear chapter; book end returns null. */
   async next(): Promise<Section | null> {
     this.assertActive();
     const result = await turnPage(this, this.book.spine, 'next');
-    this.relocations.report();
+    this.observations.relocations.report();
     return result;
   }
 
@@ -166,7 +154,7 @@ export class Rendition extends ReaderEvents {
   async prev(): Promise<Section | null> {
     this.assertActive();
     const result = await turnPage(this, this.book.spine, 'previous');
-    this.relocations.report();
+    this.observations.relocations.report();
     return result;
   }
 
@@ -179,7 +167,7 @@ export class Rendition extends ReaderEvents {
   /** Subscribe to changed reading positions; callbacks run synchronously and return an unsubscribe handle. */
   onRelocated(listener: RelocatedListener): () => void {
     this.assertActive();
-    return this.relocations.subscribe(listener);
+    return this.observations.relocations.subscribe(listener);
   }
 
   /** Return measured column geometry and visible page/spread count. */
@@ -216,7 +204,7 @@ export class Rendition extends ReaderEvents {
         true,
       );
     } else {
-      this.relocations.report();
+      this.observations.relocations.report();
     }
     this.annotations.refresh();
     return result;
@@ -236,7 +224,7 @@ export class Rendition extends ReaderEvents {
       layoutPages(this.layoutController, this.view, document);
     }
     this.view.document?.defaultView?.scrollTo(0, 0);
-    this.relocations.report();
+    this.observations.relocations.report();
     this.touch.refresh();
     this.annotations.refresh();
     return this.flowState;
@@ -268,20 +256,22 @@ export class Rendition extends ReaderEvents {
 
   /** Cancel display work and detach the view; book-owned resources remain reusable. */
   destroy(): void {
-    if (!this.destroyed) {
-      this.controller?.abort();
-      this.touch.destroy();
-      this.interactions.destroy();
-      this.annotations.destroy();
-      this.themes.destroy();
-      this.relocations.destroy();
-      this.reflows.detach();
-      this.view.destroy();
-      this.current = null;
-      this.destroyed = true;
-      this.onDestroy?.();
-      this.destroyEvents();
+    if (this.destroyed) {
+      return;
     }
+    this.destroyed = true;
+    this.controller?.abort();
+    this.current = null;
+    disposeAll([
+      () => this.touch.destroy(),
+      () => this.interactions.destroy(),
+      () => this.annotations.destroy(),
+      () => this.themes.destroy(),
+      () => this.observations.destroy(),
+      () => this.view.destroy(),
+      () => this.onDestroy?.(),
+      () => this.destroyEvents(),
+    ]);
   }
 
   /** Fail consistently after renderer destruction. */

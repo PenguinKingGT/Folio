@@ -1,8 +1,9 @@
 /** Expand one passive chapter to its intrinsic block extent without exposing an internal scrollbar. */
+import { disposeAll } from '../async/lifecycle';
 import type { Book } from '../book/book';
 import type { Section } from '../spine/section';
 import type { IframeView } from '../render/iframe-view';
-import { createView } from '../render/view-factory';
+import { createView, destroyView } from '../render/view-factory';
 import { loadViewContent } from '../render/view-content';
 import { chapterMarkup } from '../render/load-chapter';
 import { WritingLayout } from '../layout/writing';
@@ -36,6 +37,7 @@ export class ContinuousPage {
   private controller: AbortController | undefined;
   private signature = '';
   private committed = false;
+  private destroyed = false;
   private releaseInteractions: (() => void) | undefined;
 
   /** Allocate in an off-flow staging area until load and measurement succeed. */
@@ -248,10 +250,18 @@ export class ContinuousPage {
 
   /** Release observers, listeners, iframe resources, and the cell; safe to repeat. */
   destroy(): void {
-    this.releaseInteractions?.();
-    this.observer?.disconnect();
-    this.controller?.abort();
-    this.view.destroy();
-    this.cell.remove();
+    if (this.destroyed) {
+      return;
+    }
+    this.destroyed = true;
+    const release = this.releaseInteractions;
+    this.releaseInteractions = undefined;
+    disposeAll([
+      () => release?.(),
+      () => this.observer?.disconnect(),
+      () => this.controller?.abort(),
+      () => destroyView(this.view),
+      () => this.cell.remove(),
+    ]);
   }
 }

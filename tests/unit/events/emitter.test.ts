@@ -1,7 +1,7 @@
 /** Typed subscriptions preserve identity, ordering, reentrant once semantics, and terminal cleanup. */
 import { expect, expectTypeOf, test } from 'vitest';
 import { EventEmitter } from '../../../src/events/emitter';
-import { disposeAll, isAbortError } from '../../../src/events/errors';
+import { disposeAll, isAbortError } from '../../../src/async/lifecycle';
 
 /** Expose protected publication only for deterministic tests of the real subscription implementation. */
 class Counter extends EventEmitter<{ value: number; destroyed: undefined }> {

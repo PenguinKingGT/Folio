@@ -1,6 +1,6 @@
 /** Persist successful publication responses and serve exact request identities without network access when offline. */
 import { EventEmitter } from '../events/emitter';
-import { isAbortError } from '../events/errors';
+import { isAbortError } from '../async/lifecycle';
 import { withAbort } from '../async/cancellation';
 import { OfflineCache } from './cache';
 import { offlineKey } from './key';

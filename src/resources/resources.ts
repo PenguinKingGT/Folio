@@ -20,6 +20,7 @@ export interface ResourceOptions {
 export class Resources {
   private readonly types = new Map<string, string>();
   private readonly urls = new Map<string, string>();
+  private readonly reads = new Map<string, Promise<Uint8Array>>();
   private readonly controller = new AbortController();
 
   /** Bind an OPF-relative manifest to a container-relative byte provider. */
@@ -59,13 +60,20 @@ export class Resources {
   /** Resolve a reference to a cached Blob URL; caller cancellation does not cancel shared work. */
   async url(href: string, from = this.packagePath, signal?: AbortSignal): Promise<string> {
     signal?.throwIfAborted();
-    return withAbort(this.buildUrl(href, from, new Set()), signal);
+    const lifetime = this.controller.signal;
+    const consumer = signal === undefined ? lifetime : AbortSignal.any([lifetime, signal]);
+    return withAbort(this.buildUrl(href, from, new Set()), consumer);
   }
 
   /** Replace chapter asset references and inline styles; chapter links remain unchanged. */
-  async rewrite(source: string, sectionPath: string): Promise<string> {
-    this.controller.signal.throwIfAborted();
-    return rewriteDocument(source, (href) => this.url(href, sectionPath));
+  async rewrite(source: string, sectionPath: string, signal?: AbortSignal): Promise<string> {
+    const lifetime = this.controller.signal;
+    const consumer = signal === undefined ? lifetime : AbortSignal.any([lifetime, signal]);
+    consumer.throwIfAborted();
+    return withAbort(
+      rewriteDocument(source, (href) => this.url(href, sectionPath, consumer)),
+      consumer,
+    );
   }
 
   /** Release every generated URL and invalidate pending transformations; safe to repeat. */
@@ -76,6 +84,30 @@ export class Resources {
     }
     this.urls.clear();
     this.types.clear();
+    this.reads.clear();
+  }
+
+  /** Share only in-flight byte reads; independent CSS graph traversal must not introduce cross-request cycle deadlocks. */
+  private readBytes(path: string): Promise<Uint8Array> {
+    const existing = this.reads.get(path);
+    if (existing !== undefined) {
+      return existing;
+    }
+    const reads = this.reads;
+    const read = this.read;
+    const signal = this.controller.signal;
+    const operation: Promise<Uint8Array> = Promise.resolve()
+      .then(() => {
+        signal.throwIfAborted();
+        return read(path, signal);
+      })
+      .finally(() => {
+        if (reads.get(path) === operation) {
+          reads.delete(path);
+        }
+      });
+    reads.set(path, operation);
+    return operation;
   }
 
   /** Expand CSS recursively, detect import cycles, and publish at most one URL per path. */
@@ -95,7 +127,7 @@ export class Resources {
     if (cached !== undefined) {
       return cached + address.fragment;
     }
-    const bytes = await this.read(address.path, this.controller.signal);
+    const bytes = await withAbort(this.readBytes(address.path), this.controller.signal);
     this.controller.signal.throwIfAborted();
     const type = this.types.get(address.path) ?? mimeType(address.path);
     const parents = new Set([...ancestors, address.path]);

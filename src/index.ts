@@ -20,7 +20,7 @@ export type {
   PublicationPackage,
 } from './package/types';
 export { Section } from './spine/section';
-export type { SectionLoader } from './spine/section';
+export type { SectionLoader, SectionState } from './spine/section';
 export { Spine } from './spine/spine';
 export { Cover } from './cover/cover';
 export type { CoverLoader } from './cover/cover';
@@ -32,6 +32,7 @@ export { Navigation } from './navigation/navigation';
 export type { NavigationItem, Landmark } from './navigation/navigation';
 export { parseNavigation } from './navigation/parse';
 export { Book } from './book/book';
+export type { BookState } from './book/book';
 export type { BookOptions } from './book/options';
 export { Cfi } from './cfi/cfi';
 export type { CfiData, CfiPath, CfiStep } from './cfi/types';
@@ -76,6 +77,7 @@ export { resolveFlow } from './layout/flow';
 export type { ReadingFlow, FlowMode, ReadingAxis, FlowOptions, FlowState } from './layout/flow';
 export type { WritingMode, TextDirection, WritingOptions, WritingState } from './layout/writing';
 export { Locations } from './locations/locations';
+export type { LocationsState } from './locations/locations';
 export { PageList } from './pages/page-list';
 export type { PrintPageLink, PrintPage, PrintPageResolver } from './pages/types';
 export type {

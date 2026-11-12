@@ -1,4 +1,5 @@
 /** Serialize continuous display intents while keeping shared chapter producers independently owned. */
+import { errorAfterCleanup } from '../async/lifecycle';
 import type { Book } from '../book/book';
 import type { Section } from '../spine/section';
 import { resolveDisplayTarget } from '../render/target';
@@ -139,8 +140,7 @@ export class ContinuousNavigation {
       signal.throwIfAborted();
       return this.commitFocus(resolved, explicit, prepared, signal);
     } catch (error) {
-      this.window.discard(prepared.pages);
-      throw error;
+      throw errorAfterCleanup(error, () => this.window.discard(prepared.pages));
     }
   }
 
@@ -183,6 +183,7 @@ export class ContinuousNavigation {
       explicit ? readingReference(this.port, this.window, this.callbacks.measure()) : reference,
     );
     this.callbacks.notify();
+    signal.throwIfAborted();
     if (!signal.aborted && candidate.errors.length > 0) {
       this.callbacks.failed(
         new AggregateError(candidate.errors, 'Continuous neighbor preparation failed.'),

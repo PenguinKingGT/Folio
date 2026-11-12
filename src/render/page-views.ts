@@ -1,8 +1,9 @@
 /** Manage an owned reader surface, the active iframe, and a bounded fixed-layout companion. */
+import { disposeAll } from '../async/lifecycle';
 import type { Book } from '../book/book';
 import type { Section } from '../spine/section';
 import type { IframeView } from './iframe-view';
-import { createView } from './view-factory';
+import { createView, destroyView } from './view-factory';
 import { loadViewContent } from './view-content';
 import type { ViewOptions } from './iframe-view';
 import { FixedSpread } from './fixed-spread';
@@ -24,6 +25,7 @@ export class PageViews {
   private readonly fixed: FixedSpread;
   private section: Section | null = null;
   private visible = false;
+  private destroyed = false;
   private releaseInteractions: (() => void) | undefined;
   private settings: Required<PaginationOptions>;
 
@@ -143,9 +145,17 @@ export class PageViews {
   }
   /** Release every document and remove only the owned surface. */
   destroy(): void {
-    this.releaseInteractions?.();
-    this.fixed.clear();
-    this.main.destroy();
-    this.surface.remove();
+    if (this.destroyed) {
+      return;
+    }
+    this.destroyed = true;
+    const release = this.releaseInteractions;
+    this.releaseInteractions = undefined;
+    disposeAll([
+      () => release?.(),
+      () => this.fixed.clear(),
+      () => destroyView(this.main),
+      () => this.surface.remove(),
+    ]);
   }
 }

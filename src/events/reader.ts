@@ -1,6 +1,6 @@
 /** Bridge existing reader subscriptions into one typed public interface with owned cleanup. */
 import { EventEmitter } from './emitter';
-import { isAbortError } from './errors';
+import { isAbortError } from '../async/lifecycle';
 import type { ReaderEventMap } from './types';
 import type { Section } from '../spine/section';
 import type { RelocatedListener } from '../render/location-types';

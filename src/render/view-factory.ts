@@ -2,6 +2,7 @@
 import { IframeView } from './iframe-view';
 import type { ViewOptions } from './iframe-view';
 import { validateViewMode } from './view-mode';
+import { disposeAll, errorAfterCleanup } from '../async/lifecycle';
 
 /** Factories may subclass the public iframe view to customize native presentation and lifecycle. */
 export type ViewFactory = (container: HTMLElement, options: ViewOptions) => IframeView;
@@ -29,7 +30,13 @@ export function createView(container: HTMLElement, options: ViewOptions): Iframe
     }
     return view;
   } catch (error) {
-    view.destroy();
-    throw error;
+    throw errorAfterCleanup(error, () => destroyView(view));
+  }
+}
+
+/** Run host customization cleanup once and independently release the library-owned iframe/document state. */
+export function destroyView(view: IframeView | null): void {
+  if (view !== null) {
+    disposeAll([() => view.destroy(), () => IframeView.prototype.destroy.call(view)]);
   }
 }
