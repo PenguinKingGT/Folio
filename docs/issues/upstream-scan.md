@@ -63,4 +63,6 @@ The feature tracker remains complete for its original scoped migration. This iss
 | #734  | Inline PNG data URI decoding verified                                     | [Embedded images](./734-inline-images.md)                       |
 | #1164 | Current WebKit scroll observation fixed; continuous trim/restore verified | [Native scroll annotations](./1164-native-annotation-scroll.md) |
 
+[#1363](./1363-page-break-triage.md) has a reproduced page/column compatibility gap and remains pending; it is not included among verified fixes.
+
 Other inventory entries are not claimed locally resolved. No upstream issue has been closed by this work.

@@ -2,9 +2,24 @@
 
 Reviewed on **2026-11-12** against open issue bodies from `futurepress/epub.js`, selected complete comment threads, the unchanged local upstream source, and Folio source. This is a focused review of the [complete inventory](./upstream-scan.md), not a claim that all reports are Folio defects. The initial scan executed no reproductions; subsequent local verification is linked in individual rows.
 
+## Selection policy
+
+The inventory is a source of evidence, not a requirement to modify every issue. Select work by user impact, current Folio reproduction, affected reading workflows, and the maintenance cost of the proposed fix. Read the discussion before treating a title as a defect. Reuse existing tests where they establish the behavior; do not create a new implementation or test-only commit for every already-correct report.
+
+| Decision                              | Current examples and reason                                                                                                                                               |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fix reproducible core defects         | #950, #425, #1415, #1405, #1420 and the current WebKit defect discovered during #1164 have traceable local changes.                                                       |
+| Keep valuable unresolved gaps visible | [#1363](./1363-page-break-triage.md) affects authored chapter separation; current browser measurements show that a simple CSS replacement is insufficient across engines. |
+| Reuse verified behavior               | #915, #951 and #734 already load their tested image cases correctly; they require no further implementation queue.                                                        |
+| Avoid unnecessary dependency changes  | #1197 has a clean current production audit; the historical advisory still needs identification before claiming it resolved.                                               |
+| Wait for missing evidence             | #1411 and #1419 lack the original book/platform or media details needed to justify a targeted fix.                                                                        |
+| Retain intentional boundaries         | Inline publisher HTML remains excluded; copy prevention in #695 belongs to the host/service threat model.                                                                 |
+
+These examples do not classify all 486 reports as reviewed or resolved.
+
 ## Change and verification queue
 
-P1 means data loss, blocked reading, security boundaries, or unstable navigation; P2 means targeted correctness or compatibility verification. **Needs change** identifies a visible source-level gap, still requiring a failing test before implementation. **Awaiting reproduction** means an issue-specific fixture/test must establish whether Folio needs modification. Existing generic feature tests do not prove an upstream report resolved.
+P1 means data loss, blocked reading, security boundaries, or unstable navigation; P2 means targeted correctness or compatibility verification. **Needs change** identifies a visible source-level gap, still requiring a failing test before implementation. **Awaiting reproduction** means an issue-specific fixture/test must establish whether Folio needs modification. Existing evidence may establish the requested behavior, but merely mapping a report to a completed feature does not prove resolution. Candidate status does not require an implementation change.
 
 | Priority | Upstream evidence                                                                                                                                                                              | Feature         | Required change or verification target                                                                                                                                                                                                                                                                                                                  | Folio status                                                                         |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
