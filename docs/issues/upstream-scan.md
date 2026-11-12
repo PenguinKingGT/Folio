@@ -39,6 +39,12 @@ The feature tracker remains complete for its original scoped migration. This iss
 
 ## Local verification progress
 
-Three issue-specific assessments are recorded: [#950](./950-repeated-metadata.md) has a local implementation fix; [#1384](./1384-initial-resize.md) and [#1367](./1367-nested-navigation.md) verify existing behavior under documented APIs. The other inventory entries are not claimed locally resolved.
+| Issue | Local result                    | Evidence                                         |
+| ----- | ------------------------------- | ------------------------------------------------ |
+| #950  | Implementation fixed            | [Repeated metadata](./950-repeated-metadata.md)  |
+| #1384 | Existing behavior verified      | [Initial resize](./1384-initial-resize.md)       |
+| #1367 | Explicit-base behavior verified | [Nested navigation](./1367-nested-navigation.md) |
+| #837  | Existing behavior verified      | [Cross-node search](./837-cross-node-search.md)  |
+| #1264 | Existing behavior verified      | [Print labels](./1264-print-page-labels.md)      |
 
-[#837 cross-node search](./837-cross-node-search.md) also has verified existing behavior using the existing exact-match CFI regression suite.
+Other inventory entries are not claimed locally resolved. No upstream issue has been closed by this work.
