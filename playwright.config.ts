@@ -18,7 +18,7 @@ export default defineConfig({
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
     {
       name: 'mobile-chromium',
-      testMatch: ['**/touch-mobile.spec.ts', '**/issue-1416.spec.ts'],
+      testMatch: ['**/touch-mobile.spec.ts', '**/issue-1416.spec.ts', '**/issue-1408.spec.ts'],
       testIgnore: [],
       use: { ...devices['Pixel 7'] },
     },
