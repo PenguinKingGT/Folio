@@ -27,6 +27,8 @@ import { createPageList } from './pages';
 import type { PageList } from '../pages/page-list';
 import { ContinuousReader } from '../continuous/reader';
 import type { ContinuousOptions } from '../continuous/options';
+import { ScriptedReader } from '../scripted/reader';
+import type { ScriptedOptions } from '../scripted/options';
 
 /** An opened publication does not create iframes or depend on browser globals. */
 export class Book extends EventEmitter<BookEventMap> {
@@ -177,6 +179,15 @@ export class Book extends EventEmitter<BookEventMap> {
     const reader: ContinuousReader = new ContinuousReader(this, target, options, () => {
       this.renditions.delete(reader);
     });
+    this.renditions.add(reader);
+    this.emit('readerCreated', reader);
+    return reader;
+  }
+
+  /** Mount an explicitly authorized opaque-origin scripted reader with independently controlled popup permission. */
+  renderScriptedTo(target: HTMLElement | string, options: ScriptedOptions): ScriptedReader {
+    this.assertCanRender();
+    const reader = new ScriptedReader(this, target, options, () => this.renditions.delete(reader));
     this.renditions.add(reader);
     this.emit('readerCreated', reader);
     return reader;

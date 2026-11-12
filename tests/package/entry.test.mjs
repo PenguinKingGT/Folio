@@ -16,7 +16,7 @@ test('loads the built package through its public export', () => {
 test('provides declarations and an explicit publication allowlist', async () => {
   const declaration = await readFile(new URL('../../dist/index.d.ts', import.meta.url), 'utf8');
 
-  assert.match(declaration, /export declare const version/);
+  assert.match(declaration, /export \{ version \} from/);
   assert.equal(manifest.exports['.'].types, manifest.types);
   assert.deepEqual(manifest.files, ['dist', 'README.md', 'LICENSE']);
 });

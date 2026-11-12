@@ -33,3 +33,5 @@ Network requests preserve custom fetch implementations, default headers, credent
 `offline` loading options enable [persistent offline responses](./offline.md). `prefetchResources(signal?)` reads every declared manifest resource through the configured transport and returns its completed count; extracted directory books can use it to prepare unvisited chapters for offline use.
 
 `displayOptions` exposes discovered [legacy Apple preferences](./display-options.md). Missing layout defaults can be supplied by the vendor file; modern OPF metadata and explicit reader settings retain precedence.
+
+`renderScriptedTo(target, { scripts: true })` creates an explicitly authorized [opaque-origin scripted reader](./scripted-reading.md). Its navigation/message surface is separate from native host-DOM reading APIs.

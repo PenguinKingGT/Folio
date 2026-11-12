@@ -1,7 +1,7 @@
 /** Public Folio entry point; capabilities are implemented in focused modules. */
 
 /** Library version for diagnostics; consult the migration tracker for supported capabilities. */
-export const version = '0.1.0';
+export { version } from './version';
 
 export { resolveInput } from './input/source';
 export type { BookSource, InputOptions, InputType } from './input/source';
@@ -111,3 +111,7 @@ export type { JsonPublication } from './manifest/parse';
 
 export { parseAppleDisplayOptions } from './display-options/parse';
 export type { AppleDisplayOptions, ApplePlatform } from './display-options/types';
+
+export { ScriptedReader } from './scripted/reader';
+export type { ScriptedEventMap } from './scripted/reader';
+export type { ScriptedOptions, ScriptedTarget } from './scripted/options';
