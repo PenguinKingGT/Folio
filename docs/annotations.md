@@ -28,3 +28,5 @@ Highlights/underlines default to `interactive: false` so native selection and li
 Rendered targets validate before add/update commits. Unloaded targets receive structural validation and resolve when displayed. Deferred invalid/oversized targets report through `onError()`, `lastError`, and `whenIdle()` while leaving book content and other annotations available. A successful refresh after removal/correction clears the error. Subscribers run synchronously and should not throw.
 
 Limits are 4,096 registrations per reader, 20,000 native rectangles per target, 1,024 visible fragments per target, and 8,192 painted fragments per overlay. Reader/book destruction cancels callbacks, disconnects observers, removes SVG nodes, and releases registrations. Repeated cleanup is safe.
+
+Cross-paragraph highlights and underlines use native selected text-node fragments, excluding paragraph block rectangles. Writing-axis-aware merging preserves adjacent lines even with tight line spacing. Per annotation, traversal and native fragment counts are each bounded at 20,000; visible fragment painting retains its 1,024-fragment limit. See [#1415](./issues/1415-paragraph-underlines.md).

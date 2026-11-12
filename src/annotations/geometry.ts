@@ -1,4 +1,5 @@
 /** Resolve CFI ranges and map native fragment geometry through fixed/host transforms into one reader overlay. */
+import { selectedTextRects } from './text-rects';
 import { rangeFromCfi } from '../cfi/dom';
 import { Cfi } from '../cfi/cfi';
 import { targetRect } from '../render/position';
@@ -87,13 +88,10 @@ export function annotationGeometry(
       boxes: rect === null ? [] : markBox(project(rect, page, surface), annotation, width, height),
     };
   }
-  const rects = range.getClientRects();
-  if (rects.length > 20_000) {
-    throw new RangeError('Too many native annotation fragments.');
-  }
+  const rects = selectedTextRects(range);
   const boxes = Array.from(rects).flatMap((rect) => {
     const box = clipBox(project(rect, page, surface), width, height);
     return box === null ? [] : [box];
   });
-  return { annotation, vertical, boxes: mergeBoxes(boxes) };
+  return { annotation, vertical, boxes: mergeBoxes(boxes, vertical) };
 }

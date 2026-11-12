@@ -98,3 +98,5 @@ Local issue progress: [#950 repeated metadata](./issues/950-repeated-metadata.md
 [#1367 nested TOC links](./issues/1367-nested-navigation.md) has verified explicit-base navigation for EPUB 2/3 in all three native engines.
 
 [#425 source retention](./issues/425-retained-frame-source.md) has a local teardown fix and repeated open/close regression coverage; the original large-book heap report remains only partially reproduced.
+
+[#1415 paragraph underlines](./issues/1415-paragraph-underlines.md) has a local text-fragment and writing-axis merging fix with normal/tight-line regressions.

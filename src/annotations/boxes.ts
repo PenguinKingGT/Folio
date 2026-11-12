@@ -31,14 +31,17 @@ function contains(outer: AnnotationBox, inner: AnnotationBox): boolean {
 }
 
 /** Merge intersecting fragments in one row/column while preserving blank gaps between lines. */
-function connected(first: AnnotationBox, second: AnnotationBox): boolean {
+function connected(first: AnnotationBox, second: AnnotationBox, vertical?: boolean): boolean {
   const row = Math.abs(first.y - second.y) <= 0.5 && Math.abs(first.height - second.height) <= 0.5;
   const column = Math.abs(first.x - second.x) <= 0.5 && Math.abs(first.width - second.width) <= 0.5;
   return (
-    contains(first, second) ||
-    contains(second, first) ||
-    (row && first.x <= second.x + second.width + 0.5 && second.x <= first.x + first.width + 0.5) ||
-    (column &&
+    (vertical === undefined && (contains(first, second) || contains(second, first))) ||
+    (vertical !== true &&
+      row &&
+      first.x <= second.x + second.width + 0.5 &&
+      second.x <= first.x + first.width + 0.5) ||
+    (vertical !== false &&
+      column &&
       first.y <= second.y + second.height + 0.5 &&
       second.y <= first.y + first.height + 0.5)
   );
@@ -56,8 +59,11 @@ function union(first: AnnotationBox, second: AnnotationBox): AnnotationBox {
   };
 }
 
-/** Keep visible fragment count bounded before creating host SVG nodes. */
-export function mergeBoxes(boxes: readonly AnnotationBox[]): readonly AnnotationBox[] {
+/** Bound visible fragments; an explicit writing axis prevents merging distinct text rows or columns. */
+export function mergeBoxes(
+  boxes: readonly AnnotationBox[],
+  vertical?: boolean,
+): readonly AnnotationBox[] {
   if (boxes.length > 1024) {
     throw new RangeError('Too many visible annotation fragments.');
   }
@@ -66,7 +72,7 @@ export function mergeBoxes(boxes: readonly AnnotationBox[]): readonly Annotation
     let merged = box;
     for (let index = result.length - 1; index >= 0; index -= 1) {
       const previous = result[index];
-      if (previous !== undefined && connected(previous, merged)) {
+      if (previous !== undefined && connected(previous, merged, vertical)) {
         merged = union(previous, merged);
         result.splice(index, 1);
       }

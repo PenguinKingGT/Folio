@@ -64,3 +64,18 @@ test('merges overlapping horizontal/vertical fragments and keeps separate rows a
     ),
   ).toThrow('fragments');
 });
+
+test('explicit writing direction never bridges adjacent text rows or columns', () => {
+  const rows = [
+    { x: 0, y: 0, width: 20, height: 18 },
+    { x: 0, y: 12, width: 20, height: 18 },
+  ];
+  expect(mergeBoxes(rows, false)).toEqual(rows);
+  expect(mergeBoxes(rows, true)).toEqual([{ x: 0, y: 0, width: 20, height: 30 }]);
+  const columns = [
+    { x: 0, y: 0, width: 18, height: 20 },
+    { x: 12, y: 0, width: 18, height: 20 },
+  ];
+  expect(mergeBoxes(columns, true)).toEqual(columns);
+  expect(mergeBoxes(columns, false)).toEqual([{ x: 0, y: 0, width: 30, height: 20 }]);
+});
