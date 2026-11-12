@@ -92,3 +92,5 @@ Upstream reference: [Store](../epub.js/src/store.js), [DisplayOptions](../epub.j
 The [2026-11-12 open-issue scan](./issues/upstream-scan.md) inventories 486 open issues separately from this scoped feature checklist. See its priority assessment and categorized backlog; feature completion does not imply issue-specific regression verification.
 
 Local issue progress: [#950 repeated metadata](./issues/950-repeated-metadata.md) now has issue-specific regression coverage and a local fix.
+
+[#1384 initial resize](./issues/1384-initial-resize.md) has verified existing behavior in Chromium, Firefox and WebKit, with dedicated pending-display regression tests.
