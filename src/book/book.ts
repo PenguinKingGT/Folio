@@ -19,6 +19,7 @@ import type { Section } from '../spine/section';
 import { loadNavigation } from './navigation';
 import type { BookOptions } from './options';
 import { openSource } from './source';
+import { fontSource } from './font-source';
 import type { PublicationSource } from './source';
 import { Rendition } from '../render/rendition';
 import type { RenditionOptions } from '../render/rendition';
@@ -82,11 +83,12 @@ export class Book extends EventEmitter<BookEventMap> {
     options: BookOptions = {},
   ): Promise<Book> {
     validateDisplayOptions(options);
-    const source = await openSource(input, options);
+    let source = await openSource(input, options);
     try {
       const json =
         source.package.format === 'json' ? parseJsonManifest(source.package.source) : undefined;
       const parsed = json?.publication ?? parsePackage(source.package.source);
+      source = await fontSource(source, parsed);
       const displayOptions = await loadDisplayOptions(source, parsed, options);
       const publication = applyAppleDisplayOptions(parsed, displayOptions);
       const navigation = json?.navigation ?? (await loadNavigation(publication, source));

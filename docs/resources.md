@@ -13,3 +13,9 @@ Remote HTTP(S) references are rejected unless `allowRemote: true`; permitted ref
 CSS uses the MIT-licensed `css-tree` parser rather than regular-expression substitution. It follows CSS parser recovery for accepted syntax and rejects reported parse errors. Rewriting is a resource transformation, not script sanitization; content security is also tracked under F12/F36.
 
 Tests use original local resources and inspect native Blob contents, with browser checks in Chromium, Firefox, and WebKit.
+
+## Standard font obfuscation (F37)
+
+Opening an OCF ZIP publication recognizes IDPF font records in `META-INF/encryption.xml`. Manifest-declared local fonts are restored before resource delivery, including direct `Book.bytes()` reads, CSS Blob URLs and scripted embedded resources. The package identifier determines the standard key; original ZIP/offline bytes remain unchanged. Malformed recognized records and unsafe or non-font targets reject opening.
+
+This feature requires Web Crypto SHA-1 support (supported Node.js or a secure browser context) when recognized obfuscated fonts exist. It adds no dependency or global crypto fallback. Unknown encryption algorithms remain untouched; Adobe legacy obfuscation, DRM and encryption discovery for extracted directories/direct OPF/JSON are unsupported. See [#923 evidence and limits](./issues/923-font-obfuscation.md).

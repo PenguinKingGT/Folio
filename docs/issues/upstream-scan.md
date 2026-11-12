@@ -67,4 +67,6 @@ The feature tracker remains complete for its original scoped migration. This iss
 
 [#576](./576-large-media.md) review fixed current oversized-artwork clipping; the original unavailable-book navigation report remains separate.
 
+[#923](./923-font-obfuscation.md) review added standard IDPF font restoration for ZIP publications; Adobe legacy obfuscation and the unavailable original EPUB remain pending.
+
 Other inventory entries are not claimed locally resolved. No upstream issue has been closed by this work.

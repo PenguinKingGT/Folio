@@ -35,3 +35,5 @@ Network requests preserve custom fetch implementations, default headers, credent
 `displayOptions` exposes discovered [legacy Apple preferences](./display-options.md). Missing layout defaults can be supplied by the vendor file; modern OPF metadata and explicit reader settings retain precedence.
 
 `renderScriptedTo(target, { scripts: true })` creates an explicitly authorized [opaque-origin scripted reader](./scripted-reading.md). Its navigation/message surface is separate from native host-DOM reading APIs.
+
+OCF ZIP opening also recognizes [standard IDPF font obfuscation](./resources.md#standard-font-obfuscation-f37). Resource reads return restored font bytes while the original container remains unchanged; unsupported encryption and source formats retain the documented limitations.

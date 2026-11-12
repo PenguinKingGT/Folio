@@ -58,3 +58,5 @@ For every implementation: first add a minimal failing regression, then modify th
 - [#1164 review](./1164-native-annotation-scroll.md): fixed a current WebKit native-scroll observation defect found during annotation investigation; authored continuous trim/restoration is separately verified.
 
 - [#576 artwork review](./576-large-media.md): fixed oversized-media clipping in reading columns; the authored navigation reached its fragment even before this fix, so the historical chapter-reset symptom is not claimed reproduced.
+
+- [#923 font review](./923-font-obfuscation.md): standard IDPF font restoration is implemented for OCF ZIP publications, with real font-decoder evidence. Adobe legacy obfuscation remains a separate unsupported case.

@@ -10,7 +10,7 @@ Scanned on 2026-11-11 against local epub.js `0.3.93`, commit `eee359d0790002115a
 - The TypeScript / Vite / pnpm / Oxlint / Prettier / test / CI foundation is complete; smoke tests do not count as EPUB features.
 - Decide compatibility scope before implementing optional legacy behavior. Record excluded items as Out of scope with a reason.
 
-**Progress: Done 36 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 0.** Update totals with every status change; list out-of-scope items separately.
+**Progress: Done 37 / 37; In progress 0; Awaiting verification 0; Blocked 0; Not started 0.** Update totals with every status change; list out-of-scope items separately.
 
 ## Phase 1: Opening books and location primitives
 
@@ -83,6 +83,12 @@ Upstream reference: [Store](../epub.js/src/store.js), [DisplayOptions](../epub.j
 - This tracker is based on a local scan, not an upstream issue inventory. Add issue evidence under `docs/issues/` with feature IDs; a completed feature does not imply every related upstream issue is resolved.
 - Reader toolbars, bookshelves, bookmark / note persistence and third-party services such as Hypothesis belong to callers or extensions rather than the core library.
 
+## Additional issue-driven capabilities
+
+| ID  | Feature / scope                                                                                     | Status | Implementation / tests                                                                                                                                                              |
+| --- | --------------------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F37 | Standard IDPF font obfuscation for OCF ZIP publications; Adobe/DRM and directory discovery excluded | Done   | [Source](../src/obfuscation/) / [Unit](../tests/unit/obfuscation/) / [Native](../tests/browser/issues/923-obfuscated-font.test.ts) / [Cross-engine](../tests/e2e/issue-923.spec.ts) |
+
 ## Explicit compatibility exclusions
 
 - F33: Built-in inline publisher HTML insertion is out of scope; iframe selectors are validated explicitly. Trusted host-owned non-iframe managers can use `Book.renderWith()`. See the [compatibility decision](./view-compatibility.md).
@@ -108,3 +114,5 @@ Local issue progress: [#950 repeated metadata](./issues/950-repeated-metadata.md
 [#1164 annotation investigation](./issues/1164-native-annotation-scroll.md) fixed current WebKit native-scroll observation while retaining script isolation and verifying continuous frame-trim restoration.
 
 [#576 artwork review](./issues/576-large-media.md) fixed current oversized-image clipping in reading columns, with reversible defaults and horizontal/vertical/RTL native coverage; the original upstream navigation failure is not claimed reproduced.
+
+[#923 font review](./issues/923-font-obfuscation.md) added F37 with native decoding/glyph verification and strict metadata/cancellation boundaries. Its Adobe-specific report remains pending.

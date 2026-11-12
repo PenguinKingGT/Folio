@@ -20,3 +20,5 @@ Passive views keep `sandbox="allow-same-origin"` without script permission. Expl
 Before-fix reproductions confirmed unbounded response acceptance, broken CSS child selectors, and actual data-worker execution in the scripted frame. The fixes pass native Chromium tests and CSS/worker scenarios in Chromium, Firefox and WebKit. [Local regression evidence](./issues/security-regressions.md) records these separately from upstream issue resolution.
 
 The [#1420 compatibility review](./issues/1420-empty-doctype.md) permits only a prolog-level empty bare `html` subset, normalized before either parser runs. It supersedes the initial blanket rejection for that inert form; package/container DTD rejection and entity-expansion defenses remain in place.
+
+ZIP font-obfuscation metadata uses the same bounded strict XML parser and container-safe path resolver. Recognized IDPF records must target distinct declared local fonts; malformed records reject opening. Font restoration is a format compatibility transform, with no new script permissions, network discovery, or DRM support. See [F37](./resources.md#standard-font-obfuscation-f37).
