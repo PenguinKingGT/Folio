@@ -88,3 +88,17 @@ export type {
 
 export type { EventListener } from './events/emitter';
 export type { BookEventMap, ReaderEventMap, LocationsEventMap } from './events/types';
+
+export { AsyncHook } from './extensions/hook';
+export type { HookCallback } from './extensions/hook';
+export { PublicationHooks } from './extensions/publication';
+export type {
+  SectionContent,
+  SectionSerialization,
+  ViewContext,
+  ManagedReader,
+  ReaderFactory,
+} from './extensions/types';
+export { IframeView } from './render/iframe-view';
+export type { ViewOptions } from './render/iframe-view';
+export type { ViewFactory } from './render/view-factory';

@@ -6,7 +6,9 @@ import { fixedGeometry } from '../layout/fixed-geometry';
 import type { FixedGeometry } from '../layout/fixed-geometry';
 import { isFixed, pageSides, renditionValue, spreadPartner } from '../layout/fixed-model';
 import { applyFixedDocument, documentViewport } from '../layout/fixed-document';
-import { IframeView } from './iframe-view';
+import type { IframeView } from './iframe-view';
+import { createView } from './view-factory';
+import { loadViewContent } from './view-content';
 import type { ViewOptions } from './iframe-view';
 import { chapterMarkup } from './load-chapter';
 import type { Themes } from '../themes/themes';
@@ -83,12 +85,21 @@ export class FixedSpread {
       return;
     }
     const content = await chapterMarkup(this.book, partner, `${token}-companion`, signal);
-    const view = new IframeView(this.surface, this.options);
+    const view = createView(this.surface, this.options);
     this.companion = view;
     try {
-      const document = await view.load(content, `${token}-companion`, signal);
-      this.releaseInteractions = this.interactions?.attach(document, partner);
-      await this.themes?.apply(document, signal);
+      const loaded = await loadViewContent({
+        book: this.book,
+        section: partner,
+        view,
+        content,
+        token: `${token}-companion`,
+        signal,
+        themes: this.themes,
+        interactions: this.interactions,
+      });
+      this.releaseInteractions = loaded.release;
+      const document = loaded.document;
       signal.throwIfAborted();
       documentViewport(document);
       this.partner = partner;

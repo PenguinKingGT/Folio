@@ -1,7 +1,6 @@
 /** Public event maps preserve payload types across books, both reader modes, and progress indexes. */
 import type { Section } from '../spine/section';
-import type { Rendition } from '../render/rendition';
-import type { ContinuousReader } from '../continuous/reader';
+import type { ManagedReader } from '../extensions/types';
 import type { VisibleLocation } from '../render/location-types';
 import type { ContentSelection, ContentInput, LinkActivation } from '../interaction/types';
 import type { AnnotationClick } from '../annotations/types';
@@ -10,7 +9,7 @@ import type { ReadingLocation } from '../locations/types';
 /** Opening failures reject Book.open(); these events cover an already opened book's owned operations. */
 export interface BookEventMap {
   resourceLoaded: { readonly href: string; readonly from: string; readonly bytes: number };
-  readerCreated: Rendition | ContinuousReader;
+  readerCreated: ManagedReader;
   error: unknown;
   destroyed: undefined;
 }

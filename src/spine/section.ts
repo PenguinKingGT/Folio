@@ -8,6 +8,7 @@ import { escapeCfi } from '../cfi/syntax';
 import { searchSettings } from '../search/options';
 import { searchDocument } from '../search/search';
 import type { SearchOptions, SearchMatch } from '../search/types';
+import type { PublicationHooks } from '../extensions/publication';
 
 /** Load OPF-relative chapter content; the producer must honor the supplied signal. */
 export type SectionLoader = (href: string, signal: AbortSignal) => Promise<string>;
@@ -23,6 +24,7 @@ export class Section {
   private pending: Promise<Document> | undefined;
   private controller: AbortController | undefined;
   private generation = 0;
+  private lifetime = new AbortController();
   private destroyed = false;
 
   /** Bind lazy metadata/IO; standalone sections default to package spine step /6. */
@@ -31,6 +33,7 @@ export class Section {
     resource: ManifestItem,
     private readonly loader: SectionLoader,
     private readonly spineStep = 6,
+    private readonly hooks?: PublicationHooks,
   ) {
     if (!Number.isSafeInteger(spineStep) || spineStep <= 0 || spineStep % 2 !== 0) {
       throw new TypeError('Section spineStep must be a positive even integer.');
@@ -64,7 +67,20 @@ export class Section {
 
   /** Serialize the currently loaded DOM, including caller modifications. */
   async render(signal?: AbortSignal): Promise<string> {
-    return new XMLSerializer().serializeToString(await this.load(signal));
+    const combined =
+      signal === undefined ? this.lifetime.signal : AbortSignal.any([signal, this.lifetime.signal]);
+    const document = await this.load(combined);
+    const context = {
+      section: this,
+      document,
+      source: new XMLSerializer().serializeToString(document),
+    };
+    await this.hooks?.serialize.run(context, combined);
+    combined.throwIfAborted();
+    if (typeof context.source !== 'string') {
+      throw new TypeError('Serialization hooks must produce a string.');
+    }
+    return context.source;
   }
 
   /** Search passive body text across any number of inline nodes; results carry exact publication CFIs. */
@@ -92,6 +108,8 @@ export class Section {
   /** Drop cached content and invalidate in-flight work; the section may be loaded again. */
   unload(): void {
     this.generation += 1;
+    this.lifetime.abort();
+    this.lifetime = new AbortController();
     this.controller?.abort();
     this.controller = undefined;
     this.document = undefined;
@@ -119,6 +137,8 @@ export class Section {
       ) {
         throw new TypeError('Expected an XHTML chapter document.');
       }
+      await this.hooks?.content.run({ section: this, document }, signal);
+      signal.throwIfAborted();
       this.document = document;
       return document;
     } finally {

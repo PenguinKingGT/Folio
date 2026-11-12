@@ -1,6 +1,8 @@
 /** Headless publication facade connecting loading, navigation, chapters, and resources. */
 import { Cover } from '../cover/cover';
 import { EventEmitter } from '../events/emitter';
+import { PublicationHooks } from '../extensions/publication';
+import type { ManagedReader, ReaderFactory } from '../extensions/types';
 import { disposeAll, isAbortError } from '../events/errors';
 import type { BookEventMap } from '../events/types';
 import { parsePackage } from '../package/package';
@@ -25,7 +27,10 @@ import type { ContinuousOptions } from '../continuous/options';
 /** An opened publication does not create iframes or depend on browser globals. */
 export class Book extends EventEmitter<BookEventMap> {
   private destroyed = false;
-  private readonly renditions = new Set<Rendition | ContinuousReader>();
+  private closing = false;
+  private completion: Promise<void> | undefined;
+  private readonly renditions = new Set<ManagedReader>();
+  readonly hooks = new PublicationHooks();
   readonly spine: Spine;
   readonly resources: Resources;
   readonly cover: Cover;
@@ -45,8 +50,10 @@ export class Book extends EventEmitter<BookEventMap> {
     );
     const read: ResourceReader = (path, signal) => source.read(path, signal);
     this.resources = new Resources(this.publication, source.packagePath, read, options);
-    this.spine = new Spine(this.publication, (href, signal) =>
-      this.text(href, source.packagePath, signal),
+    this.spine = new Spine(
+      this.publication,
+      (href, signal) => this.text(href, source.packagePath, signal),
+      this.hooks,
     );
     this.cover = new Cover(
       this.publication,
@@ -128,7 +135,7 @@ export class Book extends EventEmitter<BookEventMap> {
 
   /** Mount a passive reader surface; opening and headless reads remain browser-independent. */
   renderTo(target: HTMLElement | string, options: RenditionOptions = {}): Rendition {
-    this.source.signal.throwIfAborted();
+    this.assertCanRender();
     const rendition: Rendition = new Rendition(this, target, options, () => {
       this.renditions.delete(rendition);
     });
@@ -142,13 +149,70 @@ export class Book extends EventEmitter<BookEventMap> {
     target: HTMLElement | string,
     options: ContinuousOptions = {},
   ): ContinuousReader {
-    this.source.signal.throwIfAborted();
+    this.assertCanRender();
     const reader: ContinuousReader = new ContinuousReader(this, target, options, () => {
       this.renditions.delete(reader);
     });
     this.renditions.add(reader);
     this.emit('readerCreated', reader);
     return reader;
+  }
+
+  /** Mount a host-supplied manager and include it in book-owned synchronous cleanup. */
+  renderWith<Options, Reader extends ManagedReader>(
+    factory: ReaderFactory<Options, Reader>,
+    target: HTMLElement | string,
+    options: Options,
+  ): Reader {
+    this.assertCanRender();
+    if (typeof factory !== 'function') {
+      throw new TypeError('Reader factories must be functions.');
+    }
+    const reader = factory(this, target, options);
+    if (
+      reader === null ||
+      typeof reader !== 'object' ||
+      typeof reader.display !== 'function' ||
+      typeof reader.getContents !== 'function' ||
+      typeof reader.destroy !== 'function'
+    ) {
+      throw new TypeError('A custom reader must implement display, getContents, and destroy.');
+    }
+    if (!this.renditions.has(reader)) {
+      this.renditions.add(reader);
+      this.emit('readerCreated', reader);
+    }
+    return reader;
+  }
+
+  /** Finish asynchronous unload hooks before releasing shared publication resources. */
+  destroyAsync(): Promise<void> {
+    this.closing = true;
+    this.completion ??= Promise.resolve().then(() => this.closeAsync());
+    return this.completion;
+  }
+
+  /** Snapshot owners once, rejecting new mounts while asynchronous unload work drains. */
+  private async closeAsync(): Promise<void> {
+    const readers = Array.from(this.renditions);
+    this.renditions.clear();
+    try {
+      disposeAll(readers.map((reader) => () => reader.destroy()));
+    } finally {
+      try {
+        await this.hooks.whenIdle();
+      } finally {
+        this.destroy();
+      }
+    }
+  }
+
+  /** Cleanup hooks may read assets, but a closing book cannot acquire another reader. */
+  private assertCanRender(): void {
+    this.source.signal.throwIfAborted();
+    if (this.closing) {
+      throw new Error('Book is closing.');
+    }
   }
 
   /** Release chapters, cover, transformed resources, producer requests, and source storage. */
@@ -167,6 +231,7 @@ export class Book extends EventEmitter<BookEventMap> {
       () => this.spine.destroy(),
       () => this.cover.destroy(),
       () => this.resources.destroy(),
+      () => this.hooks.destroy(),
       () => this.finishEvents('destroyed', undefined),
     ]);
   }

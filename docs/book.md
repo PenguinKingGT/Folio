@@ -27,3 +27,5 @@ Network requests preserve custom fetch implementations, default headers, credent
 `renderContinuous(target, options?)` creates a book-owned [continuous reader](./continuous.md) with seamless chapter scrolling, bounded preloading, trimming, and reading-position compensation. `renderTo()` retains the bounded chapter/spread reader.
 
 `Section.search()` and its `find()` alias provide [headless chapter search](./search.md) with cross-node matches, excerpts, and full range CFIs. Callers choose how to aggregate chapters and retain results.
+
+`hooks` and `renderWith()` expose trusted [host extensions](./extensions.md). Use `destroyAsync()` when asynchronous view-unload callbacks must finish before shared assets are released.

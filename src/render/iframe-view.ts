@@ -1,5 +1,6 @@
 /** Own an iframe surface and its in-flight document load independently of book resources. */
 import { loadFrame } from './frame-load';
+import type { ViewFactory } from './view-factory';
 import { setDimension, viewTimeout } from './surface';
 
 /** Basic view dimensions; pagination and scrolling options are separate layout features. */
@@ -7,6 +8,7 @@ export interface ViewOptions {
   width?: number | string;
   height?: number | string;
   loadTimeoutMs?: number;
+  createView?: ViewFactory;
 }
 
 /** Passive same-origin iframe permits host DOM measurement while denying publication scripts. */

@@ -3,6 +3,7 @@ import type { PublicationPackage } from '../package/types';
 import { Cfi } from '../cfi/cfi';
 import { Section } from './section';
 import type { SectionLoader } from './section';
+import type { PublicationHooks } from '../extensions/publication';
 
 /** Normalize URL fragments and Unicode encoding for chapter lookup. */
 function hrefKey(value: string): string {
@@ -15,13 +16,13 @@ export class Spine {
   private destroyed = false;
 
   /** Create sections in OPF order; loading remains lazy. */
-  constructor(publication: PublicationPackage, loader: SectionLoader) {
+  constructor(publication: PublicationPackage, loader: SectionLoader, hooks?: PublicationHooks) {
     this.sections = publication.spine.map((item) => {
       const resource = publication.manifest.get(item.idref);
       if (resource === undefined) {
         throw new TypeError(`Spine references missing resource: ${item.idref}`);
       }
-      return new Section(item, resource, loader, publication.spineStep);
+      return new Section(item, resource, loader, publication.spineStep, hooks);
     });
   }
 

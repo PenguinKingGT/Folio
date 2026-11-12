@@ -1,7 +1,9 @@
 /** Manage an owned reader surface, the active iframe, and a bounded fixed-layout companion. */
 import type { Book } from '../book/book';
 import type { Section } from '../spine/section';
-import { IframeView } from './iframe-view';
+import type { IframeView } from './iframe-view';
+import { createView } from './view-factory';
+import { loadViewContent } from './view-content';
 import type { ViewOptions } from './iframe-view';
 import { FixedSpread } from './fixed-spread';
 import type { FixedLayoutState, RenderedPage } from './fixed-spread';
@@ -36,7 +38,7 @@ export class PageViews {
     this.settings = paginationOptions(options);
     this.surface = createSurface(container, options);
     try {
-      this.main = new IframeView(this.surface, { ...options, width: '100%', height: '100%' });
+      this.main = createView(this.surface, { ...options, width: '100%', height: '100%' });
       this.resetFrame();
       this.fixed = new FixedSpread(book, this.surface, options, themes, interactions);
     } catch (error) {
@@ -65,9 +67,18 @@ export class PageViews {
     this.resetFrame();
     this.releaseInteractions?.();
     this.section = null;
-    const document = await this.main.load(content, token, signal);
-    this.releaseInteractions = this.interactions?.attach(document, section);
-    await this.themes?.apply(document, signal);
+    const loaded = await loadViewContent({
+      book: this.book,
+      section,
+      view: this.main,
+      content,
+      token,
+      signal,
+      themes: this.themes,
+      interactions: this.interactions,
+    });
+    this.releaseInteractions = loaded.release;
+    const document = loaded.document;
     if (isFixed(this.book.publication, section)) {
       documentViewport(document);
     }

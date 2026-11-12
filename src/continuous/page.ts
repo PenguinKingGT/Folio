@@ -1,7 +1,9 @@
 /** Expand one passive chapter to its intrinsic block extent without exposing an internal scrollbar. */
 import type { Book } from '../book/book';
 import type { Section } from '../spine/section';
-import { IframeView } from '../render/iframe-view';
+import type { IframeView } from '../render/iframe-view';
+import { createView } from '../render/view-factory';
+import { loadViewContent } from '../render/view-content';
 import { chapterMarkup } from '../render/load-chapter';
 import { WritingLayout } from '../layout/writing';
 import type { WritingState } from '../layout/writing';
@@ -54,7 +56,12 @@ export class ContinuousPage {
       (element) => Number(element.getAttribute('data-folio-section')) > section.index,
     );
     parent.insertBefore(this.cell, following ?? null);
-    this.view = new IframeView(this.cell, { ...options, width: '100%', height: 1 });
+    try {
+      this.view = createView(this.cell, { ...options, width: '100%', height: 1 });
+    } catch (error) {
+      this.cell.remove();
+      throw error;
+    }
     this.writing = new WritingLayout(options, book.publication.direction);
   }
 
@@ -68,9 +75,17 @@ export class ContinuousPage {
     this.cell.style.width = `${size.width}px`;
     this.cell.style.height = `${size.height}px`;
     const markup = await chapterMarkup(this.book, this.section, token, signal);
-    await this.view.load(markup, token, signal);
-    this.releaseInteractions = this.interactions?.attach(this.rendered().document, this.section);
-    await this.themes?.apply(this.rendered().document, signal);
+    const loaded = await loadViewContent({
+      book: this.book,
+      section: this.section,
+      view: this.view,
+      content: markup,
+      token,
+      signal,
+      themes: this.themes,
+      interactions: this.interactions,
+    });
+    this.releaseInteractions = loaded.release;
     signal.throwIfAborted();
     this.view.show();
     this.layout(size, hint);
