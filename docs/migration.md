@@ -116,3 +116,5 @@ Local issue progress: [#950 repeated metadata](./issues/950-repeated-metadata.md
 [#576 artwork review](./issues/576-large-media.md) fixed current oversized-image clipping in reading columns, with reversible defaults and horizontal/vertical/RTL native coverage; the original upstream navigation failure is not claimed reproduced.
 
 [#923 font review](./issues/923-font-obfuscation.md) added F37 with native decoding/glyph verification and strict metadata/cancellation boundaries. Its Adobe-specific report remains pending.
+
+F37 review follow-up: container-wide obfuscation records are filtered by the selected rendition manifest, so unused alternate fonts do not block opening or receive the wrong key. See the [multi-rendition regression](../tests/unit/obfuscation/renditions.test.ts).

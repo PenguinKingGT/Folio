@@ -40,7 +40,7 @@ function fontPath(entry: Element): string {
   return address.path;
 }
 
-/** Return only recognized IDPF font targets; unrelated encryption algorithms remain unsupported and untouched. */
+/** Select IDPF fonts owned by this rendition; container records for other renditions remain untouched. */
 export function obfuscatedFonts(
   source: string,
   publication: PublicationPackage,
@@ -50,15 +50,14 @@ export function obfuscatedFonts(
   if (root?.localName !== 'encryption' || root.namespaceURI !== container) {
     throw new TypeError('Expected an OCF encryption document.');
   }
-  const fonts = new Set<string>();
+  const resources = new Map<string, string>();
   for (const item of publication.manifest.values()) {
-    if (fontTypes.includes(item.mediaType.toLowerCase())) {
-      const address = resolveResource(item.href, packagePath);
-      if (address.kind === 'local') {
-        fonts.add(address.path);
-      }
+    const address = resolveResource(item.href, packagePath);
+    if (address.kind === 'local') {
+      resources.set(address.path, item.mediaType);
     }
   }
+  const seen = new Set<string>();
   const targets = new Set<string>();
   for (const entry of children(root, 'EncryptedData', encryption)) {
     const methods = children(entry, 'EncryptionMethod', encryption);
@@ -67,8 +66,17 @@ export function obfuscatedFonts(
     }
     child(entry, 'EncryptionMethod');
     const path = fontPath(entry);
-    if (!fonts.has(path) || targets.has(path)) {
-      throw new TypeError('Obfuscation must reference distinct manifest font resources.');
+    if (seen.has(path)) {
+      throw new TypeError('Obfuscation must reference distinct container resources.');
+    }
+    seen.add(path);
+    // Encryption metadata belongs to the container, while this manifest and key belong to one rendition.
+    const type = resources.get(path);
+    if (type === undefined) {
+      continue;
+    }
+    if (!fontTypes.includes(type.toLowerCase())) {
+      throw new TypeError('Obfuscation must reference manifest font resources.');
     }
     targets.add(path);
   }

@@ -10,7 +10,7 @@ An original ZIP fixture declares IDPF font obfuscation in `META-INF/encryption.x
 
 The byte-source adapter now recognizes standard IDPF records for declared local manifest fonts. It derives the key from the referenced raw package identifier, removes only XML whitespace, and restores the bounded prefix according to [EPUB font obfuscation](https://www.w3.org/TR/epub-33/#sec-font-obfuscation). Source/archive buffers remain unchanged. Direct reads, CSS Blob resources, and scripted data resources share the restored bytes.
 
-Malformed XML, unsafe/ambiguous paths, duplicate targets and non-font targets reject. Metadata reads and restored font reads honor consumer/book cancellation. Known ZIP entries control discovery, so this feature adds no optional HTTP requests to directory or direct-document loading. Web Crypto SHA-1 is required only for recognized obfuscated fonts; unsupported environments and digest errors reject explicitly. Unknown algorithms remain untouched rather than being misinterpreted as IDPF.
+Malformed XML, unsafe/ambiguous paths, duplicate targets and non-font targets declared in the selected manifest reject. Container records outside that manifest remain untouched; they may belong to another rendition. Metadata reads and restored font reads honor consumer/book cancellation. Known ZIP entries control discovery, so this feature adds no optional HTTP requests to directory or direct-document loading. Web Crypto SHA-1 is required only for recognized obfuscated fonts; unsupported environments and digest errors reject explicitly. Unknown algorithms remain untouched rather than being misinterpreted as IDPF.
 
 ## Evidence
 
@@ -23,3 +23,11 @@ Malformed XML, unsafe/ambiguous paths, duplicate targets and non-font targets re
 Fixtures use the original [Folio test font](../../tests/fixtures/fonts/README.md) and generated ZIP/XML under the project license, with no publisher font or book copied. Upstream closure remains separate.
 
 Full validation: `pnpm check` passed with 853 unit/native DOM tests, three built-package consumer tests, and 306 end-to-end browser tests. No coverage thresholds or checks were reduced.
+
+## Review follow-up: multiple OPF renditions
+
+The initial implementation rejected every IDPF target absent from the selected manifest. Because `encryption.xml` describes the entire container, a valid second OPF's font prevented opening the default rendition. Two failing public-API reproductions now pass: an unused alternate font requires no Web Crypto, and a mixed-font container restores only the selected font while preserving the alternate font's encoded bytes. Each rendition fixture has its own identifier and manifest.
+
+`tests/unit/obfuscation/renditions.test.ts` covers opening, chapter reading and selected/unselected font bytes. Metadata tests retain unsafe-path, duplicate and selected non-font rejection while covering records outside the selected manifest. This does not implement selecting or validating additional renditions; it prevents unrelated records from blocking the default one.
+
+Multi-rendition validation: `pnpm check` passed with 855 unit/native DOM tests, three package consumer tests, and 306 end-to-end browser tests.

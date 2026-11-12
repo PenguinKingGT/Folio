@@ -61,9 +61,8 @@ test.each([
   'OPS/fonts/original%20wide.ttf#part',
   'OPS/fonts/original%20wide.ttf?q=1',
   'OPS%2Ffonts/original.ttf',
-  'OPS/fonts/missing.ttf',
   'OPS/chapter.xhtml',
-])('rejects unsafe, ambiguous or undeclared font target %s', (uri) => {
+])('rejects unsafe, ambiguous or selected non-font target %s', (uri) => {
   expect(() => targets(encryption(uri))).toThrow();
 });
 
@@ -79,17 +78,10 @@ test.each([
   expect(() => targets(source)).toThrow();
 });
 
-test('does not infer a font from its filename or permit remote manifest targets', () => {
+test('does not infer a selected font type from its filename', () => {
   expect(() => obfuscatedFonts(encryption(), publication('text/plain'), 'OPS/package.opf')).toThrow(
     'manifest font',
   );
-  expect(() =>
-    obfuscatedFonts(
-      encryption(),
-      publication('font/ttf', 'https://remote.invalid/font.ttf'),
-      'OPS/package.opf',
-    ),
-  ).toThrow('manifest font');
 });
 
 test('does not apply IDPF decoding to unknown algorithms or foreign-namespace records', () => {
@@ -108,4 +100,16 @@ test('rejects duplicate records after normalizing their container paths', () => 
   expect(() => targets(source.replace('</encryption>', record + '</encryption>'))).toThrow(
     'distinct',
   );
+});
+
+test('ignores records outside the selected manifest, including local counterparts of remote fonts', () => {
+  expect(targets(encryption('ALT/fonts/other.ttf'))).toEqual(new Set());
+  expect(targets(encryption('OPS/fonts/missing.ttf'))).toEqual(new Set());
+  expect(
+    obfuscatedFonts(
+      encryption(),
+      publication('font/ttf', 'https://remote.invalid/font.ttf'),
+      'OPS/package.opf',
+    ),
+  ).toEqual(new Set());
 });
