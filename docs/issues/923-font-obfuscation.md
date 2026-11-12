@@ -31,3 +31,13 @@ The initial implementation rejected every IDPF target absent from the selected m
 `tests/unit/obfuscation/renditions.test.ts` covers opening, chapter reading and selected/unselected font bytes. Metadata tests retain unsafe-path, duplicate and selected non-font rejection while covering records outside the selected manifest. This does not implement selecting or validating additional renditions; it prevents unrelated records from blocking the default one.
 
 Multi-rendition validation: `pnpm check` passed with 855 unit/native DOM tests, three package consumer tests, and 306 end-to-end browser tests.
+
+## Review follow-up: large-font restoration work
+
+The initial `Uint8Array.from(bytes, mapper)` called JavaScript for every byte, although only 1040 bytes change. Restoration now copies the complete typed-array view natively and applies XOR only to its bounded prefix. Input storage remains unchanged, including when the caller supplies a view into a larger buffer.
+
+`tests/unit/obfuscation/large-font.test.ts` uses a 20 MiB input to detect generic JavaScript iteration over the unchanged tail without wall-clock assertions. It checks the complete source and tail with native hashes, transformed prefix bytes, independent output storage, and nonzero input offsets. The iteration check failed before the fix with 20,971,520 visited bytes and now passes; existing short/empty/font-prefix/key-offset tests remain in place.
+
+Run `pnpm bench:fonts` for the separate public `Book.bytes()` benchmark. It builds the library, opens an original synthetic ZIP, verifies restored bytes, discards one warm-up and records five reads. On this macOS arm64 / Node.js 24.17.0 run, the 20 MiB median fell from 683.42 ms (baseline `9793bd4`) to 2.65 ms with the checked-in benchmark command. These measurements include archive byte copying and are local observations, not CI timing requirements or cross-device guarantees.
+
+Large-font validation: `pnpm check` passed with 857 unit/native DOM tests, three package consumer tests, and 306 end-to-end browser tests. `pnpm bench:fonts` also completed successfully.

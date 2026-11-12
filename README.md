@@ -30,6 +30,7 @@ On Linux, install browser system dependencies with `pnpm exec playwright install
 | `pnpm test:coverage`                | Check thresholds; generate HTML and LCOV reports            |
 | `pnpm test:package`                 | Build and verify package imports and declaration artifacts  |
 | `pnpm test:e2e`                     | Test the example in Chromium, Firefox, and WebKit           |
+| `pnpm bench:fonts`                  | Build and benchmark 20 MiB font resource reads              |
 | `pnpm check`                        | Run the complete CI validation pipeline                     |
 | `pnpm pack`                         | Build and create a local package archive                    |
 

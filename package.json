@@ -37,7 +37,8 @@
     "test:e2e": "playwright test",
     "test:package": "pnpm build && node --test tests/package/*.test.mjs",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm test:package && pnpm test:e2e",
-    "prepack": "pnpm build"
+    "prepack": "pnpm build",
+    "bench:fonts": "pnpm build && node tests/benchmarks/font-obfuscation.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.65.0",

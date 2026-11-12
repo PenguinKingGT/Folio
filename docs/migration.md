@@ -118,3 +118,5 @@ Local issue progress: [#950 repeated metadata](./issues/950-repeated-metadata.md
 [#923 font review](./issues/923-font-obfuscation.md) added F37 with native decoding/glyph verification and strict metadata/cancellation boundaries. Its Adobe-specific report remains pending.
 
 F37 review follow-up: container-wide obfuscation records are filtered by the selected rendition manifest, so unused alternate fonts do not block opening or receive the wrong key. See the [multi-rendition regression](../tests/unit/obfuscation/renditions.test.ts).
+
+F37 performance review: large-font restoration now uses native copying and at most 1040 JavaScript byte transformations, with immutable-input/tail regressions and a reproducible `pnpm bench:fonts` benchmark.

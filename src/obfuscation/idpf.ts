@@ -37,7 +37,11 @@ export function restoreIdpfFont(bytes: Uint8Array, key: Uint8Array): Uint8Array<
     throw new TypeError('An IDPF font key must contain exactly 20 bytes.');
   }
   const mask = new DataView(key.buffer, key.byteOffset, key.byteLength);
-  return Uint8Array.from(bytes, (byte, index) =>
-    index < 1040 ? byte ^ mask.getUint8(index % 20) : byte,
-  );
+  // Copy natively; JavaScript must not visit the potentially multi-megabyte unchanged tail.
+  const restored = new Uint8Array(bytes);
+  const prefix = restored.subarray(0, 1040);
+  prefix.forEach((byte, index) => {
+    prefix[index] = byte ^ mask.getUint8(index % 20);
+  });
+  return restored;
 }
