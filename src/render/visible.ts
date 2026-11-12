@@ -1,6 +1,7 @@
 /** Map real viewport intersections to structural CFIs without walking every character. */
 import { cfiFromNode, cfiFromRange } from '../cfi/dom';
 import { Cfi } from '../cfi/cfi';
+import { scalarBoundary } from '../text/scalars';
 
 /** Native document coordinates of the visible subrectangle inside an expanded iframe. */
 interface ClipRect {
@@ -51,19 +52,6 @@ function boundary(range: Range, node: Node, length: number, clip: ClipRect, end:
     }
   }
   return low;
-}
-
-/** Keep visible text endpoints outside UTF-16 surrogate pairs. */
-export function scalarBoundary(text: string, offset: number, end: boolean): number {
-  if (
-    offset > 0 &&
-    offset < text.length &&
-    /[\uD800-\uDBFF]/.test(text.charAt(offset - 1)) &&
-    /[\uDC00-\uDFFF]/.test(text.charAt(offset))
-  ) {
-    return offset + (end ? 1 : -1);
-  }
-  return offset;
 }
 
 /** Encode one text endpoint without retaining its native Range. */

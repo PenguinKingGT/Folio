@@ -21,7 +21,7 @@ export class Spine {
       if (resource === undefined) {
         throw new TypeError(`Spine references missing resource: ${item.idref}`);
       }
-      return new Section(item, resource, loader);
+      return new Section(item, resource, loader, publication.spineStep);
     });
   }
 

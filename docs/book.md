@@ -25,3 +25,5 @@ Network requests preserve custom fetch implementations, default headers, credent
 `pageList` exposes lazy printed-page indexing independently of character/word `locations`. See [printed-page APIs](./pages.md) for label, CFI, and ordinal percentage conversion. Opening a book does not resolve page-break anchors or load their chapter bodies.
 
 `renderContinuous(target, options?)` creates a book-owned [continuous reader](./continuous.md) with seamless chapter scrolling, bounded preloading, trimming, and reading-position compensation. `renderTo()` retains the bounded chapter/spread reader.
+
+`Section.search()` and its `find()` alias provide [headless chapter search](./search.md) with cross-node matches, excerpts, and full range CFIs. Callers choose how to aggregate chapters and retain results.

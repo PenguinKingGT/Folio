@@ -2,8 +2,9 @@
 import { Cfi } from '../cfi/cfi';
 import { escapeCfi } from '../cfi/syntax';
 import type { PublicationPackage } from '../package/types';
-import { chapterCorpus, corpusPoint } from './corpus';
-import type { TextCorpus } from './corpus';
+import { chapterCorpus } from '../text/corpus';
+import { corpusPoint } from '../text/position';
+import type { TextCorpus } from '../text/corpus';
 import type { LocationLoader, LocationOptions, LocationSnapshot, ReadingLocation } from './types';
 
 /** Choose Unicode word segmentation using publication language, with an ICU fallback for invalid tags. */

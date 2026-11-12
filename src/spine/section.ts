@@ -4,6 +4,10 @@ import type { Document } from '@xmldom/xmldom';
 import type { ManifestItem, SpineItem } from '../package/types';
 import { parseXml } from '../xml/parse';
 import { withAbort } from '../async/cancellation';
+import { escapeCfi } from '../cfi/syntax';
+import { searchSettings } from '../search/options';
+import { searchDocument } from '../search/search';
+import type { SearchOptions, SearchMatch } from '../search/types';
 
 /** Load OPF-relative chapter content; the producer must honor the supplied signal. */
 export type SectionLoader = (href: string, signal: AbortSignal) => Promise<string>;
@@ -21,12 +25,16 @@ export class Section {
   private generation = 0;
   private destroyed = false;
 
-  /** Bind chapter metadata to a loader without starting network or parsing work. */
+  /** Bind lazy metadata/IO; standalone sections default to package spine step /6. */
   constructor(
     item: SpineItem,
     resource: ManifestItem,
     private readonly loader: SectionLoader,
+    private readonly spineStep = 6,
   ) {
+    if (!Number.isSafeInteger(spineStep) || spineStep <= 0 || spineStep % 2 !== 0) {
+      throw new TypeError('Section spineStep must be a positive even integer.');
+    }
     this.index = item.index;
     this.idref = item.idref;
     this.href = resource.href;
@@ -45,12 +53,40 @@ export class Section {
       this.controller = new AbortController();
       this.pending = this.fetchDocument(this.generation, this.controller.signal);
     }
-    return withAbort(this.pending, signal);
+    // Unload/destroy must cancel consumers even when a custom producer ignores its own signal.
+    let consumer = signal;
+    if (this.controller !== undefined) {
+      const producer = this.controller.signal;
+      consumer = signal === undefined ? producer : AbortSignal.any([producer, signal]);
+    }
+    return withAbort(this.pending, consumer);
   }
 
   /** Serialize the currently loaded DOM, including caller modifications. */
   async render(signal?: AbortSignal): Promise<string> {
     return new XMLSerializer().serializeToString(await this.load(signal));
+  }
+
+  /** Search passive body text across any number of inline nodes; results carry exact publication CFIs. */
+  async search(query: string, options: SearchOptions = {}): Promise<readonly SearchMatch[]> {
+    this.assertActive();
+    const request = searchSettings(query, options);
+    const generation = this.generation;
+    const document = await this.load(request.settings.signal);
+    this.assertActive();
+    if (generation !== this.generation) {
+      throw new DOMException('Search was cancelled by chapter unload.', 'AbortError');
+    }
+    return searchDocument(document, request.query, request.settings, {
+      index: this.index,
+      href: this.href,
+      base: `/${this.spineStep}/${(this.index + 1) * 2}[${escapeCfi(this.idref)}]`,
+    });
+  }
+
+  /** Compatibility alias uses the same cross-node literal search and asynchronous loading contract. */
+  find(query: string, options: SearchOptions = {}): Promise<readonly SearchMatch[]> {
+    return this.search(query, options);
   }
 
   /** Drop cached content and invalidate in-flight work; the section may be loaded again. */

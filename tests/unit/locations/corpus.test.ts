@@ -1,6 +1,7 @@
 /** Passive text extraction shares rendering policy and preserves structural text slots. */
 import { expect, test } from 'vitest';
-import { chapterCorpus, corpusPoint } from '../../../src/locations/corpus';
+import { chapterCorpus } from '../../../src/text/corpus';
+import { corpusPoint } from '../../../src/text/position';
 import { chapter } from './fixture';
 
 test('merges adjacent text and skips scripts, style text and formatting-only slots', () => {

@@ -44,6 +44,7 @@ export { TouchNavigation } from './touch/navigation';
 export { Themes } from './themes/themes';
 export { ContentInteractions } from './interaction/interactions';
 export { Annotations } from './annotations/annotations';
+export type { SearchOptions, SearchMatch } from './search/types';
 export type {
   Annotation,
   AnnotationType,

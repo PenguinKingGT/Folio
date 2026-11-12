@@ -10,7 +10,7 @@ Scanned on 2026-11-11 against local epub.js `0.3.93`, commit `eee359d0790002115a
 - The TypeScript / Vite / pnpm / Oxlint / Prettier / test / CI foundation is complete; smoke tests do not count as EPUB features.
 - Decide compatibility scope before implementing optional legacy behavior. Record excluded items as Out of scope with a reason.
 
-**Progress: Done 26 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 10.** Update totals with every status change; list out-of-scope items separately.
+**Progress: Done 27 / 36; In progress 0; Awaiting verification 0; Blocked 0; Not started 9.** Update totals with every status change; list out-of-scope items separately.
 
 ## Phase 1: Opening books and location primitives
 
@@ -58,7 +58,7 @@ Upstream reference: [Locations](../epub.js/src/locations.js), [PageList](../epub
 | F24 | Themes: CSS / URL / rule registration, switching, font / size and style overrides                               | Done        | [Source](../src/themes/) / [Unit](../tests/unit/themes/) / [Browser](../tests/browser/themes/) / [Cross-engine](../tests/e2e/themes.spec.ts)                                           |
 | F25 | Content interaction: selection / Range / CFI events, input forwarding, internal and external links              | Done        | [Source](../src/interaction/) / [Unit](../tests/unit/interaction/) / [Browser](../tests/browser/interaction/) / [Cross-engine](../tests/e2e/interactions.spec.ts)                      |
 | F26 | Annotations: highlight / underline / mark, add / update / remove, clicks, reload restoration and relayout       | Done        | [Source](../src/annotations/) / [Unit](../tests/unit/annotations/) / [Browser](../tests/browser/annotations/) / [Cross-engine](../tests/e2e/annotations.spec.ts)                       |
-| F27 | Search: chapter and cross-text-node matches with excerpts and CFIs for caller-side aggregation                  | Not started | —                                                                                                                                                                                      |
+| F27 | Search: chapter and cross-text-node matches with excerpts and CFIs for caller-side aggregation                  | Done        | [API](./search.md) / [Source](../src/search/) / [Unit](../tests/unit/search/) / [Native](../tests/browser/search/) / [Cross-engine](../tests/e2e/search.spec.ts)                       |
 | F28 | Events: typed on / off / once for books, rendering, locations, selection and errors                             | Not started | —                                                                                                                                                                                      |
 | F29 | Extensions: asynchronous content / serialization / rendering / unload hooks, custom managers / views and styles | Not started | —                                                                                                                                                                                      |
 

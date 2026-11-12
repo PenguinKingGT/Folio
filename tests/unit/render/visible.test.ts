@@ -1,6 +1,6 @@
 /** UTF-16 endpoint normalization preserves full Unicode scalars for either visible boundary. */
 import { expect, test } from 'vitest';
-import { scalarBoundary } from '../../../src/render/visible';
+import { scalarBoundary } from '../../../src/text/scalars';
 
 test('expands endpoints around a split surrogate pair and preserves other UTF-16 boundaries', () => {
   expect(scalarBoundary('A😀B', 2, false)).toBe(1);
