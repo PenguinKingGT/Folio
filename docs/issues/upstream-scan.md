@@ -49,5 +49,6 @@ The feature tracker remains complete for its original scoped migration. This iss
 | #933  | Unload contract verified                          | [Unload hooks](./933-unload-hooks.md)                 |
 | #1326 | Font-boundary behavior verified                   | [Previous page after reflow](./1326-font-boundary.md) |
 | #1200 | Malformed input rejected; valid ordering verified | [CFI comparison](./1200-cfi-order.md)                 |
+| #1416 | Delayed native reversal verified                  | [Scroll anchoring](./1416-scroll-reversal.md)         |
 
 Other inventory entries are not claimed locally resolved. No upstream issue has been closed by this work.
