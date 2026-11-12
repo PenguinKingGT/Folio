@@ -46,5 +46,6 @@ The feature tracker remains complete for its original scoped migration. This iss
 | #1367 | Explicit-base behavior verified | [Nested navigation](./1367-nested-navigation.md) |
 | #837  | Existing behavior verified      | [Cross-node search](./837-cross-node-search.md)  |
 | #1264 | Existing behavior verified      | [Print labels](./1264-print-page-labels.md)      |
+| #933  | Unload contract verified        | [Unload hooks](./933-unload-hooks.md)            |
 
 Other inventory entries are not claimed locally resolved. No upstream issue has been closed by this work.
