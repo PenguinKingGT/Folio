@@ -77,6 +77,9 @@ export class IframeView {
   destroy(): void {
     this.loading?.abort();
     this.frame.remove();
+    // Hosts may retain the exposed frame after teardown; do not retain chapter-sized attribute strings.
+    this.frame.removeAttribute('srcdoc');
+    this.loading = undefined;
     this.loadedDocument = null;
     this.destroyed = true;
   }

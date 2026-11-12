@@ -96,3 +96,5 @@ Local issue progress: [#950 repeated metadata](./issues/950-repeated-metadata.md
 [#1384 initial resize](./issues/1384-initial-resize.md) has verified existing behavior in Chromium, Firefox and WebKit, with dedicated pending-display regression tests.
 
 [#1367 nested TOC links](./issues/1367-nested-navigation.md) has verified explicit-base navigation for EPUB 2/3 in all three native engines.
+
+[#425 source retention](./issues/425-retained-frame-source.md) has a local teardown fix and repeated open/close regression coverage; the original large-book heap report remains only partially reproduced.

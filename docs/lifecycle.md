@@ -11,3 +11,5 @@ Cleanup attempts every independent phase. Host extension failures produce an `Ag
 Use `await book.destroyAsync()` when asynchronous unload hooks must finish before shared publication resources close. It waits for staged view cancellation and resulting unload callbacks, including callbacks queued while a rendering hook is cancelled. `book.destroy()` provides synchronous teardown; asynchronous hook failures remain observable through the hook lifecycle described in [Extensions](./extensions.md).
 
 Evidence: [unit regressions](../tests/unit/lifecycle/), [native DOM regressions](../tests/browser/lifecycle/), and [three-engine scenarios](../tests/e2e/lifecycle.spec.ts).
+
+Destroyed passive iframe views remove their `srcdoc` attribute as well as their native document reference, so a host retaining a destroyed frame does not retain the chapter source string. See [#425 regression evidence](./issues/425-retained-frame-source.md).
