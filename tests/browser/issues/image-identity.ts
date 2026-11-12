@@ -23,13 +23,13 @@ function png(width: number, color: string): Uint8Array<ArrayBuffer> {
 }
 
 /** Give similar filenames distinct intrinsic dimensions and unique manifest IDs. */
-function imageBook(): Promise<Book> {
+function imageBook(firstId: string, secondId: string): Promise<Book> {
   const files = bookFiles();
   files.set(
     'OPS/package.opf',
     (files.get('OPS/package.opf') ?? '').replace(
       '</manifest>',
-      '<item id="first-image" href="images/17.3.png" media-type="image/png"/><item id="second-image" href="images/173.png" media-type="image/png"/></manifest>',
+      `<item id="${firstId}" href="images/17.3.png" media-type="image/png"/><item id="${secondId}" href="images/173.png" media-type="image/png"/></manifest>`,
     ),
   );
   files.set(
@@ -44,13 +44,15 @@ function imageBook(): Promise<Book> {
   return Book.open(zipSync(entries, { level: 0 }));
 }
 
-/** Resolve both native images and compare the resource cache against the exact declared hrefs. */
-export async function imageIdentity(): Promise<{
+/** Decode images with ordinary or leading-digit manifest IDs and compare the cache against exact hrefs. */
+export async function imageIdentity(digitIds = false): Promise<{
   widths: readonly number[];
   distinct: boolean;
   exact: boolean;
 }> {
-  const book = await imageBook();
+  const firstId = digitIds ? '1-image-1' : 'first-image';
+  const secondId = digitIds ? '2-image-2' : 'second-image';
+  const book = await imageBook(firstId, secondId);
   const container = host();
   try {
     const reader = book.renderTo(container);
@@ -65,7 +67,11 @@ export async function imageIdentity(): Promise<{
     return {
       widths: images.map((image) => image.naturalWidth),
       distinct: first !== second,
-      exact: images[0]?.src === first && images[1]?.src === second,
+      exact:
+        images[0]?.src === first &&
+        images[1]?.src === second &&
+        book.publication.manifest.get(firstId)?.href === 'images/17.3.png' &&
+        book.publication.manifest.get(secondId)?.href === 'images/173.png',
     };
   } finally {
     book.destroy();
