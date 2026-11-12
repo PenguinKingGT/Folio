@@ -19,15 +19,18 @@ export function manifestMetadata(value: unknown): PackageMetadata {
   const languages = Array.isArray(metadata.language)
     ? list(metadata.language, 'languages')
     : [metadata.language];
-  const language = languages.map((entry) => text(entry, 'metadata language'))[0];
+  const languageValues = languages.map((entry) => text(entry, 'metadata language'));
+  const language = languageValues[0];
   if (language === undefined) {
     throw new TypeError('metadata language cannot be empty.');
   }
+  const authors = creators(field(metadata, 'creators', 'author', 'creator'));
   return {
+    dublinCore: { ...jsonCore(metadata), language: languageValues, creator: authors },
     identifier: text(metadata.identifier, 'metadata identifier'),
     title: text(metadata.title, 'metadata title'),
     language,
-    creators: creators(field(metadata, 'creators', 'author', 'creator')),
+    creators: authors,
     description: text(metadata.description, 'metadata description', true),
     publisher: text(metadata.publisher, 'metadata publisher', true),
     date: text(metadata.date, 'metadata date', true),
@@ -61,4 +64,34 @@ export function manifestDirection(metadata: Record<string, unknown>): 'ltr' | 'r
     throw new TypeError('Invalid JSON reading progression.');
   }
   return value;
+}
+
+/** Preserve supported textual Dublin Core values without introducing absent fields into JSON metadata. */
+function jsonCore(metadata: Record<string, unknown>): Readonly<Record<string, readonly string[]>> {
+  const values = new Map<string, readonly string[]>();
+  for (const name of [
+    'title',
+    'identifier',
+    'subject',
+    'description',
+    'publisher',
+    'contributor',
+    'date',
+    'type',
+    'format',
+    'source',
+    'relation',
+    'coverage',
+    'rights',
+  ]) {
+    const value = metadata[name];
+    if (value !== undefined) {
+      const entries = Array.isArray(value) ? list(value, `metadata ${name}`) : [value];
+      values.set(
+        name,
+        entries.map((entry) => text(entry, `metadata ${name}`, true)),
+      );
+    }
+  }
+  return Object.fromEntries(values);
 }

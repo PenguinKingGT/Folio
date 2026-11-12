@@ -32,3 +32,5 @@ Normalized packages use the canonical `/6` spine step, producing stable CFIs fro
 JSON text is limited to 5 MiB, arrays to 10,000 entries, individual strings to 16,384 UTF-16 units, and hrefs to 4,096 units. Navigation permits at most 10,000 total entries and 32 nested levels; cyclic host objects reject through the same bounds. Invalid types, explicit null values in supported fields, duplicate IDs, malformed escapes, unsafe schemes, and unresolved resource references reject. Unsupported metadata vocabularies and extra fields are not interpreted.
 
 Tests cover legacy aliases, metadata, lazy loading, references, nonlinear chapters, inline/external navigation, printed-page bases, hostile/bounded input, failure cleanup, and native range-CFI/rendering/isolation behavior in Chromium, Firefox, and WebKit.
+
+Metadata also exposes `dublinCore`, retaining all languages, normalized creators, and supplied textual Dublin Core values (including subject arrays). Primary `language` remains the first supplied language. See [#950](./issues/950-repeated-metadata.md).

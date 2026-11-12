@@ -6,7 +6,7 @@ Query date: **2026-11-12**. Repository: [futurepress/epub.js](https://github.com
 
 The [priority assessment](./upstream-priority.md) lists concrete reports, expected behavior, proposed changes or verification tasks, and local inspection targets. Start with security boundaries, loading failures, resize/display races, scrolling correctness, and data loss. A report against epub.js does not establish that Folio has the same defect.
 
-- **Implementation candidates:** preserve repeated Dublin Core metadata beyond creators (#950); investigate reported navigation, position, annotations and lifecycle defects with issue-specific tests. An existing F01–F36 capability is not sufficient evidence of resolution.
+- **Implementation candidates:** [#950 metadata preservation](./950-repeated-metadata.md) now has a local fix; investigate reported navigation, position, annotations and lifecycle defects with issue-specific tests. An existing F01–F36 capability is not sufficient evidence of resolution.
 - **Verification first:** reproduce each candidate against Folio and the referenced upstream behavior with an original minimal fixture. Read remaining discussion before changing code. If Folio already behaves correctly, record that specific test instead of changing code unnecessarily.
 - **Compatibility decisions:** inline publisher HTML (#1381 and related reports) remains excluded by [F33](../view-compatibility.md). Internal DTD/entity subsets in #1420 conflict with [F36](../security.md); do not copy the upstream workaround without a separate policy decision. Optional empty-subset compatibility should be considered separately from entity expansion.
 - **Scope additions:** SMIL/media-overlay playback (#1043, #1289) and publisher alternate-stylesheet selection (#586) need explicit scope/API decisions. Parsing a manifest overlay attribute or registering host themes is not equivalent to implementing those features.
@@ -31,7 +31,7 @@ Every open issue is listed once below. The routing is preliminary, using report 
 
 ## Status and evidence rules
 
-Priority items distinguish **Change candidate**, **Awaiting reproduction**, **Design difference**, and **Scope decision**. No upstream issue is marked **Verified fix**, **Duplicate**, or **Closed** by this scan. Similar reports are related candidates until their causes are proven identical.
+Priority items distinguish **Change candidate**, **Awaiting reproduction**, **Design difference**, and **Scope decision**. The initial scan marked no issue verified, duplicate or closed. Subsequent local fixes are linked from the priority assessment and inventory; upstream closure remains separate. Similar reports are related candidates until their causes are proven identical.
 
 For each implementation task, record an original reproduction fixture, a test that fails before the fix, the passing regression, relevant browser engines, and the local commit. Keep upstream state separate from local verification. Missing attachments, platform details or unresolved discussion must remain explicit evidence gaps.
 

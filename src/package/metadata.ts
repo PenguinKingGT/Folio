@@ -1,4 +1,5 @@
 /** Parse OPF metadata without flattening refinements or repeated creator fields. */
+import { readDublinCore } from './dublin-core';
 import type { Element } from '@xmldom/xmldom';
 import { children } from '../xml/parse';
 import { dcNamespace, opfNamespace } from './helpers';
@@ -27,6 +28,7 @@ export function parseMetadata(element: Element, identifierId: string): PackageMe
     throw new TypeError('Package title and language are required.');
   }
   return {
+    dublinCore: readDublinCore(element),
     title,
     language,
     identifier: identifierValue,

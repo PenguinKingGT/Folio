@@ -28,6 +28,8 @@ export interface MetadataEntry {
 
 /** Dublin Core fields plus unflattened extension metadata. */
 export interface PackageMetadata {
+  /** Every direct Dublin Core value grouped by local name, retaining repetitions and source order. */
+  dublinCore: Readonly<Record<string, readonly string[]>>;
   title: string;
   creators: readonly string[];
   language: string;
