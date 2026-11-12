@@ -10,7 +10,7 @@ import type { ScriptedSettings } from './options';
 
 const xhtml = 'http://www.w3.org/1999/xhtml';
 const policy =
-  "default-src 'none'; script-src data: 'unsafe-inline'; style-src data: 'unsafe-inline'; img-src data:; font-src data:; media-src data:; frame-src 'none'; object-src 'none'; connect-src 'none'; form-action 'none'; base-uri 'none'";
+  "default-src 'none'; script-src data: 'unsafe-inline'; style-src data: 'unsafe-inline'; img-src data:; font-src data:; media-src data:; worker-src 'none'; frame-src 'none'; object-src 'none'; connect-src 'none'; form-action 'none'; base-uri 'none'";
 
 /** Data sources avoid XML/HTML raw-script differences and cannot terminate their containing script element. */
 function script(document: Document, code: string): Element {
@@ -33,6 +33,9 @@ function executable(document: Document): void {
     }
     if (name !== 'script') {
       continue;
+    }
+    if (element.namespaceURI !== xhtml) {
+      throw new TypeError('Scripted views support only XHTML script elements.');
     }
     const type = (element.getAttribute('type') ?? '').trim().toLowerCase();
     if (type === 'module') {

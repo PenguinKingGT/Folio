@@ -1,4 +1,6 @@
 /** Parse a structurally valid native XHTML document and normalize XML prefixes before HTML srcdoc serialization. */
+import { validateXmlSource } from '../xml/constraints';
+
 const xhtml = 'http://www.w3.org/1999/xhtml';
 
 /** HTML srcdoc parsing does not recognize XML namespace prefixes on HTML/SVG/MathML tags. */
@@ -37,9 +39,7 @@ export function nativeContent(source: string): {
   root: Element;
   head: Element;
 } {
-  if (typeof source !== 'string' || source.length > 5 * 1024 * 1024) {
-    throw new RangeError('Native chapter source exceeds the supported document size.');
-  }
+  validateXmlSource(source, 'xhtml');
   const document = new DOMParser().parseFromString(source, 'application/xhtml+xml');
   normalizePrefixes(document);
   const root = document.documentElement;

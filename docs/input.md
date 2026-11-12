@@ -23,4 +23,6 @@ if (source.type === 'epub') {
 
 Response types are `text`, `binary`, `blob`, and `json`. JSON returns `unknown` and requires validation. Inject a custom network implementation through `fetch`, returning a standard `Response`.
 
-Per-request headers override matching defaults; credentials and signals can be overridden separately. Unsuccessful HTTP responses throw `HttpError` with `url` and `status`. Network, decoding, and cancellation failures propagate. Cancellation is checked before requesting, after receiving a response, and after reading its body, including when a custom adapter ignores the signal.
+Per-request headers override matching defaults; credentials can be overridden separately. Default and per-call signals are combined, so either can cancel the request. Unsuccessful HTTP responses throw `HttpError` with `url` and `status`. Network, decoding, and cancellation failures propagate. Cancellation is checked before requesting, after receiving a response, and after reading its body, including when a custom adapter ignores the signal.
+
+`maxResponseBytes` defaults to 64 MiB and must be a positive safe integer. A per-request value overrides the requester default. Response readers enforce decoded bytes independently of `Content-Length`, cap chunks at 65,536, and cancel/release oversized or aborted streams. Network container, OPF and JSON markup use strict UTF-8 decoding. See [security boundaries](./security.md).

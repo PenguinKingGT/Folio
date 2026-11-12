@@ -1,15 +1,11 @@
 /** Strict, environment-independent XML parsing shared by publication parsers. */
 import { DOMParser } from '@xmldom/xmldom';
+import { validateXmlSource } from './constraints';
 import type { Document, Element } from '@xmldom/xmldom';
 
 /** Parse bounded XML; XHTML permits external doctype declarations without fetching DTDs. */
 export function parseXml(source: string, mode: 'xml' | 'xhtml' = 'xml'): Document {
-  if (source.length > 5 * 1024 * 1024) {
-    throw new RangeError('XML exceeds the document size limit.');
-  }
-  if (/<!ENTITY|<!DOCTYPE[^>]*\[/i.test(source) || (mode === 'xml' && /<!DOCTYPE/i.test(source))) {
-    throw new TypeError('DTD and entity declarations are not supported.');
-  }
+  validateXmlSource(source, mode);
   try {
     const document = new DOMParser({
       onError: (_level, message) => {

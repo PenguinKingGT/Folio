@@ -18,6 +18,6 @@ archive.destroy();
 - Paths are container-relative literal ZIP filenames; Unicode is preserved. Traversal, absolute paths, backslashes, control characters, schemes, and duplicate entries are rejected.
 - Defaults: 50 MiB compressed, 20 MiB per entry, 100 MiB total extracted, 10,000 entries. Override with `ArchiveLimits`; values must be positive safe integers.
 
-Decompression uses `fflate` (MIT), with declared-size checks before extraction and actual-total checks afterward. This is bounded synchronous ZIP access, not a streaming decoder, DRM implementation, or complete hostile-archive audit. Additional hardening is tracked under F36.
+Decompression uses `fflate` (MIT), with declared-size checks before extraction and actual-total checks afterward. This is bounded synchronous ZIP access, not a streaming decoder, DRM implementation, or complete hostile-archive audit. Network download bounds and additional isolation policies are documented under [F36](./security.md).
 
 Tests generate their own ZIP data under the project license; no upstream book fixtures are copied.

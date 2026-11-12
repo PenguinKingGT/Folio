@@ -1,6 +1,7 @@
 /** Injectable Fetch adapter with consistent responses, HTTP errors, and cancellation. */
 import { withAbort } from '../async/cancellation';
 import { readResponse } from './response';
+import { responseLimit } from './limits';
 export interface ResponseTypes {
   text: string;
   binary: ArrayBuffer;
@@ -13,6 +14,8 @@ export interface RequestOptions {
   headers?: HeadersInit;
   credentials?: RequestCredentials;
   signal?: AbortSignal;
+  /** Maximum decoded response bytes; defaults to 64 MiB. */
+  maxResponseBytes?: number;
 }
 
 /** Custom transports return a standard Response for authentication, caching, or host integration. */
@@ -44,6 +47,7 @@ export class HttpError extends Error {
  * @returns A reusable request function.
  */
 export function createRequester(defaults: RequesterOptions = {}): Requester {
+  const defaultLimit = responseLimit(defaults.maxResponseBytes);
   const fetcher = defaults.fetch ?? globalThis.fetch.bind(globalThis);
   /** Merge settings and decode the response, giving cancellation priority over delivery. */
   return async <T extends keyof ResponseTypes>(
@@ -51,6 +55,7 @@ export function createRequester(defaults: RequesterOptions = {}): Requester {
     type: T,
     options: RequestOptions = {},
   ): Promise<ResponseTypes[T]> => {
+    const limit = responseLimit(options.maxResponseBytes ?? defaultLimit);
     const headers = new Headers(defaults.headers);
     new Headers(options.headers).forEach((value, key) => headers.set(key, value));
     let signal = options.signal ?? defaults.signal;
@@ -73,6 +78,6 @@ export function createRequester(defaults: RequesterOptions = {}): Requester {
     if (!response.ok) {
       throw new HttpError(url, response.status);
     }
-    return readResponse(response, type, signal);
+    return readResponse(response, type, signal, limit);
   };
 }

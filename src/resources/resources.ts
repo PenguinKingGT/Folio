@@ -120,6 +120,9 @@ export class Resources {
     if (address.kind !== 'local') {
       return address.url;
     }
+    if (ancestors.size >= 16) {
+      throw new RangeError('Resource dependencies exceed the supported depth.');
+    }
     if (ancestors.has(address.path)) {
       throw new TypeError(`Cyclic CSS resource dependency: ${address.path}`);
     }
@@ -133,6 +136,9 @@ export class Resources {
     const parents = new Set([...ancestors, address.path]);
     let content: BlobPart = Uint8Array.from(bytes);
     if (type === 'text/css') {
+      if (bytes.length > 1024 * 1024) {
+        throw new RangeError('Stylesheet exceeds the supported 1 MiB limit.');
+      }
       content = await rewriteCss(
         new TextDecoder('utf-8', { fatal: true }).decode(bytes),
         (reference) => this.buildUrl(reference, address.path, parents),

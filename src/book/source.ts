@@ -58,6 +58,12 @@ function archiveSource(
   }
 }
 
+/** Publication markup uses strict UTF-8 rather than silently replacing malformed network bytes. */
+async function sourceText(request: Requester, url: string, signal: AbortSignal): Promise<string> {
+  const bytes = await request(url, 'binary', { signal });
+  return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+}
+
 /** Discover a directory OPF or read a direct OPF/JSON document against its origin-root byte provider. */
 async function networkSource(
   url: URL,
@@ -75,11 +81,11 @@ async function networkSource(
       url.pathname += '/';
     }
     root = url;
-    const xml = await request(new URL('META-INF/container.xml', root).href, 'text', { signal });
+    const xml = await sourceText(request, new URL('META-INF/container.xml', root).href, signal);
     packagePath = parseContainer(xml).packagePath;
     packageUrl = new URL(encodePath(packagePath), root);
   }
-  const packageXml = await request(packageUrl.href, 'text', { signal });
+  const packageXml = await sourceText(request, packageUrl.href, signal);
   return {
     kind: directory ? 'directory' : 'document',
     packagePath,

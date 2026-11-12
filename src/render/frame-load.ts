@@ -1,5 +1,7 @@
 /** Wait for the intended srcdoc document, ignoring initial/stale iframe load events. */
 
+import { restoreStyles } from './restore-styles';
+
 /** Resolve only when the document token matches; every terminal path removes listeners and timers. */
 export function loadFrame(
   frame: HTMLIFrameElement,
@@ -26,6 +28,7 @@ export function loadFrame(
     const loaded = (): void => {
       const document = frame.contentDocument;
       if (document?.documentElement?.getAttribute('data-folio-document') === token) {
+        restoreStyles(document);
         cleanup();
         resolve(document);
       }
