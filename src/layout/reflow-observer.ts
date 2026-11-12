@@ -36,11 +36,11 @@ export class ReflowObserver {
     const schedule = (event?: Event) => {
       const target = event?.target;
       const realm = document.defaultView;
-      // Theme mutations already reflow explicitly; delayed style loads must not undo newer native scrolls.
+      // Reader-owned style mutations already reflow explicitly; delayed loads must not undo newer native scrolls.
       if (
         realm !== null &&
         target instanceof realm.HTMLStyleElement &&
-        target.hasAttribute('data-folio-theme')
+        (target.hasAttribute('data-folio-theme') || target.hasAttribute('data-folio-column-media'))
       ) {
         return;
       }

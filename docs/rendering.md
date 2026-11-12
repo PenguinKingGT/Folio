@@ -41,6 +41,8 @@ Actual column counts come from browser overflow with a one-pixel CSSOM rounding 
 
 Each chapter uses standards mode for consistent CSS columns and scrolling roots. Pagination sets document/body dimensions, margin/padding and column rules while retaining chapter text styling. Automatic resize preservation is described under F17; fixed layout is described under F18; writing directions are described under F19.
 
+Column-based reading supplies low-priority defaults that fit images and outer SVG artwork within a physical column, use contained image fitting and avoid breaking artwork. Small intrinsic images are not enlarged. Explicit publisher declarations and reader themes can override these defaults. Resizing or changing spreads updates the limits; natural scrolling removes them and fixed-layout pages retain their authored geometry. Attributes, nested SVG viewports and body structure are preserved. See [oversized-artwork verification](./issues/576-large-media.md).
+
 ## Scrolled flow (F14)
 
 For seamless multi-chapter scrolling, use [Book.renderContinuous()](./continuous.md) (F22). The `renderTo()` flow settings described here retain a bounded chapter/spread window, including its `scrolled-continuous` metadata alias.

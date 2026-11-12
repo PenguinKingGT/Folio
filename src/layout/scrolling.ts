@@ -2,6 +2,7 @@
 import { applyColumns } from './columns';
 import { computePagination } from './pagination';
 import type { WritingState } from './writing';
+import type { ColumnMedia } from './column-media';
 
 /** Configure vertical document flow or horizontal, non-snapping column scrolling. */
 export function applyScrolling(
@@ -9,6 +10,7 @@ export function applyScrolling(
   width: number,
   height: number,
   writing: WritingState,
+  media: ColumnMedia,
 ): { length: number; viewport: number } {
   const root = document.documentElement;
   const body = document.body;
@@ -18,11 +20,13 @@ export function applyScrolling(
     applyColumns(
       document,
       computePagination(width, height, { spread: 'none', gap: 0 }, axis),
+      media,
       reverse,
     );
     // Hide the scrollbar so it cannot cover the final line of a fixed-size column.
     root.style.scrollbarWidth = 'none';
   } else {
+    media.clear(document);
     naturalFlow(document, axis === 'vertical');
   }
   root.style.overflowX = axis === 'horizontal' ? 'auto' : 'hidden';

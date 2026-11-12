@@ -106,3 +106,5 @@ Local issue progress: [#950 repeated metadata](./issues/950-repeated-metadata.md
 [#1420 empty DOCTYPE](./issues/1420-empty-doctype.md) narrows the earlier DTD exclusion only for inert bare XHTML empty subsets, with headless/native/scripted regressions and entity rejection retained.
 
 [#1164 annotation investigation](./issues/1164-native-annotation-scroll.md) fixed current WebKit native-scroll observation while retaining script isolation and verifying continuous frame-trim restoration.
+
+[#576 artwork review](./issues/576-large-media.md) fixed current oversized-image clipping in reading columns, with reversible defaults and horizontal/vertical/RTL native coverage; the original upstream navigation failure is not claimed reproduced.

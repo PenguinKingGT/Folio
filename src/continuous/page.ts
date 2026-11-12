@@ -9,6 +9,7 @@ import { chapterMarkup } from '../render/load-chapter';
 import { WritingLayout } from '../layout/writing';
 import type { WritingState } from '../layout/writing';
 import { applyScrolling } from '../layout/scrolling';
+import { ColumnMedia } from '../layout/column-media';
 import { isFixed } from '../layout/fixed-model';
 import { documentViewport, applyFixedDocument } from '../layout/fixed-document';
 import { fixedGeometry } from '../layout/fixed-geometry';
@@ -32,6 +33,7 @@ export class ContinuousPage {
   readonly cell: HTMLDivElement;
   readonly view: IframeView;
   private readonly writing: WritingLayout;
+  private readonly media = new ColumnMedia();
   private metrics: ContinuousMetrics | null = null;
   private observer: ResizeObserver | undefined;
   private controller: AbortController | undefined;
@@ -132,7 +134,7 @@ export class ContinuousPage {
         scale,
       };
     } else {
-      applyScrolling(document, size.width, size.height, writing);
+      applyScrolling(document, size.width, size.height, writing, this.media);
       if (document.defaultView?.getComputedStyle(document.body).display === 'block') {
         document.body.style.display = 'flow-root';
       }

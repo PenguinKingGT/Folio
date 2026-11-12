@@ -7,9 +7,11 @@ import type { PaginationOptions, PaginationState } from './pagination';
 import { applyScrolling } from './scrolling';
 import { WritingLayout } from './writing';
 import type { WritingOptions } from './writing';
+import { ColumnMedia } from './column-media';
 
 /** Own layout configuration and measurements, without retaining chapter documents. */
 export class ReaderLayout {
+  private readonly media = new ColumnMedia();
   private readonly pages: PaginationLayout;
   private flow: ReadingFlow;
   private measured: FlowState | null = null;
@@ -24,7 +26,7 @@ export class ReaderLayout {
     private readonly metadata?: string,
     direction = 'default',
   ) {
-    this.pages = new PaginationLayout(options);
+    this.pages = new PaginationLayout(options, this.media);
     this.flow = resolveFlow(options, metadata).flow;
     this.requestedAxis = options.axis;
     this.writing = new WritingLayout(options, direction);
@@ -115,7 +117,7 @@ export class ReaderLayout {
     this.pages.configure(options);
     const extent = measureFrame(frame, (width, height) => {
       this.viewport = { width, height };
-      return applyScrolling(document, width, height, writing);
+      return applyScrolling(document, width, height, writing, this.media);
     });
     this.measured = Object.freeze({ flow: this.flow, ...writing, ...extent });
     return null;

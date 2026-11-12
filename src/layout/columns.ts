@@ -1,6 +1,7 @@
 /** Apply column geometry and measure real overflow, including an incomplete final spread. */
 import type { PaginationGeometry, PaginationState } from './pagination';
 import type { ReadingAxis } from './flow';
+import type { ColumnMedia } from './column-media';
 
 /** Supplement CSSOM dimensions when negative vertical overflow is omitted from scrollHeight. */
 function columnExtent(document: Document, axis: ReadingAxis, reverse: boolean): number {
@@ -24,6 +25,7 @@ function columnExtent(document: Document, axis: ReadingAxis, reverse: boolean): 
 export function applyColumns(
   document: Document,
   geometry: PaginationGeometry,
+  media: ColumnMedia,
   reverse = false,
 ): PaginationState {
   const root = document.documentElement;
@@ -43,6 +45,7 @@ export function applyColumns(
   body.style.columnGap = `${geometry.gap}px`;
   body.style.columnCount = String(geometry.columnsPerView);
   body.style.columnFill = 'auto';
+  media.apply(document, geometry);
   // CSSOM rounds scrollWidth to integer pixels; tolerate one pixel to avoid a phantom column.
   const columns = Math.max(
     geometry.columnsPerView,

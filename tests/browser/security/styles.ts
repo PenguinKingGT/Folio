@@ -23,7 +23,7 @@ export async function styleScenario(book: Book): Promise<{
     return {
       color: doc.defaultView.getComputedStyle(em).color,
       content: doc.defaultView.getComputedStyle(em, '::before').content,
-      literal: doc.querySelector('style')?.textContent ?? '',
+      literal: doc.querySelector('style:not([data-folio-column-media])')?.textContent ?? '',
       scripts: doc.querySelectorAll('script').length,
       compromised: document.body.hasAttribute('data-style-escape'),
     };

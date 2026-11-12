@@ -65,4 +65,6 @@ The feature tracker remains complete for its original scoped migration. This iss
 
 [#1363](./1363-page-break-triage.md) has a reproduced page/column compatibility gap and remains pending; it is not included among verified fixes.
 
+[#576](./576-large-media.md) review fixed current oversized-artwork clipping; the original unavailable-book navigation report remains separate.
+
 Other inventory entries are not claimed locally resolved. No upstream issue has been closed by this work.

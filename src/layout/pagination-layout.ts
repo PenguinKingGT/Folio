@@ -3,6 +3,7 @@ import { applyColumns, measureFrame } from './columns';
 import { computePagination, paginationOptions } from './pagination';
 import type { PaginationOptions, PaginationState } from './pagination';
 import type { ReadingAxis } from './flow';
+import type { ColumnMedia } from './column-media';
 
 /** Reusable layout controller that never retains documents or browser subscriptions. */
 export class PaginationLayout {
@@ -10,7 +11,10 @@ export class PaginationLayout {
   private measured: PaginationState | null = null;
 
   /** Validate initial spread and spacing settings before allocating a reader surface. */
-  constructor(options: PaginationOptions = {}) {
+  constructor(
+    options: PaginationOptions,
+    private readonly media: ColumnMedia,
+  ) {
     this.options = paginationOptions(options);
   }
 
@@ -34,7 +38,12 @@ export class PaginationLayout {
   ): PaginationState {
     const candidate = paginationOptions({ ...this.options, ...changes });
     const state = measureFrame(frame, (width, height) =>
-      applyColumns(document, computePagination(width, height, candidate, axis), reverse),
+      applyColumns(
+        document,
+        computePagination(width, height, candidate, axis),
+        this.media,
+        reverse,
+      ),
     );
     this.options = candidate;
     this.measured = state;
