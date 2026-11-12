@@ -1,5 +1,8 @@
 /** Public layout-independent reading progress, generation, lookup, and persistence. */
 import { Cfi } from '../cfi/cfi';
+import { EventEmitter } from '../events/emitter';
+import { isAbortError } from '../events/errors';
+import type { LocationsEventMap } from '../events/types';
 import { withAbort } from '../async/cancellation';
 import type { PublicationPackage } from '../package/types';
 import { generateLocations } from './generate';
@@ -8,7 +11,7 @@ import { loadLocations } from './storage';
 import type { LocationLoader, LocationOptions, LocationSnapshot, ReadingLocation } from './types';
 
 /** Own one atomically replaceable character/word index for a publication. */
-export class Locations {
+export class Locations extends EventEmitter<LocationsEventMap> {
   private snapshot: LocationSnapshot;
   private generating: AbortController | undefined;
   private destroyed = false;
@@ -18,6 +21,7 @@ export class Locations {
     private readonly publication: PublicationPackage,
     private readonly loadChapter: LocationLoader,
   ) {
+    super();
     this.snapshot = {
       version: 1,
       identifier: publication.metadata.identifier,
@@ -62,6 +66,20 @@ export class Locations {
   /** Generate an index atomically; cancellation, errors, or newer requests preserve previous results. */
   async generate(options: LocationOptions = {}): Promise<readonly ReadingLocation[]> {
     this.assertActive();
+    try {
+      const entries = await this.generateIndex(options);
+      this.emit('generated', entries);
+      return entries;
+    } catch (error) {
+      if (!isAbortError(error)) {
+        this.emit('error', error);
+      }
+      throw error;
+    }
+  }
+
+  /** Commit one generation before notifying typed subscribers. */
+  private async generateIndex(options: LocationOptions): Promise<readonly ReadingLocation[]> {
     this.generating?.abort();
     const controller = new AbortController();
     this.generating = controller;
@@ -141,7 +159,17 @@ export class Locations {
     if (index === null || !Number.isInteger(index) || this.entries[index] === undefined) {
       throw new RangeError('Current reading location is out of range.');
     }
+    if (this.snapshot.current === index) {
+      return;
+    }
     this.snapshot = { ...this.snapshot, current: index };
+    const cfi = this.cfiFromLocation(index);
+    if (cfi !== null) {
+      this.emit(
+        'changed',
+        Object.freeze({ index, cfi, percentage: this.percentageFromLocation(index) }),
+      );
+    }
   }
 
   /** Serialize the current versioned snapshot; very large indexes require a coarser sample interval. */
@@ -160,14 +188,19 @@ export class Locations {
     const snapshot = loadLocations(input, this.publication);
     this.generating?.abort();
     this.snapshot = snapshot;
+    this.emit('restored', snapshot.locations);
     return snapshot.locations;
   }
 
   /** Cancel work and release the sampled index; safe to repeat. */
   destroy(): void {
+    if (this.destroyed) {
+      return;
+    }
     this.generating?.abort();
     this.snapshot = { ...this.snapshot, locations: Object.freeze([]), total: 0, current: null };
     this.destroyed = true;
+    this.finishEvents('destroyed', undefined);
   }
 
   /** Reject state-changing and lookup operations after cleanup. */

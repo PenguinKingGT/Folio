@@ -1,5 +1,8 @@
 /** Headless publication facade connecting loading, navigation, chapters, and resources. */
 import { Cover } from '../cover/cover';
+import { EventEmitter } from '../events/emitter';
+import { disposeAll, isAbortError } from '../events/errors';
+import type { BookEventMap } from '../events/types';
 import { parsePackage } from '../package/package';
 import type { PublicationPackage } from '../package/types';
 import type { Navigation } from '../navigation/navigation';
@@ -20,7 +23,8 @@ import { ContinuousReader } from '../continuous/reader';
 import type { ContinuousOptions } from '../continuous/options';
 
 /** An opened publication does not create iframes or depend on browser globals. */
-export class Book {
+export class Book extends EventEmitter<BookEventMap> {
+  private destroyed = false;
   private readonly renditions = new Set<Rendition | ContinuousReader>();
   readonly spine: Spine;
   readonly resources: Resources;
@@ -35,6 +39,7 @@ export class Book {
     readonly navigation: Navigation,
     options: BookOptions,
   ) {
+    super();
     this.locations = new Locations(this.publication, (href, signal) =>
       this.text(href, source.packagePath, signal),
     );
@@ -87,6 +92,20 @@ export class Book {
     from = this.packagePath,
     signal = this.source.signal,
   ): Promise<Uint8Array> {
+    try {
+      const bytes = await this.readBytes(href, from, signal);
+      this.emit('resourceLoaded', Object.freeze({ href, from, bytes: bytes.length }));
+      return bytes;
+    } catch (error) {
+      if (!isAbortError(error)) {
+        this.emit('error', error);
+      }
+      throw error;
+    }
+  }
+
+  /** Resolve publication bytes before publishing a successful resource notification. */
+  private async readBytes(href: string, from: string, signal: AbortSignal): Promise<Uint8Array> {
     signal.throwIfAborted();
     const address = this.resources.resolve(href, from);
     if (address.kind === 'local') {
@@ -114,6 +133,7 @@ export class Book {
       this.renditions.delete(rendition);
     });
     this.renditions.add(rendition);
+    this.emit('readerCreated', rendition);
     return rendition;
   }
 
@@ -127,20 +147,27 @@ export class Book {
       this.renditions.delete(reader);
     });
     this.renditions.add(reader);
+    this.emit('readerCreated', reader);
     return reader;
   }
 
   /** Release chapters, cover, transformed resources, producer requests, and source storage. */
   destroy(): void {
-    for (const rendition of this.renditions) {
-      rendition.destroy();
+    if (this.destroyed) {
+      return;
     }
+    this.destroyed = true;
+    const readers = Array.from(this.renditions);
     this.renditions.clear();
-    this.locations.destroy();
-    this.pageList.destroy();
-    this.source.destroy();
-    this.spine.destroy();
-    this.cover.destroy();
-    this.resources.destroy();
+    disposeAll([
+      ...readers.map((reader) => () => reader.destroy()),
+      () => this.locations.destroy(),
+      () => this.pageList.destroy(),
+      () => this.source.destroy(),
+      () => this.spine.destroy(),
+      () => this.cover.destroy(),
+      () => this.resources.destroy(),
+      () => this.finishEvents('destroyed', undefined),
+    ]);
   }
 }

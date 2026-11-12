@@ -14,14 +14,15 @@ import { continuousOptions } from './options';
 import type { ContinuousOptions } from './options';
 import { continuousLocation, visiblePages } from './location';
 import { ContinuousEvents } from './events';
-import { scrollToPosition } from './position';
+import { turnContinuous } from './turn';
+import { ReaderEvents } from '../events/reader';
 import { TouchNavigation } from '../touch/navigation';
 import { Themes } from '../themes/themes';
 import { ContentInteractions } from '../interaction/interactions';
 import { Annotations } from '../annotations/annotations';
 
 /** Opening remains lazy; display commits requested content and reports optional preload failures separately. */
-export class ContinuousReader {
+export class ContinuousReader extends ReaderEvents {
   /** Reader-owned opt-in pagination gesture bindings. */
   readonly touch: TouchNavigation;
   /** Reader-owned default, named, and override styles. */
@@ -48,6 +49,7 @@ export class ContinuousReader {
     options: ContinuousOptions = {},
     private readonly onDestroy?: () => void,
   ) {
+    super();
     const settings = continuousOptions(options);
     this.port = new ContinuousPort(mountTarget(target), settings);
     this.themes = new Themes(book, {
@@ -80,6 +82,7 @@ export class ContinuousReader {
     this.observer = new ContinuousObserver(this.port, (layout) => this.flush(layout));
     this.touch = new TouchNavigation(this, options.touch);
     this.annotations = new Annotations(book, this, this.port.surface);
+    this.connectEvents(this);
   }
 
   /** The real outer scroll element is exposed for host scroll and accessibility integration. */
@@ -107,7 +110,7 @@ export class ContinuousReader {
   /** Display chapter/href/fragment/CFI/percentage targets; a new request cancels old consumers. */
   async display(target?: DisplayTarget): Promise<Section> {
     this.assertActive();
-    return this.navigation.display(target, true);
+    return this.displayEvent(() => this.navigation.display(target, true), false);
   }
 
   /** Measure actual clipped native content, returning null inside an unloaded virtual range. */
@@ -186,30 +189,12 @@ export class ContinuousReader {
     }
   }
 
-  /** Restore the native scroll intent before updating the retained view window. */
+  /** Delegate logical movement while retaining ownership of the live navigation window. */
   private async turn(delta: 1 | -1): Promise<Section | null> {
     this.assertActive();
-    if (!this.active) {
-      return this.display();
-    }
-    await this.whenIdle();
-    const state = this.flowState;
-    if (state === null) {
-      return null;
-    }
-    const before = this.port.offset();
-    const position = Math.max(
-      0,
-      Math.min(Math.max(0, state.length - state.viewport), before + state.viewport * delta),
+    return turnContinuous(this, this.navigation, this.port, this.window, this.active, delta, () =>
+      this.report(),
     );
-    if (Math.abs(position - before) <= 1) {
-      return null;
-    }
-    scrollToPosition(this.port, this.window, position);
-    this.report();
-    this.navigation.sync();
-    await this.whenIdle();
-    return this.currentSection;
   }
 
   /** Keep resize work deferred while an explicit/native display is staging new documents. */
@@ -288,6 +273,7 @@ export class ContinuousReader {
     this.snapshot = null;
     this.current = null;
     this.onDestroy?.();
+    this.destroyEvents();
   }
 
   /** Fail consistently after reader or book destruction. */

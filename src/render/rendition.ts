@@ -24,6 +24,8 @@ import { Themes } from '../themes/themes';
 import { RenditionAnchor } from './reading-anchor';
 import { ContentInteractions } from '../interaction/interactions';
 import { Annotations } from '../annotations/annotations';
+import { ReaderEvents } from '../events/reader';
+import { layoutPages } from '../layout/page-layout';
 
 /** Initial renderer options; layout-specific behavior is added by subsequent features. */
 export type RenditionOptions = ViewOptions &
@@ -33,7 +35,7 @@ export type RenditionOptions = ViewOptions &
   TouchSettings;
 
 /** Display a book in one reusable, script-disabled iframe surface. */
-export class Rendition {
+export class Rendition extends ReaderEvents {
   /** Reader-owned opt-in pagination gesture bindings. */
   readonly touch: TouchNavigation;
   private readonly view: PageViews;
@@ -60,6 +62,7 @@ export class Rendition {
     options: RenditionOptions = {},
     private readonly onDestroy?: () => void,
   ) {
+    super();
     touchOptions(options.touch);
     this.layoutController = new ReaderLayout(
       options,
@@ -88,6 +91,7 @@ export class Rendition {
     );
     this.touch = new TouchNavigation(this, options.touch);
     this.annotations = new Annotations(book, this, this.view.surface);
+    this.connectEvents(this);
   }
 
   /** The owned iframe is exposed for host integration; scripts remain disabled. */
@@ -103,6 +107,11 @@ export class Rendition {
   /** Load, sanitize, resolve assets, and display one chapter; a newer display cancels the old wait. */
   async display(target?: DisplayTarget): Promise<Section> {
     this.assertActive();
+    return this.displayEvent(() => this.displayChapter(target));
+  }
+
+  /** Stage and commit one display intent before publishing its completion. */
+  private async displayChapter(target?: DisplayTarget): Promise<Section> {
     this.controller?.abort();
     const controller = new AbortController();
     this.controller = controller;
@@ -189,17 +198,6 @@ export class Rendition {
     return this.view.pages();
   }
 
-  /** Choose fixed-page fitting before the configured reflowable flow. */
-  private applyLayout(document: Document, options: PaginationOptions = {}): PaginationState | null {
-    this.layoutController.configure(options);
-    const fixed = this.view.applyFixed(options);
-    if (fixed !== null) {
-      this.layoutController.useFixed(fixed.width, fixed.height, document);
-      return null;
-    }
-    return this.layoutController.apply(this.frame, document, options);
-  }
-
   /** Reflow current contents while retaining the last reported reading CFI; no document returns null. */
   layout(options: PaginationOptions = {}): PaginationState | null {
     this.assertActive();
@@ -210,7 +208,7 @@ export class Rendition {
       return null;
     }
     const anchor = this.readingAnchor.cfi;
-    const result = this.applyLayout(document, options);
+    const result = layoutPages(this.layoutController, this.view, document, options);
     if (this.fixedLayout === null && anchor !== null && this.current !== null) {
       // Keep the logical anchor across repeated reflows instead of drifting to each new page start.
       this.readingAnchor.seek(
@@ -235,7 +233,7 @@ export class Rendition {
     this.layoutController.setFlow(mode, axis, this.view.document);
     const document = this.view.document;
     if (document !== null) {
-      this.applyLayout(document);
+      layoutPages(this.layoutController, this.view, document);
     }
     this.view.document?.defaultView?.scrollTo(0, 0);
     this.relocations.report();
@@ -282,6 +280,7 @@ export class Rendition {
       this.current = null;
       this.destroyed = true;
       this.onDestroy?.();
+      this.destroyEvents();
     }
   }
 

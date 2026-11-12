@@ -85,3 +85,6 @@ export type {
   ReadingLocation,
   LocationSnapshot,
 } from './locations/types';
+
+export type { EventListener } from './events/emitter';
+export type { BookEventMap, ReaderEventMap, LocationsEventMap } from './events/types';
